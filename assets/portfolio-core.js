@@ -22,7 +22,7 @@
   function asNumber(value, fallback = 0) {
     if (typeof value === 'number') return Number.isFinite(value) ? value : fallback;
     if (value === null || value === undefined) return fallback;
-    const normalized = String(value).replace(/[,₩$\s]/g, '');
+    const normalized = String(value).replace(/[,₩$%\s]/g, '');
     if (!normalized) return fallback;
     const parsed = Number(normalized);
     return Number.isFinite(parsed) ? parsed : fallback;
@@ -52,6 +52,14 @@
     return { amount: numericAmount, currency: 'USD', valueKrw: numericAmount * fxRate, valueUsd: numericAmount, fxRate };
   }
 
+  function parseTickerList(value) {
+    if (Array.isArray(value)) return value.map(normalizeTicker).filter(Boolean);
+    return String(value || '')
+      .split(/[\s,;]+/)
+      .map(normalizeTicker)
+      .filter(Boolean);
+  }
+
   function inferLeverage(ticker, asset = {}) {
     const normalized = normalizeTicker(ticker);
     const explicit = asNumber(asset.leverage, NaN);
@@ -74,21 +82,67 @@
   }
 
   function parsePortfolioText(text) {
-    return String(text || '')
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .filter((line) => !/^ticker\s*[,\t]/i.test(line))
+    const lines = String(text || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+    const header = lines[0] && /^ticker\s*[,\t]/i.test(lines[0]) ? lines.shift().toLowerCase().split(/[\t,]/).map((part) => part.trim()) : null;
+    return lines
       .map((line) => {
         const parts = line.split(/[\t,]/).map((part) => part.trim());
-        return {
-          ticker: normalizeTicker(parts[0]),
-          amount: asNumber(parts[1], 0),
-          currency: asCurrency(parts[2] || 'USD'),
-          leverageOverride: parts[3] === undefined || parts[3] === '' ? null : asNumber(parts[3], null),
-        };
+        if (header) {
+          const row = Object.fromEntries(header.map((key, index) => [key, parts[index]]));
+          return normalizeParsedRow(row);
+        }
+        return normalizeParsedRow({ ticker: parts[0], shares: parts[1], priceCurrency: parts[2] || 'USD', leverageOverride: parts[3] });
       })
-      .filter((row) => row.ticker && row.amount !== 0);
+      .filter((row) => row.ticker && (row.shares !== 0 || row.amount !== 0));
+  }
+
+  function normalizeParsedRow(row) {
+    const ticker = normalizeTicker(row.ticker || row.symbol);
+    const shares = asNumber(row.shares ?? row.quantity ?? row.units, 0);
+    const amount = asNumber(row.amount ?? row.value ?? row.cash, 0);
+    const amountCurrency = row.currency ?? row.amountCurrency ?? row.amountcurrency ?? row.priceCurrency ?? row.pricecurrency ?? 'USD';
+    const priceCurrency = row.priceCurrency ?? row.pricecurrency ?? row.price_currency ?? row.currency ?? 'USD';
+    const leverageValue = row.leverageOverride ?? row.leverageoverride ?? row.leverage ?? row.multiple;
+    return {
+      ticker,
+      shares,
+      amount,
+      currency: asCurrency(amountCurrency),
+      priceCurrency: asCurrency(priceCurrency),
+      leverageOverride: leverageValue === undefined || leverageValue === '' ? null : asNumber(leverageValue, null),
+    };
+  }
+
+  function resolveShareValuation(input, asset, marketData) {
+    const shares = asNumber(input.shares ?? input.quantity ?? input.units, NaN);
+    if (!Number.isFinite(shares) || shares === 0) return null;
+    const price = asPositiveNumber(input.price ?? asset.price ?? asset.close ?? asset.lastClose, NaN);
+    if (!Number.isFinite(price) || price <= 0) {
+      throw new Error(`${normalizeTicker(input.ticker)} share valuation requires a fetched close price.`);
+    }
+    const priceCurrency = asCurrency(asset.currency || input.priceCurrency || input.currency || 'USD');
+    const converted = convertAmount(shares * price, priceCurrency, marketData);
+    return {
+      mode: 'shares',
+      shares,
+      price,
+      priceCurrency,
+      priceAsOf: asset.priceAsOf || asset.asOf || '',
+      converted,
+    };
+  }
+
+  function resolveCashValuation(input, marketData) {
+    const amount = asNumber(input.amount, 0);
+    if (!Number.isFinite(amount) || amount === 0) return null;
+    return {
+      mode: 'amount',
+      shares: 0,
+      price: null,
+      priceCurrency: asCurrency(input.currency),
+      priceAsOf: '',
+      converted: convertAmount(amount, input.currency, marketData),
+    };
   }
 
   function normalizePortfolioRows(rows, marketData) {
@@ -97,9 +151,12 @@
     for (const input of Array.isArray(rows) ? rows : []) {
       const ticker = normalizeTicker(input.ticker);
       if (!ticker) continue;
-      const converted = convertAmount(input.amount, input.currency, marketData);
-      if (!Number.isFinite(converted.valueKrw) || converted.valueKrw === 0) continue;
-      const asset = assets[ticker] || { ticker, name: ticker, currency: input.currency || 'USD', type: 'stock' };
+      const asset = assets[ticker] || { ticker, name: ticker, currency: input.priceCurrency || input.currency || 'USD', type: 'stock' };
+      const shareValuation = resolveShareValuation(input, asset, marketData);
+      const cashValuation = shareValuation ? null : resolveCashValuation(input, marketData);
+      const valuation = shareValuation || cashValuation;
+      if (!valuation || !Number.isFinite(valuation.converted.valueKrw) || valuation.converted.valueKrw === 0) continue;
+
       const leverageOverride = input.leverageOverride === null || input.leverageOverride === undefined || input.leverageOverride === ''
         ? null
         : asNumber(input.leverageOverride, null);
@@ -108,24 +165,35 @@
         ticker,
         name: asset.name || ticker,
         type: asset.type || 'stock',
-        currency: asset.currency || asCurrency(input.currency),
-        inputCurrency: asCurrency(input.currency),
+        currency: asset.currency || valuation.priceCurrency,
+        inputCurrency: asCurrency(input.currency || valuation.priceCurrency),
+        priceCurrency: valuation.priceCurrency,
         inputAmount: 0,
+        inputShares: 0,
+        averagePrice: valuation.price,
+        price: valuation.price,
+        priceAsOf: valuation.priceAsOf || asset.priceAsOf || asset.asOf || '',
+        valuationModes: new Set(),
         valueKrw: 0,
         valueUsd: 0,
         leverage,
         leverageSource: leverageOverride ? 'manual' : (asset.leverage ? 'metadata' : 'inferred/default'),
         sourceStatus: asset.sourceStatus || 'unknown',
-        priceAsOf: asset.priceAsOf || asset.asOf || '',
       };
-      existing.inputAmount += converted.amount;
-      existing.valueKrw += converted.valueKrw;
-      existing.valueUsd += converted.valueUsd;
+      existing.inputAmount += valuation.mode === 'amount' ? valuation.converted.amount : 0;
+      existing.inputShares += valuation.shares || 0;
+      existing.valueKrw += valuation.converted.valueKrw;
+      existing.valueUsd += valuation.converted.valueUsd;
+      existing.price = valuation.price ?? existing.price;
+      existing.averagePrice = existing.inputShares ? Math.abs((existing.priceCurrency === 'KRW' ? existing.valueKrw : existing.valueUsd) / existing.inputShares) : existing.price;
+      existing.priceCurrency = valuation.priceCurrency || existing.priceCurrency;
+      existing.priceAsOf = valuation.priceAsOf || existing.priceAsOf;
+      existing.valuationModes.add(valuation.mode);
       existing.leverage = leverageOverride || existing.leverage || leverage;
       existing.leverageSource = leverageOverride ? 'manual' : existing.leverageSource;
       grouped.set(ticker, existing);
     }
-    const direct = Array.from(grouped.values());
+    const direct = Array.from(grouped.values()).map((row) => ({ ...row, valuationModes: Array.from(row.valuationModes).sort() }));
     const totalKrw = direct.reduce((sum, row) => sum + row.valueKrw, 0);
     const fxRate = getFxRate(marketData);
     return {
@@ -152,7 +220,7 @@
     existing.leveredValueKrw += item.leveredValueKrw || 0;
     existing.holdingWeight += item.holdingWeight || 0;
     if (item.sourceTicker) existing.sourceTicker.add(item.sourceTicker);
-    if (item.coverage === 'live' || item.coverage === 'sample') existing.coverage = item.coverage;
+    if (['live', 'issuer', 'official', 'sample'].includes(item.coverage)) existing.coverage = item.coverage;
     bucket.set(ticker, existing);
   }
 
@@ -168,45 +236,83 @@
       .sort((a, b) => Math.abs(b.leveredValueKrw || b.valueKrw) - Math.abs(a.leveredValueKrw || a.valueKrw));
   }
 
-  function computeLookThrough(normalizedPortfolio, marketData) {
+  function getUniverseOptions(options = {}) {
+    const topN = asNumber(options.exposureTopN ?? options.topN, Infinity);
+    const minWeight = Math.max(0, asNumber(options.exposureMinWeight ?? options.minWeight, 0));
+    return {
+      topN: Number.isFinite(topN) && topN > 0 ? Math.floor(topN) : Infinity,
+      minWeight,
+      includeTickers: new Set(parseTickerList(options.includeTickers)),
+      excludeTickers: new Set(parseTickerList(options.excludeTickers)),
+    };
+  }
+
+  function shouldDisplayHolding(holding, rank, universe) {
+    const ticker = normalizeTicker(holding.ticker);
+    if (universe.excludeTickers.has(ticker)) return false;
+    if (universe.includeTickers.has(ticker)) return true;
+    if (rank > universe.topN) return false;
+    if (holding.weight < universe.minWeight) return false;
+    return true;
+  }
+
+  function computeLookThrough(normalizedPortfolio, marketData, options = {}) {
     const etfHoldings = marketData?.etfHoldings || {};
     const totalKrw = normalizedPortfolio.totalKrw || 0;
     const bucket = new Map();
     const coverageRows = [];
+    const universe = getUniverseOptions(options);
 
     for (const row of normalizedPortfolio.direct) {
       const holdingsRecord = etfHoldings[row.ticker];
-      const holdings = Array.isArray(holdingsRecord?.holdings) ? holdingsRecord.holdings : [];
+      const rawHoldings = Array.isArray(holdingsRecord?.holdings) ? holdingsRecord.holdings : [];
+      const positiveHoldings = rawHoldings
+        .map((holding) => ({ ...holding, ticker: normalizeTicker(holding.ticker), weight: Math.max(0, Math.min(1, asNumber(holding.weight, 0))) }))
+        .filter((holding) => holding.ticker && holding.weight > 0);
+      const positiveWeightTotal = positiveHoldings.reduce((sum, holding) => sum + holding.weight, 0);
+      const normalizationFactor = positiveWeightTotal > 1 ? 1 / positiveWeightTotal : 1;
+      const holdings = positiveHoldings
+        .map((holding) => ({ ...holding, weight: holding.weight * normalizationFactor }))
+        .sort((a, b) => b.weight - a.weight);
       const hasHoldings = holdings.length > 0;
       const isEtf = row.type === 'etf' || Boolean(holdingsRecord);
       const leverage = row.leverage || 1;
       if (isEtf && hasHoldings) {
         let coveredWeight = 0;
-        for (const holding of holdings) {
-          const weight = Math.max(0, Math.min(1, asNumber(holding.weight, 0)));
-          if (weight <= 0) continue;
+        let displayedWeight = 0;
+        let filteredWeight = 0;
+        let displayedHoldings = 0;
+        holdings.forEach((holding, index) => {
+          const weight = holding.weight;
           coveredWeight += weight;
-          addExposure(bucket, {
-            ticker: holding.ticker || `${row.ticker}:UNKNOWN`,
-            name: holding.name || holding.ticker || `${row.ticker} holding`,
-            sourceTicker: row.ticker,
-            valueKrw: row.valueKrw * weight,
-            leveredValueKrw: row.valueKrw * weight * leverage,
-            holdingWeight: weight,
-            coverage: holdingsRecord.sourceStatus || 'sample',
-            type: 'underlying',
-          });
-        }
-        const residual = Math.max(0, 1 - coveredWeight);
-        if (residual > 0.000001) {
+          if (shouldDisplayHolding(holding, index + 1, universe)) {
+            displayedWeight += weight;
+            displayedHoldings += 1;
+            addExposure(bucket, {
+              ticker: holding.ticker || `${row.ticker}:UNKNOWN`,
+              name: holding.name || holding.ticker || `${row.ticker} holding`,
+              sourceTicker: row.ticker,
+              valueKrw: row.valueKrw * weight,
+              leveredValueKrw: row.valueKrw * weight * leverage,
+              holdingWeight: weight,
+              coverage: holdingsRecord.sourceStatus || 'sample',
+              type: 'underlying',
+            });
+          } else {
+            filteredWeight += weight;
+          }
+        });
+        const residualWeight = Math.max(0, 1 - Math.min(coveredWeight, 1));
+        const otherWeight = Math.max(0, filteredWeight + residualWeight);
+        if (otherWeight > 0.000001) {
           addExposure(bucket, {
             ticker: `${row.ticker}:OTHER`,
-            name: `${row.ticker} 기타/미상 보유분`,
+            name: `${row.ticker} 기타/필터/미상 보유분`,
             sourceTicker: row.ticker,
-            valueKrw: row.valueKrw * residual,
-            leveredValueKrw: row.valueKrw * residual * leverage,
-            holdingWeight: residual,
-            coverage: 'residual',
+            valueKrw: row.valueKrw * otherWeight,
+            leveredValueKrw: row.valueKrw * otherWeight * leverage,
+            holdingWeight: otherWeight,
+            coverage: filteredWeight ? 'filtered_residual' : 'residual',
             type: 'residual',
           });
         }
@@ -214,8 +320,11 @@
           ticker: row.ticker,
           name: row.name,
           holdingCount: holdings.length,
+          displayedHoldings,
           coveredWeight: Math.min(coveredWeight, 1),
-          residualWeight: residual,
+          displayedWeight,
+          filteredWeight,
+          residualWeight,
           leverage,
           source: holdingsRecord.source || 'holdings',
           asOf: holdingsRecord.asOf || '',
@@ -236,7 +345,10 @@
           ticker: row.ticker,
           name: row.name,
           holdingCount: isEtf ? 0 : 1,
+          displayedHoldings: isEtf ? 0 : 1,
           coveredWeight: isEtf ? 0 : 1,
+          displayedWeight: isEtf ? 0 : 1,
+          filteredWeight: 0,
           residualWeight: isEtf ? 1 : 0,
           leverage: isEtf ? leverage : 1,
           source: isEtf ? 'unavailable' : 'direct stock',
@@ -249,7 +361,7 @@
     const exposureRows = finalizeExposure(bucket, totalKrw);
     const leveredGrossKrw = exposureRows.reduce((sum, row) => sum + Math.abs(row.leveredValueKrw), 0);
     const unleveredGrossKrw = exposureRows.reduce((sum, row) => sum + Math.abs(row.valueKrw), 0);
-    return { exposureRows, coverageRows, leveredGrossKrw, unleveredGrossKrw };
+    return { exposureRows, coverageRows, leveredGrossKrw, unleveredGrossKrw, universe };
   }
 
   function returnsForTicker(ticker, marketData) {
@@ -296,13 +408,14 @@
   function buildCorrelationMatrix(tickers, marketData, limit = 12) {
     const unique = [];
     const seen = new Set();
+    const max = Number.isFinite(asNumber(limit, 12)) ? Math.max(1, Math.floor(asNumber(limit, 12))) : 12;
     for (const ticker of tickers || []) {
       const normalized = normalizeTicker(ticker);
-      if (!normalized || seen.has(normalized)) continue;
+      if (!normalized || normalized.includes(':') || seen.has(normalized)) continue;
       if (!returnsForTicker(normalized, marketData).length) continue;
       unique.push(normalized);
       seen.add(normalized);
-      if (unique.length >= limit) break;
+      if (unique.length >= max) break;
     }
     const rows = unique.map((rowTicker) => ({
       ticker: rowTicker,
@@ -323,12 +436,12 @@
 
   function calculatePortfolio(rows, marketData, options = {}) {
     const normalized = normalizePortfolioRows(rows, marketData);
-    const lookThrough = computeLookThrough(normalized, marketData);
+    const lookThrough = computeLookThrough(normalized, marketData, options);
     const instrumentCorrelation = buildCorrelationMatrix(normalized.direct.map((row) => row.ticker), marketData, options.instrumentLimit || 12);
     const underlyingTickers = lookThrough.exposureRows
       .map((row) => row.ticker)
       .filter((ticker) => !ticker.includes(':'));
-    const underlyingCorrelation = buildCorrelationMatrix(underlyingTickers, marketData, options.underlyingLimit || 12);
+    const underlyingCorrelation = buildCorrelationMatrix(underlyingTickers, marketData, options.underlyingLimit || options.exposureTopN || 12);
     const fxFreshness = classifyFreshness(marketData?.fx?.asOf || marketData?.dataAsOf || marketData?.generatedAt);
     return {
       ...normalized,
@@ -348,6 +461,7 @@
     asNumber,
     asCurrency,
     convertAmount,
+    parseTickerList,
     inferLeverage,
     parsePortfolioText,
     normalizePortfolioRows,

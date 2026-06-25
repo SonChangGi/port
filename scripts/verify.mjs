@@ -17,9 +17,8 @@ const contains = (file, needle) => file.includes(needle);
 
 for (const path of [
   'index.html', 'assets/styles.css', 'assets/app.js', 'assets/portfolio-core.js', 'data/market-data.json',
-  'scripts/refresh-data.mjs', 'scripts/verify.mjs', 'scripts/regression.mjs', 'scripts/static-smoke.mjs',
-  'DESIGN.md', '.omx/plans/prd-portfolio-dashboard.md', '.omx/plans/test-spec-portfolio-dashboard.md',
-  '.omx/artifacts/visual-ralph/portfolio-dashboard/reference.md', '.github/workflows/update-data.yml',
+  'scripts/refresh-data.mjs', 'scripts/verify.mjs', 'scripts/regression.mjs', 'scripts/static-smoke.mjs', 'scripts/ultraqa.mjs',
+  'DESIGN.md', 'README.md', '.github/workflows/update-data.yml',
 ]) {
   assert(statSync(path).isFile(), `${path} exists`);
 }
@@ -30,21 +29,35 @@ assert(contains(files.html, 'id="exposure"'), 'look-through exposure section exi
 assert(contains(files.html, 'id="correlation"'), 'correlation section exists');
 assert(contains(files.html, '투자, 세무, 법률 또는 매매 조언이 아닙니다'), 'non-advice disclaimer exists');
 assert(contains(files.html, 'data/market-data.json'), 'generated JSON link exists');
+assert(contains(files.html, '보유 주수'), 'share-count input copy exists');
+assert(contains(files.html, '종가 통화'), 'close-price currency copy exists');
+assert(contains(files.html, 'id="filter-top-n"'), 'top-N universe filter exists');
+assert(contains(files.html, 'id="filter-min-weight"'), 'minimum weight universe filter exists');
+assert(contains(files.html, 'id="filter-include"'), 'include ticker universe filter exists');
+assert(contains(files.html, 'id="filter-exclude"'), 'exclude ticker universe filter exists');
 
 assert(contains(files.core, 'calculatePortfolio'), 'portfolio calculation API exists');
+assert(contains(files.core, 'resolveShareValuation'), 'share-count valuation API exists');
 assert(contains(files.core, 'computeLookThrough'), 'ETF look-through API exists');
+assert(contains(files.core, 'filtered_residual'), 'filtered residual bucket preserves hidden holdings');
 assert(contains(files.core, 'inferLeverage'), 'leverage inference API exists');
 assert(contains(files.core, 'buildCorrelationMatrix'), 'correlation API exists');
 assert(contains(files.core, 'classifyFreshness'), 'freshness API exists');
+assert(contains(files.app, 'shares-input'), 'share input is wired');
+assert(contains(files.app, 'price-currency-input'), 'price currency input is wired');
+assert(contains(files.app, 'readAnalysisOptions'), 'analysis filter reader is wired');
 assert(contains(files.app, 'renderHeatmap'), 'heatmap renderer exists');
 assert(contains(files.app, 'FALLBACK_MARKET_DATA'), 'fallback load state exists');
 assert(contains(files.app, 'parsePortfolioText'), 'CSV import is wired');
 assert(contains(files.app, 'no-store'), 'browser JSON fetch avoids stale cache');
 
 assert(contains(files.css, ':root'), 'CSS tokens exist');
-assert(contains(files.css, '--primary: #2457d6'), 'Quant Dashboard primary token exists');
-assert(contains(files.css, '@media (max-width: 980px)'), 'responsive tablet breakpoint exists');
-assert(contains(files.css, '@media (max-width: 640px)'), 'responsive mobile breakpoint exists');
+assert(contains(files.css, 'color-scheme: dark'), 'dark color scheme is declared');
+assert(!contains(files.css, 'color-scheme: light'), 'light color scheme declaration removed');
+assert(contains(files.css, '--bg: #080a0f'), 'dark cockpit background token exists');
+assert(contains(files.css, '--accent: #7dd3fc'), 'dark cyan accent token exists');
+assert(contains(files.css, '.filter-card'), 'filter card styling exists');
+assert(contains(files.css, '@media (max-width: 720px)'), 'mobile breakpoint exists');
 assert(contains(files.css, '.heatmap'), 'correlation heatmap styling exists');
 assert(contains(files.css, '.table-wrap'), 'table overflow guard exists');
 
@@ -52,22 +65,38 @@ assert(files.data.schemaVersion === 1, 'market data schemaVersion is 1');
 assert(files.data.baseCurrency === 'KRW', 'market data base currency is KRW');
 assert(Number.isFinite(files.data.fx?.rate) && files.data.fx.rate > 0, 'USD/KRW FX rate exists');
 assert(typeof files.data.generatedAt === 'string' && files.data.generatedAt.length > 0, 'generatedAt exists');
-assert(files.data.assets && Object.keys(files.data.assets).length >= 6, 'asset records exist');
+assert(files.data.assets && Object.keys(files.data.assets).length >= 100, 'broad asset records exist');
+for (const [ticker, asset] of Object.entries(files.data.assets)) {
+  assert(Number.isFinite(asset.price) && asset.price > 0, `${ticker} close price exists`);
+  assert(['KRW', 'USD'].includes(asset.currency), `${ticker} price currency is explicit`);
+  assert(typeof asset.priceAsOf === 'string' && asset.priceAsOf.length >= 10, `${ticker} close price date exists`);
+}
 assert(files.data.assets.TQQQ?.leverage === 3, 'TQQQ leverage metadata exists');
-assert(files.data.etfHoldings && Object.keys(files.data.etfHoldings).length >= 2, 'ETF holdings records exist');
-assert(Array.isArray(files.data.samplePortfolio) && files.data.samplePortfolio.length >= 3, 'sample portfolio exists');
+assert(files.data.etfHoldings?.SPY?.holdings?.length >= 400, 'SPY decomposes into broad constituent set');
+assert(files.data.etfHoldings?.QQQ?.holdings?.length >= 100, 'QQQ decomposes into broad constituent set');
+assert(files.data.etfHoldings?.TQQQ?.sourceStatus === 'proxy', 'TQQQ uses explicit QQQ proxy status');
+assert(Array.isArray(files.data.samplePortfolio) && files.data.samplePortfolio.every((row) => Number.isFinite(row.shares)), 'sample portfolio is share-count based');
 assert(Array.isArray(files.data.sources) && files.data.sources.length > 0, 'source provenance exists');
 assert(Array.isArray(files.data.warnings), 'warnings array exists');
 
 for (const section of ['## Source of truth', '## Brand', '## Product goals', '## Visual language', '## Components', '## Accessibility', '## Interaction states', '## Implementation constraints']) {
   assert(contains(files.design, section), `DESIGN.md contains ${section}`);
 }
+assert(contains(files.design, '보유 주수'), 'DESIGN.md documents share-count workflow');
+assert(contains(files.design, '다크'), 'DESIGN.md documents dark visual baseline');
 assert(contains(files.readme, 'npm run refresh:data'), 'README documents refresh command');
-assert(contains(files.readme, 'KRW'), 'README documents KRW input');
+assert(contains(files.readme, '보유 주수'), 'README documents share-count input');
+assert(contains(files.readme, 'State Street'), 'README documents SPY provider source');
+assert(contains(files.readme, 'Invesco'), 'README documents QQQ provider source');
 assert(contains(files.readme, '레버리지 제외'), 'README documents leverage views');
 assert(contains(files.refresh, 'Frankfurter'), 'refresh script uses Frankfurter FX');
 assert(contains(files.refresh, 'Yahoo Chart'), 'refresh script uses Yahoo Chart');
-assert(contains(files.refresh, 'StockAnalysis'), 'refresh script uses public ETF holdings page');
+assert(contains(files.refresh, 'State Street official holdings XLSX'), 'refresh script uses SPY official holdings');
+assert(contains(files.refresh, 'Invesco QQQ holdings API'), 'refresh script uses QQQ official holdings');
+assert(contains(files.refresh, 'REQUEST_TIMEOUT_MS'), 'refresh script defines provider request timeout');
+assert(contains(files.refresh, 'AbortController'), 'refresh script aborts stalled provider requests');
+assert(!contains(files.refresh, 'slice(0, 40)'), 'refresh script no longer caps parsed holdings at 40');
+assert(!contains(files.refresh, 'record.holdings.slice(0, 12)'), 'refresh script no longer truncates ETF holdings to 12 for exposure data');
 
 const failed = checks.filter((check) => !check.ok);
 for (const check of checks) console.log(`${check.ok ? 'PASS' : 'FAIL'} ${check.label}`);
