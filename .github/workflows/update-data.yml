@@ -1,0 +1,33 @@
+name: Update portfolio dashboard data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 0 * * 2-6'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '26'
+      - name: Refresh generated market data
+        run: npm run refresh:data
+      - name: Verify static dashboard
+        run: npm test
+      - name: Commit data refresh
+        run: |
+          if git diff --quiet -- data/market-data.json; then
+            echo "No generated data changes."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/market-data.json
+          git commit -m "Refresh portfolio market data" -m "Constraint: Free best-effort public data sources can lag or fail." -m "Confidence: medium" -m "Scope-risk: narrow" -m "Tested: npm test" -m "Not-tested: Provider completeness beyond parsed public sources"
+          git push

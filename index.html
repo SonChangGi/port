@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="KRW/USD 투자 금액을 입력해 ETF·주식 포트폴리오 비중, 레버리지 포함/제외 노출, 상관관계를 확인하는 정적 포트폴리오 대시보드" />
+  <title>Port Portfolio Dashboard</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+  <script src="assets/portfolio-core.js" defer></script>
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+  <header class="hero" aria-labelledby="page-title">
+    <nav class="top-nav" aria-label="프로젝트 이동">
+      <a class="ghost-link" href="https://sonchanggi.github.io/quant-dashboard/">← Quant Dashboard로 돌아가기</a>
+      <a href="#portfolio-input">입력</a>
+      <a href="#exposure">노출</a>
+      <a href="#correlation">상관관계</a>
+      <a href="#data-health">데이터 상태</a>
+    </nav>
+    <div class="hero-grid">
+      <div class="hero-main">
+        <p class="eyebrow">Port · Portfolio Cockpit</p>
+        <h1 id="page-title"><span class="title-line">최종 투자</span><span class="title-line">포트폴리오 비중</span><span class="title-line">ETF 기초 노출</span></h1>
+        <p class="hero-copy">
+          ETF와 주식의 KRW/USD 투자 금액을 입력하면 환율을 반영한 최종 비중, ETF look-through 노출,
+          레버리지 제외/포함 관점, 수익률 상관관계를 한 화면에서 점검합니다.
+        </p>
+        <div class="hero-actions">
+          <a class="primary-button" href="#portfolio-input">포트폴리오 입력하기</a>
+          <a class="secondary-button" href="data/market-data.json">생성 데이터 JSON 보기</a>
+        </div>
+      </div>
+      <aside class="hero-note" aria-label="데이터 정책">
+        <strong>데이터 정책</strong>
+        <p id="hero-data-status">생성된 정적 JSON에서 최신 환율·가격·보유비중을 불러오는 중...</p>
+      </aside>
+    </div>
+  </header>
+
+  <noscript>
+    <div class="noscript-warning">
+      이 대시보드는 정적 JSON과 브라우저 계산으로 표와 heatmap을 그리므로 JavaScript가 필요합니다.
+    </div>
+  </noscript>
+
+  <main>
+    <section class="section notice" aria-label="주의사항">
+      <strong>중요:</strong> 이 페이지는 개인 리서치용 노출 분석 도구이며 투자, 세무, 법률 또는 매매 조언이 아닙니다.
+      무료 데이터 소스는 지연·누락·구조 변경이 있을 수 있으므로 데이터 상태와 원천 링크를 함께 확인하세요.
+    </section>
+
+    <section class="section input-section" id="portfolio-input" aria-labelledby="input-title">
+      <div class="section-heading">
+        <p class="eyebrow">Input</p>
+        <h2 id="input-title">포트폴리오 입력</h2>
+        <p>티커, 투자 금액, 통화를 입력하세요. 레버리지 배율은 비워두면 데이터/일반 ETF 규칙으로 추정합니다.</p>
+      </div>
+      <div class="input-grid">
+        <article class="panel portfolio-editor" aria-labelledby="editor-title">
+          <div class="panel-header compact">
+            <div>
+              <p class="eyebrow">Holdings</p>
+              <h3 id="editor-title">종목·금액</h3>
+            </div>
+            <button id="add-row" type="button" class="secondary-button">행 추가</button>
+          </div>
+          <div class="table-wrap">
+            <table class="input-table">
+              <caption>투자 포트폴리오 입력 표</caption>
+              <thead>
+                <tr>
+                  <th scope="col">티커</th>
+                  <th scope="col">금액</th>
+                  <th scope="col">통화</th>
+                  <th scope="col">레버리지</th>
+                  <th scope="col">삭제</th>
+                </tr>
+              </thead>
+              <tbody id="portfolio-rows"></tbody>
+            </table>
+          </div>
+          <div class="editor-actions">
+            <button id="calculate" type="button" class="primary-button">계산</button>
+            <button id="reset-sample" type="button" class="secondary-button">샘플 복원</button>
+            <button id="clear-rows" type="button" class="secondary-button">비우기</button>
+          </div>
+          <p id="input-status" class="status-line" role="status" aria-live="polite">데이터 준비 중...</p>
+        </article>
+
+        <article class="panel import-panel" aria-labelledby="import-title">
+          <p class="eyebrow">Paste Import</p>
+          <h3 id="import-title">CSV/텍스트 붙여넣기</h3>
+          <p>한 줄에 <code>ticker,amount,currency,leverage(optional)</code> 형식으로 입력합니다.</p>
+          <textarea id="portfolio-import" rows="8" spellcheck="false" placeholder="SPY,5000,USD&#10;TQQQ,1500,USD,3&#10;005930.KS,3000000,KRW"></textarea>
+          <button id="import-rows" type="button" class="secondary-button">붙여넣기 반영</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="summary-title">
+      <div class="section-heading centered">
+        <p class="eyebrow">Portfolio Summary</p>
+        <h2 id="summary-title">최종 비중 요약</h2>
+        <p id="summary-subtitle">입력값을 계산하면 총액, 환율, ETF 보유비중 커버리지, 레버리지 노출이 표시됩니다.</p>
+      </div>
+      <div class="metric-row" id="summary-cards" aria-live="polite">
+        <div class="skeleton-line">요약 지표를 준비하는 중...</div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="instrument-title">
+      <div class="section-heading">
+        <p class="eyebrow">Instrument Weights</p>
+        <h2 id="instrument-title">입력 종목 기준 최종 비중</h2>
+      </div>
+      <article class="panel">
+        <div class="table-wrap">
+          <table>
+            <caption>직접 입력한 ETF·주식별 평가금액과 포트폴리오 비중</caption>
+            <thead>
+              <tr>
+                <th scope="col">티커</th>
+                <th scope="col">이름</th>
+                <th scope="col">유형</th>
+                <th scope="col">평가금액(KRW)</th>
+                <th scope="col">평가금액(USD)</th>
+                <th scope="col">비중</th>
+                <th scope="col">레버리지</th>
+              </tr>
+            </thead>
+            <tbody id="instrument-rows">
+              <tr><td colspan="7">입력값을 계산하세요.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="section" id="exposure" aria-labelledby="exposure-title">
+      <div class="section-heading">
+        <p class="eyebrow">Look-through Exposure</p>
+        <h2 id="exposure-title">ETF 기초 노출 · 레버리지 제외/포함</h2>
+        <p>ETF 보유비중이 있는 경우 기초 종목으로 펼쳐 보고, 레버리지 ETF는 NAV 기준과 배율 반영 기준을 함께 보여줍니다.</p>
+      </div>
+      <div class="exposure-grid">
+        <article class="panel">
+          <h3>레버리지 제외(NAV 기준)</h3>
+          <div class="table-wrap">
+            <table>
+              <caption>ETF 보유비중을 반영하되 레버리지 배율을 제외한 기초 노출</caption>
+              <thead><tr><th>기초 티커</th><th>이름</th><th>금액(KRW)</th><th>비중</th><th>출처 ETF</th></tr></thead>
+              <tbody id="exposure-unlevered"><tr><td colspan="5">계산 대기 중</td></tr></tbody>
+            </table>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>레버리지 포함(배율 반영)</h3>
+          <div class="table-wrap">
+            <table>
+              <caption>ETF 레버리지 배율을 반영한 기초 노출</caption>
+              <thead><tr><th>기초 티커</th><th>이름</th><th>노출(KRW)</th><th>총자산 대비</th><th>출처 ETF</th></tr></thead>
+              <tbody id="exposure-levered"><tr><td colspan="5">계산 대기 중</td></tr></tbody>
+            </table>
+          </div>
+        </article>
+      </div>
+      <article class="panel coverage-panel" aria-labelledby="coverage-title">
+        <h3 id="coverage-title">ETF 보유비중 커버리지</h3>
+        <div class="table-wrap">
+          <table>
+            <caption>ETF별 보유비중 데이터 커버리지와 잔여 미상 비중</caption>
+            <thead><tr><th>ETF/종목</th><th>보유종목 수</th><th>커버리지</th><th>미상/잔여</th><th>레버리지</th><th>상태</th></tr></thead>
+            <tbody id="coverage-rows"><tr><td colspan="6">계산 대기 중</td></tr></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="section" id="correlation" aria-labelledby="correlation-title">
+      <div class="section-heading centered">
+        <p class="eyebrow">Correlation</p>
+        <h2 id="correlation-title">수익률 상관관계</h2>
+        <p>생성 JSON의 일별 수익률이 겹치는 구간만 사용합니다. 표본 수가 부족하면 n/a로 표시합니다.</p>
+      </div>
+      <div class="correlation-grid">
+        <article class="panel">
+          <h3>입력 종목 상관관계</h3>
+          <div id="instrument-correlation" class="heatmap-wrap">계산 대기 중</div>
+        </article>
+        <article class="panel">
+          <h3>기초 종목 상관관계</h3>
+          <div id="underlying-correlation" class="heatmap-wrap">계산 대기 중</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="data-health" aria-labelledby="data-health-title">
+      <div class="section-heading">
+        <p class="eyebrow">Data Health</p>
+        <h2 id="data-health-title">데이터 상태와 갱신 방법</h2>
+        <p>정적 페이지는 생성된 JSON만 읽습니다. 최신 데이터는 refresh 스크립트 또는 GitHub Actions에서 갱신합니다.</p>
+      </div>
+      <article class="panel">
+        <div id="warnings" class="warning-list" aria-live="polite"></div>
+        <div class="table-wrap">
+          <table>
+            <caption>데이터 소스별 상태</caption>
+            <thead><tr><th>소스</th><th>상태</th><th>기준일</th><th>설명</th></tr></thead>
+            <tbody id="source-rows"><tr><td colspan="4">데이터 상태 확인 중...</td></tr></tbody>
+          </table>
+        </div>
+        <div class="manual-update-actions">
+          <a class="primary-button" href="https://github.com/SonChangGi/port/actions/workflows/update-data.yml" target="_blank" rel="noopener noreferrer">GitHub Actions에서 데이터 갱신</a>
+          <code class="code-pill">npm run refresh:data && npm test</code>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>
+      Port Portfolio Dashboard · 공개/무료 데이터 기반 개인 리서치 도구입니다. 데이터 지연, ETF 보유비중 누락,
+      환율 기준일 차이, correlation 표본 부족이 있을 수 있습니다.
+    </p>
+  </footer>
+</body>
+</html>
