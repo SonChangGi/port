@@ -4,7 +4,10 @@
   const Core = window.PortfolioCore;
   const DATA_URL = 'data/market-data.json';
   const QUANT_DASHBOARD_URL = 'https://sonchanggi.github.io/quant-dashboard/';
+  const ACTIONS_UPDATE_URL = 'https://github.com/SonChangGi/port/actions/workflows/update-data.yml';
   const DEFAULT_ANALYSIS_TOP_N = 120;
+  const DEFAULT_UPDATE_SYMBOLS = '0167A0.KS RAM';
+  const DEFAULT_UPDATE_ETFS = '0167A0.KS RAM';
   const state = { marketData: null, latestResult: null };
   const $ = (selector) => document.querySelector(selector);
 
@@ -105,6 +108,12 @@
     ['#filter-top-n', '#filter-min-weight', '#filter-include', '#filter-exclude'].forEach((selector) => {
       $(selector)?.addEventListener('input', debounce(calculateAndRender, 160));
     });
+    ['#update-symbols', '#update-etfs'].forEach((selector) => {
+      $(selector)?.addEventListener('input', renderRefreshCommand);
+    });
+    $('#update-from-portfolio')?.addEventListener('click', fillRefreshInputsFromPortfolio);
+    $('#copy-refresh-command')?.addEventListener('click', copyRefreshCommand);
+    renderRefreshCommand();
   }
 
   function populateRows(rows) {
@@ -172,6 +181,73 @@
       instrumentLimit: 12,
       underlyingLimit: Math.min(24, Math.max(1, Number.isFinite(exposureTopN) ? exposureTopN : 24)),
     };
+  }
+
+  function fillRefreshInputsFromPortfolio() {
+    const tickers = uniqueTickers(readTickerInputsFromDom());
+    const symbols = tickers.length ? tickers.join(' ') : DEFAULT_UPDATE_SYMBOLS;
+    const etfs = tickers.filter((ticker) => {
+      const asset = state.marketData?.assets?.[ticker];
+      return asset?.type === 'etf' || state.marketData?.etfHoldings?.[ticker] || ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM', 'RAM', '0167A0.KS'].includes(ticker);
+    }).join(' ') || DEFAULT_UPDATE_ETFS;
+    const symbolsInput = $('#update-symbols');
+    const etfsInput = $('#update-etfs');
+    if (symbolsInput) symbolsInput.value = symbols;
+    if (etfsInput) etfsInput.value = etfs;
+    renderRefreshCommand();
+    setStatus('update-status', `${tickers.length || 2}개 티커 기준으로 refresh 입력을 만들었습니다. Actions 입력칸 또는 로컬 명령에 사용하세요.`, 'success');
+  }
+
+  function readTickerInputsFromDom() {
+    return Array.from(document.querySelectorAll('#portfolio-rows .ticker-input')).map((input) => input.value || '');
+  }
+
+  function renderRefreshCommand() {
+    const symbols = canonicalTickerText($('#update-symbols')?.value || DEFAULT_UPDATE_SYMBOLS);
+    const etfs = canonicalTickerText($('#update-etfs')?.value || DEFAULT_UPDATE_ETFS);
+    const command = buildRefreshCommand(symbols, etfs);
+    const commandElement = $('#refresh-command');
+    if (commandElement) commandElement.textContent = command;
+    const actionsLink = $('#open-actions-update');
+    if (actionsLink) actionsLink.href = ACTIONS_UPDATE_URL;
+    return command;
+  }
+
+  async function copyRefreshCommand() {
+    const command = renderRefreshCommand();
+    try {
+      await navigator.clipboard.writeText(command);
+      setStatus('update-status', 'refresh 명령을 복사했습니다. 로컬 터미널에서 실행하거나 Actions 입력값으로 옮겨 주세요.', 'success');
+    } catch (error) {
+      setStatus('update-status', `클립보드 복사가 막혔습니다. 아래 명령을 직접 복사하세요: ${command}`, 'error');
+    }
+  }
+
+  function buildRefreshCommand(symbols, etfs) {
+    const envParts = [];
+    if (canonicalTickerText(symbols)) envParts.push(`PORT_EXTRA_SYMBOLS=${shellQuote(canonicalTickerText(symbols))}`);
+    if (canonicalTickerText(etfs)) envParts.push(`PORT_EXTRA_ETFS=${shellQuote(canonicalTickerText(etfs))}`);
+    return `${envParts.join(' ')}${envParts.length ? ' ' : ''}npm run refresh:data && npm test`;
+  }
+
+  function canonicalTickerText(value) {
+    return uniqueTickers(String(value || '').split(/[\s,;]+/)).join(' ');
+  }
+
+  function uniqueTickers(values) {
+    const seen = new Set();
+    const tickers = [];
+    for (const value of values || []) {
+      const ticker = Core.normalizeTicker(value);
+      if (!ticker || seen.has(ticker)) continue;
+      seen.add(ticker);
+      tickers.push(ticker);
+    }
+    return tickers;
+  }
+
+  function shellQuote(value) {
+    return `"${String(value || '').replace(/(["\\$`])/g, '\\$1')}"`;
   }
 
   function calculateAndRender() {
@@ -430,5 +506,5 @@
     };
   }
 
-  window.__PORT_APP_TESTS__ = { loadMarketData, renderHeatmap, readAnalysisOptions, FALLBACK_MARKET_DATA, QUANT_DASHBOARD_URL };
+  window.__PORT_APP_TESTS__ = { loadMarketData, renderHeatmap, readAnalysisOptions, buildRefreshCommand, canonicalTickerText, FALLBACK_MARKET_DATA, QUANT_DASHBOARD_URL, ACTIONS_UPDATE_URL };
 })();

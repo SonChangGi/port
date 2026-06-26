@@ -2,6 +2,15 @@ name: Update portfolio dashboard data
 
 on:
   workflow_dispatch:
+    inputs:
+      extra_symbols:
+        description: 'Additional tickers to fetch prices/returns for, e.g. 0167A0.KS RAM'
+        required: false
+        default: ''
+      extra_etfs:
+        description: 'Additional ETF tickers to fetch holdings for, e.g. RAM'
+        required: false
+        default: ''
   schedule:
     - cron: '30 0 * * 2-6'
 
@@ -17,6 +26,9 @@ jobs:
         with:
           node-version: '26'
       - name: Refresh generated market data
+        env:
+          PORT_EXTRA_SYMBOLS: ${{ github.event.inputs.extra_symbols || '' }}
+          PORT_EXTRA_ETFS: ${{ github.event.inputs.extra_etfs || '' }}
         run: npm run refresh:data
       - name: Verify static dashboard
         run: npm test

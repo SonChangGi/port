@@ -181,8 +181,10 @@ textarea { resize: vertical; border-radius: var(--radius-md); min-height: 120px;
 select option { background: #111827; color: var(--ink); }
 
 .filter-card { margin-top: 18px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: rgba(8,10,15,.38); }
-.filter-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
-.filter-grid label { display: grid; gap: 6px; color: var(--muted); font-size: .88rem; font-weight: 850; }
+.filter-grid,
+.update-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.filter-grid label,
+.update-grid label { display: grid; gap: 6px; color: var(--muted); font-size: .88rem; font-weight: 850; }
 
 .table-wrap { width: 100%; overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius-md); background: rgba(8,10,15,.32); }
 .table-wrap::-webkit-scrollbar, .heatmap-wrap::-webkit-scrollbar, .code-pill::-webkit-scrollbar { height: 10px; }
@@ -218,9 +220,12 @@ tr:last-child td { border-bottom: 0; }
 .muted { color: var(--muted); }
 
 .coverage-panel { margin-top: 18px; }
+.data-update-panel { margin-bottom: 18px; }
 .warning-list { display: grid; gap: 10px; margin-bottom: 14px; }
 .warning-item { border: 1px solid rgba(251, 191, 36, .28); background: rgba(251, 191, 36, .1); color: #fde68a; border-radius: var(--radius-md); padding: 12px 14px; font-weight: 750; }
 .code-pill { display: inline-flex; max-width: 100%; overflow-x: auto; white-space: nowrap; }
+.command-pill { flex: 1 1 520px; min-height: 42px; align-items: center; padding: 10px 12px; border: 1px solid rgba(125,211,252,.2); border-radius: 14px; background: rgba(8,10,15,.76); color: var(--accent); font-weight: 850; }
+.refresh-help { margin: 14px 0 0; line-height: 1.65; }
 
 .heatmap-wrap { overflow-x: auto; padding-bottom: 4px; }
 .heatmap { display: grid; gap: 6px; min-width: max-content; }
@@ -252,7 +257,7 @@ tr:last-child td { border-bottom: 0; }
   .hero-main, .hero-note, .panel, .notice, .metric-card { border-radius: 22px; }
   .hero-main { padding: 24px; }
   body { word-break: normal; }
-  .metric-row, .filter-grid { grid-template-columns: 1fr; }
+  .metric-row, .filter-grid, .update-grid { grid-template-columns: 1fr; }
   .panel-header { flex-direction: column; }
   h1 { font-size: clamp(2rem, 9vw, 2.95rem); line-height: 1.12; }
   h2 { font-size: clamp(1.75rem, 8vw, 2.35rem); }

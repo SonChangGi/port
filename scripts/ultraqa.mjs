@@ -192,6 +192,23 @@ record('new DRAM ticker calculates from shares and decomposes into individual me
   assert.ok(result.mappedUnleveredKrw / result.totalKrw > 0.999);
 });
 
+record('0167A0 alias and RAM ETF calculate from refreshed provider close prices', () => {
+  const korean = data.assets['0167A0.KS'];
+  const ram = data.assets.RAM;
+  assert.ok(korean && korean.price > 0 && korean.currency === 'KRW');
+  assert.ok(korean.priceSynthetic !== true && korean.valuationEligible !== false);
+  assert.ok(ram && ram.price > 0 && ram.currency === 'USD');
+  assert.equal(ram.leverage, 2);
+  assert.ok(ram.priceSynthetic !== true && ram.valuationEligible !== false);
+  const result = Core.calculatePortfolio([
+    { ticker: '0167A0', shares: 1, priceCurrency: 'USD' },
+    { ticker: 'RAM', shares: 1, priceCurrency: 'USD' },
+  ], data, { exposureTopN: Infinity });
+  assert.equal(result.direct.find((row) => row.ticker === '0167A0.KS').priceCurrency, 'KRW');
+  assert.equal(result.direct.find((row) => row.ticker === 'RAM').priceCurrency, 'USD');
+  assert.ok(result.totalKrw > korean.price);
+});
+
 record('blank top-N default expands all public SPY constituents in primary rows', () => {
   const result = Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: Infinity });
   assert.ok(result.primaryExposureRows.length >= 400, `expected broad constituent expansion, got ${result.primaryExposureRows.length}`);

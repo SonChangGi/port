@@ -9,6 +9,7 @@ const files = {
   design: readFileSync('DESIGN.md', 'utf8'),
   readme: readFileSync('README.md', 'utf8'),
   refresh: readFileSync('scripts/refresh-data.mjs', 'utf8'),
+  workflow: readFileSync('.github/workflows/update-data.yml', 'utf8'),
 };
 
 const checks = [];
@@ -38,6 +39,11 @@ assert(contains(files.html, 'id="filter-min-weight"'), 'minimum weight universe 
 assert(contains(files.html, 'id="filter-include"'), 'include ticker universe filter exists');
 assert(contains(files.html, 'id="filter-exclude"'), 'exclude ticker universe filter exists');
 assert(contains(files.html, '개별 종목 최종 비중'), 'look-through copy is individual-stock centered');
+assert(contains(files.html, 'id="data-update"'), 'data update panel exists');
+assert(contains(files.html, 'id="update-symbols"'), 'extra price ticker input exists');
+assert(contains(files.html, 'id="update-etfs"'), 'extra ETF holdings input exists');
+assert(contains(files.html, 'id="copy-refresh-command"'), 'refresh command copy button exists');
+assert(contains(files.html, '0167A0.KS RAM'), '0167A0/RAM refresh preset is visible');
 
 assert(contains(files.core, 'calculatePortfolio'), 'portfolio calculation API exists');
 assert(contains(files.core, 'resolveShareValuation'), 'share-count valuation API exists');
@@ -50,6 +56,8 @@ assert(contains(files.core, 'filtered_residual'), 'filtered residual bucket pres
 assert(contains(files.core, 'inferLeverage'), 'leverage inference API exists');
 assert(contains(files.core, 'buildCorrelationMatrix'), 'correlation API exists');
 assert(contains(files.core, 'classifyFreshness'), 'freshness API exists');
+assert(contains(files.core, "'0167A0', '0167A0.KS'"), 'core normalizes 0167A0 alias to Yahoo/KRX symbol');
+assert(contains(files.core, 'RAM: 2'), 'RAM leverage metadata exists');
 assert(contains(files.app, 'shares-input'), 'share input is wired');
 assert(contains(files.app, 'price-currency-input'), 'price currency input is wired');
 assert(contains(files.app, 'readAnalysisOptions'), 'analysis filter reader is wired');
@@ -60,6 +68,9 @@ assert(contains(files.app, 'renderHeatmap'), 'heatmap renderer exists');
 assert(contains(files.app, 'FALLBACK_MARKET_DATA'), 'fallback load state exists');
 assert(contains(files.app, 'parsePortfolioText'), 'CSV import is wired');
 assert(contains(files.app, 'no-store'), 'browser JSON fetch avoids stale cache');
+assert(contains(files.app, 'buildRefreshCommand'), 'data update command builder is wired');
+assert(contains(files.app, 'canonicalTickerText'), 'data update ticker canonicalization is wired');
+assert(contains(files.app, 'ACTIONS_UPDATE_URL'), 'Actions update URL is centralized');
 
 assert(contains(files.css, ':root'), 'CSS tokens exist');
 assert(contains(files.css, 'color-scheme: dark'), 'dark color scheme is declared');
@@ -70,6 +81,8 @@ assert(contains(files.css, '.filter-card'), 'filter card styling exists');
 assert(contains(files.css, '@media (max-width: 720px)'), 'mobile breakpoint exists');
 assert(contains(files.css, '.heatmap'), 'correlation heatmap styling exists');
 assert(contains(files.css, '.table-wrap'), 'table overflow guard exists');
+assert(contains(files.css, '.data-update-panel'), 'data update panel styling exists');
+assert(contains(files.css, '.command-pill'), 'refresh command pill styling exists');
 
 assert(files.data.schemaVersion === 1, 'market data schemaVersion is 1');
 assert(files.data.baseCurrency === 'KRW', 'market data base currency is KRW');
@@ -85,6 +98,15 @@ assert(files.data.assets.TQQQ?.leverage === 3, 'TQQQ leverage metadata exists');
 assert(files.data.assets.DRAM?.type === 'etf', 'DRAM is recognized as an ETF');
 assert(files.data.assets.DRAM?.source === 'Roundhill DailyNAV CSV', 'DRAM price comes from Roundhill DailyNAV');
 assert(Number.isFinite(files.data.assets.DRAM?.price) && files.data.assets.DRAM.price > 0, 'DRAM close price exists');
+assert(files.data.assets['0167A0.KS']?.type === 'etf', '0167A0.KS is recognized as an ETF');
+assert(files.data.assets['0167A0.KS']?.currency === 'KRW', '0167A0.KS close price currency is KRW');
+assert(Number.isFinite(files.data.assets['0167A0.KS']?.price) && files.data.assets['0167A0.KS'].price > 0, '0167A0.KS close price exists');
+assert(files.data.assets['0167A0.KS']?.priceSynthetic !== true, '0167A0.KS close price is provider-backed');
+assert(files.data.assets.RAM?.type === 'etf', 'RAM is recognized as an ETF');
+assert(files.data.assets.RAM?.currency === 'USD', 'RAM close price currency is USD');
+assert(files.data.assets.RAM?.leverage === 2, 'RAM leverage metadata is 2x');
+assert(Number.isFinite(files.data.assets.RAM?.price) && files.data.assets.RAM.price > 0, 'RAM close price exists');
+assert(files.data.assets.RAM?.priceSynthetic !== true, 'RAM close price is provider-backed');
 assert(files.data.etfHoldings?.SPY?.holdings?.length >= 400, 'SPY decomposes into broad constituent set');
 assert(files.data.etfHoldings?.QQQ?.holdings?.length >= 100, 'QQQ decomposes into broad constituent set');
 assert(files.data.etfHoldings?.TQQQ?.sourceStatus === 'proxy', 'TQQQ uses explicit QQQ proxy status');
@@ -106,11 +128,16 @@ assert(contains(files.readme, '보유 주수'), 'README documents share-count in
 assert(contains(files.readme, 'State Street'), 'README documents SPY provider source');
 assert(contains(files.readme, 'Invesco'), 'README documents QQQ provider source');
 assert(contains(files.readme, 'Roundhill'), 'README documents DRAM/Roundhill provider source');
+assert(contains(files.readme, 'Naver Finance'), 'README documents KR ticker fallback source');
+assert(contains(files.readme, 'extra_symbols'), 'README documents Actions manual inputs');
 assert(contains(files.readme, 'PORT_EXTRA_SYMBOLS'), 'README documents extra ticker refresh path');
 assert(contains(files.readme, '레버리지 제외'), 'README documents leverage views');
 assert(contains(files.readme, '개별 종목'), 'README documents individual stock look-through');
 assert(contains(files.refresh, 'Frankfurter'), 'refresh script uses Frankfurter FX');
 assert(contains(files.refresh, 'Yahoo Chart'), 'refresh script uses Yahoo Chart');
+assert(contains(files.refresh, 'Naver Finance chart'), 'refresh script uses Naver Finance chart fallback');
+assert(contains(files.refresh, "'0167A0', '0167A0.KS'"), 'refresh script normalizes 0167A0 alias');
+assert(contains(files.refresh, "'RAM', '0167A0.KS'"), 'refresh script includes RAM and 0167A0.KS in built-in symbols/ETFs');
 assert(contains(files.refresh, 'State Street official holdings XLSX'), 'refresh script uses SPY official holdings');
 assert(contains(files.refresh, 'Invesco QQQ holdings API'), 'refresh script uses QQQ official holdings');
 assert(contains(files.refresh, 'Roundhill DailyNAV CSV'), 'refresh script uses Roundhill DailyNAV');
@@ -121,6 +148,10 @@ assert(contains(files.refresh, 'valuationEligible: false'), 'refresh fallback pr
 assert(contains(files.refresh, 'AbortController'), 'refresh script aborts stalled provider requests');
 assert(!contains(files.refresh, 'slice(0, 40)'), 'refresh script no longer caps parsed holdings at 40');
 assert(!contains(files.refresh, 'record.holdings.slice(0, 12)'), 'refresh script no longer truncates ETF holdings to 12 for exposure data');
+assert(contains(files.workflow, 'extra_symbols'), 'Actions workflow accepts extra_symbols input');
+assert(contains(files.workflow, 'extra_etfs'), 'Actions workflow accepts extra_etfs input');
+assert(contains(files.workflow, 'PORT_EXTRA_SYMBOLS'), 'Actions workflow passes extra_symbols to refresh script');
+assert(contains(files.workflow, 'PORT_EXTRA_ETFS'), 'Actions workflow passes extra_etfs to refresh script');
 
 const failed = checks.filter((check) => !check.ok);
 for (const check of checks) console.log(`${check.ok ? 'PASS' : 'FAIL'} ${check.label}`);

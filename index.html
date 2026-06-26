@@ -18,6 +18,7 @@
       <a href="#portfolio-input">입력</a>
       <a href="#exposure">개별 비중</a>
       <a href="#correlation">상관관계</a>
+      <a href="#data-update">데이터 업데이트</a>
       <a href="#data-health">데이터 상태</a>
     </nav>
     <div class="hero-grid">
@@ -31,6 +32,7 @@
         </p>
         <div class="hero-actions">
           <a class="primary-button" href="#portfolio-input">포트폴리오 계산</a>
+          <a class="secondary-button" href="#data-update">새 티커 종가 업데이트</a>
           <a class="secondary-button" href="data/market-data.json" target="_blank" rel="noopener noreferrer">생성 JSON 보기</a>
         </div>
       </div>
@@ -220,6 +222,40 @@
         <h2 id="data-health-title">데이터 신선도와 실패 상태</h2>
         <p>정적 페이지는 생성된 JSON만 읽습니다. 최신 데이터는 refresh 스크립트 또는 GitHub Actions에서 갱신합니다.</p>
       </div>
+      <article class="panel data-update-panel" id="data-update" aria-labelledby="data-update-title">
+        <div class="panel-header compact">
+          <div>
+            <p class="eyebrow">Refresh</p>
+            <h3 id="data-update-title">새 티커 종가 추가·업데이트</h3>
+            <p>
+              브라우저는 외부 금융 API를 직접 호출하지 않습니다. 0167A0처럼 한국 ETF는 <code>0167A0.KS</code>로 정규화하고,
+              RAM 같은 ETF는 종가와 holdings 파싱 대상에 함께 넣어 Actions 또는 로컬 refresh에서 생성 JSON을 갱신합니다.
+            </p>
+          </div>
+          <a id="open-actions-update" class="primary-button" href="https://github.com/SonChangGi/port/actions/workflows/update-data.yml" target="_blank" rel="noopener noreferrer">Actions에서 실행</a>
+        </div>
+        <div class="update-grid">
+          <label>
+            종가/수익률 추가 티커
+            <input id="update-symbols" value="0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
+          </label>
+          <label>
+            holdings도 시도할 ETF 티커
+            <input id="update-etfs" value="0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
+          </label>
+        </div>
+        <div class="manual-update-actions">
+          <button id="update-from-portfolio" type="button" class="secondary-button">현재 입력 티커로 채우기</button>
+          <button id="copy-refresh-command" type="button" class="secondary-button">명령 복사</button>
+          <code id="refresh-command" class="code-pill command-pill">npm run refresh:data && npm test</code>
+        </div>
+        <p id="update-help" class="muted refresh-help">
+          로컬에서는 위 명령을 실행하고, Actions에서는 <strong>Run workflow</strong> 입력칸의
+          <code>extra_symbols</code>/<code>extra_etfs</code>에 같은 값을 넣으세요. 갱신 후 Pages의 JSON을 다시 읽으면 보유 주수 계산에 실제 종가가 사용됩니다.
+        </p>
+        <p id="update-status" class="status-line" role="status" aria-live="polite">0167A0 → 0167A0.KS 별칭과 RAM ETF 갱신 입력을 준비했습니다.</p>
+      </article>
+
       <article class="panel">
         <div id="warnings" class="warning-list" aria-live="polite"></div>
         <div class="table-wrap">
@@ -231,7 +267,8 @@
         </div>
         <div class="manual-update-actions">
           <a class="primary-button" href="https://github.com/SonChangGi/port/actions/workflows/update-data.yml" target="_blank" rel="noopener noreferrer">GitHub Actions에서 데이터 갱신</a>
-          <code class="code-pill">npm run refresh:data && npm test</code>
+          <a class="secondary-button" href="#data-update">새 티커 입력 만들기</a>
+          <code class="code-pill">PORT_EXTRA_SYMBOLS="0167A0.KS RAM" PORT_EXTRA_ETFS="0167A0.KS RAM" npm run refresh:data && npm test</code>
         </div>
       </article>
     </section>

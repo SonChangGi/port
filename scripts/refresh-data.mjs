@@ -8,15 +8,22 @@ const MAX_HOLDING_PRICE_SYMBOLS = Number(process.env.PORT_MAX_HOLDING_PRICE_SYMB
 const REQUEST_TIMEOUT_MS = Math.max(1000, Number(process.env.PORT_REQUEST_TIMEOUT_MS || 15000));
 const PRICE_FETCH_CONCURRENCY = Math.max(1, Math.min(12, Number(process.env.PORT_PRICE_CONCURRENCY || 6)));
 const FORCE_PROVIDER_TIMEOUT = process.env.PORT_FORCE_PROVIDER_TIMEOUT === '1';
-const BUILTIN_SYMBOLS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM', 'AAPL', 'MSFT', 'NVDA', 'AMD', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', '005930.KS'];
-const BUILTIN_ETFS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM'];
+const TICKER_ALIASES = new Map([
+  ['0167A0', '0167A0.KS'],
+]);
+const SPECIAL_ASSET_NAMES = {
+  '0167A0.KS': 'SOL AI Semiconductor TOP2 Plus ETF',
+  RAM: 'Roundhill T-REX 2X Long DRAM Daily Target ETF',
+};
+const BUILTIN_SYMBOLS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM', 'RAM', '0167A0.KS', 'AAPL', 'MSFT', 'NVDA', 'AMD', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', '005930.KS'];
+const BUILTIN_ETFS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM', 'RAM', '0167A0.KS'];
 const EXTRA_SYMBOLS = parseSymbolListEnv(process.env.PORT_EXTRA_SYMBOLS);
 const EXTRA_ETFS = parseSymbolListEnv(process.env.PORT_EXTRA_ETFS);
 const DEFAULT_SYMBOLS = uniqueSymbols([...BUILTIN_SYMBOLS, ...EXTRA_SYMBOLS, ...EXTRA_ETFS]);
 const DEFAULT_ETFS = uniqueSymbols([...BUILTIN_ETFS, ...EXTRA_ETFS]);
 const ROUNDHILL_ETFS = new Set(['DRAM']);
 const ROUNDHILL_DAILY_NAV_URL = 'https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_DailyNAV.csv';
-const LEVERAGE = { TQQQ: 3, SQQQ: -3, SOXL: 3, SOXS: -3, UPRO: 3, SPXL: 3, SPXS: -3, QLD: 2, SSO: 2 };
+const LEVERAGE = { TQQQ: 3, SQQQ: -3, SOXL: 3, SOXS: -3, UPRO: 3, SPXL: 3, SPXS: -3, QLD: 2, SSO: 2, RAM: 2 };
 const OFFICIAL_HOLDINGS_URLS = {
   SPY: 'https://www.ssga.com/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx',
   QQQ: 'https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&interval=monthly&productType=ETF',
@@ -48,12 +55,17 @@ const offline = process.argv.includes('--offline-sample');
 function parseSymbolListEnv(value) {
   return String(value || '')
     .split(/[\s,;]+/)
-    .map((symbol) => symbol.trim().toUpperCase())
+    .map(canonicalSymbol)
     .filter(Boolean);
 }
 
 function uniqueSymbols(values) {
-  return Array.from(new Set(values.map((symbol) => String(symbol || '').trim().toUpperCase()).filter(Boolean)));
+  return Array.from(new Set(values.map(canonicalSymbol).filter(Boolean)));
+}
+
+function canonicalSymbol(value) {
+  const raw = String(value || '').trim().toUpperCase();
+  return TICKER_ALIASES.get(raw) || raw;
 }
 
 function todayIso() {
@@ -157,13 +169,48 @@ async function fetchYahooChart(symbol, range = RANGE) {
   if (!latest) throw new Error(`No close points for ${symbol}`);
   return {
     ticker: symbol,
-    name: meta.longName || meta.shortName || symbol,
+    name: SPECIAL_ASSET_NAMES[symbol] || meta.longName || meta.shortName || symbol,
     type: /ETF|FUND/i.test(meta.instrumentType || '') ? 'etf' : 'stock',
     currency: meta.currency || inferCurrency(symbol),
     price: latest.close,
     priceAsOf: latest.date,
     returns,
     source: 'Yahoo Chart',
+    sourceUrl: url,
+    sourceStatus: 'live',
+  };
+}
+
+async function fetchNaverChart(symbol, range = RANGE) {
+  const code = naverSymbolCode(symbol);
+  if (!code) throw new Error(`${symbol} is not a Naver Finance chart code`);
+  const count = rangeToNaverCount(range);
+  const url = `https://fchart.stock.naver.com/sise.nhn?symbol=${encodeURIComponent(code)}&timeframe=day&count=${count}&requestType=0`;
+  const text = await fetchText(url, `Naver Finance chart ${symbol}`);
+  const points = [];
+  for (const match of text.matchAll(/<item\s+data="([^"]+)"/g)) {
+    const [rawDate, , , , rawClose] = match[1].split('|');
+    const close = Number(rawClose);
+    if (!/^\d{8}$/.test(rawDate) || !Number.isFinite(close) || close <= 0) continue;
+    points.push({ date: `${rawDate.slice(0, 4)}-${rawDate.slice(4, 6)}-${rawDate.slice(6, 8)}`, close });
+  }
+  const returns = [];
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1].close;
+    const current = points[index].close;
+    if (previous > 0 && current > 0) returns.push({ date: points[index].date, value: current / previous - 1 });
+  }
+  const latest = points.at(-1);
+  if (!latest) throw new Error(`No Naver close points for ${symbol}`);
+  return {
+    ticker: symbol,
+    name: SPECIAL_ASSET_NAMES[symbol] || symbol,
+    type: DEFAULT_ETFS.includes(symbol) ? 'etf' : 'stock',
+    currency: 'KRW',
+    price: latest.close,
+    priceAsOf: latest.date,
+    returns,
+    source: 'Naver Finance chart',
     sourceUrl: url,
     sourceStatus: 'live',
   };
@@ -181,10 +228,18 @@ async function fetchAsset(symbol) {
     }
   }
 
-  const asset = await fetchYahooChart(symbol);
+  let asset;
+  try {
+    asset = await fetchYahooChart(symbol);
+  } catch (error) {
+    if (!naverSymbolCode(symbol)) throw error;
+    warnings.push(`${symbol} Yahoo Chart failed: ${error.message}; trying Naver Finance chart fallback.`);
+    asset = await fetchNaverChart(symbol);
+  }
   asset.leverage = LEVERAGE[symbol] || 1;
   if (DEFAULT_ETFS.includes(symbol)) asset.type = 'etf';
-  sources.push({ name: `Yahoo Chart ${symbol}`, url: asset.sourceUrl, status: 'live', asOf: asset.priceAsOf, detail: `${asset.returns.length} daily returns loaded.` });
+  if (SPECIAL_ASSET_NAMES[symbol]) asset.name = SPECIAL_ASSET_NAMES[symbol];
+  sources.push({ name: `${asset.source} ${symbol}`, url: asset.sourceUrl, status: asset.sourceStatus, asOf: asset.priceAsOf, detail: `${asset.returns.length} daily returns loaded.` });
   return asset;
 }
 
@@ -224,7 +279,7 @@ function fallbackAsset(symbol) {
   });
   return {
     ticker: symbol,
-    name: symbol,
+    name: SPECIAL_ASSET_NAMES[symbol] || symbol,
     type: DEFAULT_ETFS.includes(symbol) ? 'etf' : 'stock',
     currency: inferCurrency(symbol),
     price: symbol.endsWith('.KS') ? 70000 : 100 + base * 8,
@@ -421,6 +476,25 @@ function inferCurrency(symbol) {
   if (/\.HK$/.test(normalized)) return 'HKD';
   if (/\.L$/.test(normalized)) return 'GBP';
   return 'USD';
+}
+
+function naverSymbolCode(symbol) {
+  const normalized = canonicalSymbol(symbol);
+  const match = normalized.match(/^([0-9A-Z]{6})\.(KS|KQ)$/);
+  if (match) return match[1];
+  if (/^[0-9A-Z]{6}$/.test(normalized)) return normalized;
+  return '';
+}
+
+function rangeToNaverCount(range) {
+  const normalized = String(range || '').toLowerCase();
+  const match = normalized.match(/^(\d+)(d|mo|y|yr)$/);
+  if (!match) return 180;
+  const amount = Number(match[1]);
+  const unit = match[2];
+  if (unit === 'd') return Math.max(5, amount);
+  if (unit === 'mo') return Math.max(22, amount * 23);
+  return Math.max(250, amount * 260);
 }
 
 function mergeHoldings(rows) {
@@ -704,8 +778,8 @@ async function main() {
     } catch (error) {
       const asset = fallbackAsset(symbol);
       assets[symbol] = asset;
-      warnings.push(`${symbol} Yahoo Chart failed: ${error.message}; using deterministic fallback series.`);
-      sources.push({ name: `Yahoo Chart ${symbol}`, status: 'fallback', asOf: asset.priceAsOf, detail: error.message });
+      warnings.push(`${symbol} price fetch failed: ${error.message}; using deterministic fallback series.`);
+      sources.push({ name: `${symbol} price fallback`, status: 'fallback', asOf: asset.priceAsOf, detail: error.message });
     }
   });
 

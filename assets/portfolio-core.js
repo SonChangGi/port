@@ -12,11 +12,15 @@
     TQQQ: 3, SQQQ: -3, QLD: 2, PSQ: -1, QID: -2,
     UPRO: 3, SPXL: 3, SPXS: -3, SSO: 2, SDS: -2, SH: -1,
     SOXL: 3, SOXS: -3, TECL: 3, TECS: -3, FNGU: 3, FNGD: -3,
-    TMF: 3, TBT: -2, UGL: 2, GLL: -2,
+    TMF: 3, TBT: -2, UGL: 2, GLL: -2, RAM: 2,
   }));
+  const TICKER_ALIASES = new Map([
+    ['0167A0', '0167A0.KS'],
+  ]);
 
   function normalizeTicker(value) {
-    return String(value || '').trim().toUpperCase();
+    const raw = String(value || '').trim().toUpperCase();
+    return TICKER_ALIASES.get(raw) || raw;
   }
 
   function asNumber(value, fallback = 0) {
