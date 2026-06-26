@@ -27,7 +27,7 @@
         <p class="hero-copy">
           보유 주수를 입력하면 생성 JSON의 최신 종가와 USD/KRW 환율을 사용해 평가금액을 계산하고,
           ETF 투자금액은 각 구성종목 비중으로 풀어 개별 종목 최종 비중과 레버리지 노출을 보여줍니다.
-          데이터 신선도와 미상 잔여비중은 별도 감사 표에 남깁니다.
+          데이터 신선도와 미상 잔여비중은 별도 잔여 노출 표에 남깁니다.
         </p>
         <div class="hero-actions">
           <a class="primary-button" href="#portfolio-input">포트폴리오 계산</a>
@@ -99,7 +99,7 @@
               <label>항상 포함<input id="filter-include" type="text" placeholder="NVDA, AAPL" /></label>
               <label>제외<input id="filter-exclude" type="text" placeholder="CASH" /></label>
             </div>
-            <p class="muted">필터는 화면 표시와 상관관계 유니버스를 고릅니다. 최종 노출 표에는 개별 종목만 표시하고, 필터에서 빠진 값은 별도 감사 bucket에 합산합니다.</p>
+            <p class="muted">필터는 화면 표시와 상관관계 유니버스를 고릅니다. 필터로 숨긴 구성종목 금액은 개별 종목 표에 섞지 않고 아래 잔여 노출 표에만 합산합니다.</p>
           </div>
         </article>
       </div>
@@ -174,12 +174,12 @@
         </article>
       </div>
       <article class="panel coverage-panel" aria-labelledby="audit-title">
-        <h3 id="audit-title">필터/미상/미매핑 감사 bucket</h3>
-        <p class="muted">개별 종목 최종 비중 표에 ETF 자체나 OTHER bucket을 섞지 않기 위해, 필터에서 제외된 구성종목과 미상 잔여값은 여기에서만 금액 보존용으로 확인합니다.</p>
+        <h3 id="audit-title">개별 종목 표에서 제외된 잔여 노출</h3>
+        <p class="muted">실제 ETF 구성종목명이 아니라 금액 보존용 보조 행입니다. 사용자가 필터로 숨긴 구성종목, 운용사 holdings 합계가 100%에 못 미치는 현금·파생·반올림 잔여분, 또는 holdings를 못 가져온 ETF만 여기에 모읍니다.</p>
         <div class="table-wrap">
           <table>
-            <caption>주 표에서 제외된 필터/미상/미매핑 노출 감사 목록</caption>
-            <thead><tr><th>감사 bucket</th><th>설명</th><th>NAV 금액(KRW)</th><th>NAV 비중</th><th>레버리지 반영</th><th>출처 ETF</th></tr></thead>
+            <caption>개별 종목 표에 넣지 않은 숨김/잔여/미매핑 노출 목록</caption>
+            <thead><tr><th>잔여 항목</th><th>설명</th><th>NAV 금액(KRW)</th><th>NAV 비중</th><th>레버리지 반영</th><th>출처 ETF</th></tr></thead>
             <tbody id="exposure-audit-rows"><tr><td colspan="6">계산 대기 중</td></tr></tbody>
           </table>
         </div>

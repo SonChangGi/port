@@ -190,7 +190,7 @@
       renderCoverageRows(result.coverageRows);
       renderHeatmap('instrument-correlation', result.instrumentCorrelation);
       renderHeatmap('underlying-correlation', result.underlyingCorrelation);
-      setStatus('input-status', `${rows.length}개 입력 종목 계산 완료 · 개별 종목 ${result.primaryExposureRows.length}개 · 감사 bucket ${result.auditExposureRows.length}개 · 데이터 생성 ${formatDateTime(state.marketData.generatedAt)}`, 'success');
+      setStatus('input-status', `${rows.length}개 입력 종목 계산 완료 · 개별 종목 ${result.primaryExposureRows.length}개 · 잔여 노출 ${result.auditExposureRows.length}개 · 데이터 생성 ${formatDateTime(state.marketData.generatedAt)}`, 'success');
     } catch (error) {
       setStatus('input-status', `계산 오류: ${error.message}`, 'error');
       renderCalculationError(error.message);
@@ -242,11 +242,11 @@
       metricCard('총 평가금액', formatCurrency(result.totalKrw, 'KRW'), `${formatCurrency(result.totalUsd, 'USD')} · FX ${formatNumber(result.fxRate, 2)}`),
       metricCard('입력 종가 기준', `USD/KRW ${formatNumber(result.fxRate, 2)}`, `${state.marketData.fx?.source || 'source'} · ${state.marketData.fx?.asOf || '기준일 없음'}`),
       metricCard('ETF 구성종목', `${formatNumber(displayedHoldingCount, 0)}/${formatNumber(fullHoldingCount, 0)}`, '필터 통과/전체 구성종목 수'),
-      metricCard('개별종목 매핑', formatPercent(result.mappedUnleveredKrw / (result.totalKrw || 1)), result.auditExposureRows.length ? `감사 bucket ${formatPercent(result.auditUnleveredKrw / (result.totalKrw || 1))}` : 'ETF 잔여/필터 없음'),
+      metricCard('개별종목 매핑', formatPercent(result.mappedUnleveredKrw / (result.totalKrw || 1)), result.auditExposureRows.length ? `숨김/잔여 ${formatPercent(result.auditUnleveredKrw / (result.totalKrw || 1))}` : '숨김/잔여 없음'),
       metricCard('레버리지 총노출', `${formatPercent(result.leveredGrossKrw / (result.totalKrw || 1))}`, leveragedRows.length ? `${leveragedRows.map((row) => `${row.ticker} ${formatNumber(row.leverage, 1)}x`).join(' · ')}` : '레버리지 ETF 없음'),
     ];
     $('#summary-cards').innerHTML = cards.join('');
-    $('#summary-subtitle').textContent = `생성 데이터 기준일 ${state.marketData.dataAsOf || 'unknown'} · ETF 입력금액은 구성종목별 비중으로 매핑하고, 필터/미상 값은 별도 감사 표에만 표시합니다.`;
+    $('#summary-subtitle').textContent = `생성 데이터 기준일 ${state.marketData.dataAsOf || 'unknown'} · ETF 입력금액은 구성종목별 비중으로 매핑하고, 사용자가 숨긴 값이나 데이터 잔여분만 별도 잔여 노출 표에 표시합니다.`;
   }
 
   function renderInstrumentRows(rows) {
@@ -274,7 +274,7 @@
         <td class="number">${formatPercent(row.weight)}</td>
         <td>${escapeHtml(row.sourceTickers.join(', ') || '-')}</td>
       </tr>
-    `).join('') || '<tr><td colspan="5">표시할 개별 종목 노출이 없습니다. ETF 보유종목 커버리지와 감사 bucket을 확인하세요.</td></tr>';
+    `).join('') || '<tr><td colspan="5">표시할 개별 종목 노출이 없습니다. ETF 보유종목 커버리지와 잔여 노출을 확인하세요.</td></tr>';
     $('#exposure-levered').innerHTML = rows.map((row) => `
       <tr>
         <td><strong>${escapeHtml(row.ticker)}</strong></td>
@@ -283,7 +283,7 @@
         <td class="number">${formatPercent(row.leveredWeight)}</td>
         <td>${escapeHtml(row.sourceTickers.join(', ') || '-')}</td>
       </tr>
-    `).join('') || '<tr><td colspan="5">표시할 개별 종목 노출이 없습니다. ETF 보유종목 커버리지와 감사 bucket을 확인하세요.</td></tr>';
+    `).join('') || '<tr><td colspan="5">표시할 개별 종목 노출이 없습니다. ETF 보유종목 커버리지와 잔여 노출을 확인하세요.</td></tr>';
     $('#exposure-audit-rows').innerHTML = auditExposureRows.map((row) => `
       <tr>
         <td><strong>${escapeHtml(row.ticker)}</strong><br><span class="muted">${escapeHtml(row.type || '')}</span></td>
@@ -293,7 +293,7 @@
         <td class="number">${formatCurrency(row.leveredValueKrw, 'KRW')}<br><span class="muted">${formatPercent(row.leveredWeight)}</span></td>
         <td>${escapeHtml(row.sourceTickers.join(', ') || '-')}</td>
       </tr>
-    `).join('') || '<tr><td colspan="6">필터/미상/미매핑 감사 bucket이 없습니다.</td></tr>';
+    `).join('') || '<tr><td colspan="6">개별 종목 표에서 제외된 잔여 노출이 없습니다.</td></tr>';
   }
 
   function renderCoverageRows(rows) {
