@@ -236,6 +236,13 @@
       .sort((a, b) => Math.abs(b.leveredValueKrw || b.valueKrw) - Math.abs(a.leveredValueKrw || a.valueKrw));
   }
 
+  function exposureTotals(rows) {
+    return (Array.isArray(rows) ? rows : []).reduce((totals, row) => ({
+      valueKrw: totals.valueKrw + Math.abs(row.valueKrw || 0),
+      leveredValueKrw: totals.leveredValueKrw + Math.abs(row.leveredValueKrw || 0),
+    }), { valueKrw: 0, leveredValueKrw: 0 });
+  }
+
   function getUniverseOptions(options = {}) {
     const topN = asNumber(options.exposureTopN ?? options.topN, Infinity);
     const minWeight = Math.max(0, asNumber(options.exposureMinWeight ?? options.minWeight, 0));
@@ -259,7 +266,8 @@
   function computeLookThrough(normalizedPortfolio, marketData, options = {}) {
     const etfHoldings = marketData?.etfHoldings || {};
     const totalKrw = normalizedPortfolio.totalKrw || 0;
-    const bucket = new Map();
+    const stockBucket = new Map();
+    const auditBucket = new Map();
     const coverageRows = [];
     const universe = getUniverseOptions(options);
 
@@ -288,7 +296,7 @@
           if (shouldDisplayHolding(holding, index + 1, universe)) {
             displayedWeight += weight;
             displayedHoldings += 1;
-            addExposure(bucket, {
+            addExposure(stockBucket, {
               ticker: holding.ticker || `${row.ticker}:UNKNOWN`,
               name: holding.name || holding.ticker || `${row.ticker} holding`,
               sourceTicker: row.ticker,
@@ -305,7 +313,7 @@
         const residualWeight = Math.max(0, 1 - Math.min(coveredWeight, 1));
         const otherWeight = Math.max(0, filteredWeight + residualWeight);
         if (otherWeight > 0.000001) {
-          addExposure(bucket, {
+          addExposure(auditBucket, {
             ticker: `${row.ticker}:OTHER`,
             name: `${row.ticker} 기타/필터/미상 보유분`,
             sourceTicker: row.ticker,
@@ -331,15 +339,16 @@
           status: holdingsRecord.sourceStatus || 'sample',
         });
       } else {
-        addExposure(bucket, {
-          ticker: row.ticker,
-          name: row.name,
+        const targetBucket = isEtf ? auditBucket : stockBucket;
+        addExposure(targetBucket, {
+          ticker: isEtf ? `${row.ticker}:UNMAPPED` : row.ticker,
+          name: isEtf ? `${row.name || row.ticker} · 구성종목 미확보` : row.name,
           sourceTicker: row.ticker,
           valueKrw: row.valueKrw,
           leveredValueKrw: row.valueKrw * (isEtf ? leverage : 1),
           holdingWeight: 1,
           coverage: isEtf ? 'no_holdings' : 'direct',
-          type: isEtf ? 'etf_residual' : 'stock',
+          type: isEtf ? 'unmapped_etf' : 'stock',
         });
         coverageRows.push({
           ticker: row.ticker,
@@ -358,10 +367,24 @@
       }
     }
 
-    const exposureRows = finalizeExposure(bucket, totalKrw);
-    const leveredGrossKrw = exposureRows.reduce((sum, row) => sum + Math.abs(row.leveredValueKrw), 0);
-    const unleveredGrossKrw = exposureRows.reduce((sum, row) => sum + Math.abs(row.valueKrw), 0);
-    return { exposureRows, coverageRows, leveredGrossKrw, unleveredGrossKrw, universe };
+    const primaryExposureRows = finalizeExposure(stockBucket, totalKrw);
+    const auditExposureRows = finalizeExposure(auditBucket, totalKrw);
+    const exposureTotal = exposureTotals(primaryExposureRows);
+    const auditTotal = exposureTotals(auditExposureRows);
+    const leveredGrossKrw = exposureTotal.leveredValueKrw + auditTotal.leveredValueKrw;
+    const unleveredGrossKrw = exposureTotal.valueKrw + auditTotal.valueKrw;
+    return {
+      primaryExposureRows,
+      auditExposureRows,
+      coverageRows,
+      leveredGrossKrw,
+      unleveredGrossKrw,
+      mappedUnleveredKrw: exposureTotal.valueKrw,
+      mappedLeveredKrw: exposureTotal.leveredValueKrw,
+      auditUnleveredKrw: auditTotal.valueKrw,
+      auditLeveredKrw: auditTotal.leveredValueKrw,
+      universe,
+    };
   }
 
   function returnsForTicker(ticker, marketData) {
@@ -438,7 +461,7 @@
     const normalized = normalizePortfolioRows(rows, marketData);
     const lookThrough = computeLookThrough(normalized, marketData, options);
     const instrumentCorrelation = buildCorrelationMatrix(normalized.direct.map((row) => row.ticker), marketData, options.instrumentLimit || 12);
-    const underlyingTickers = lookThrough.exposureRows
+    const underlyingTickers = lookThrough.primaryExposureRows
       .map((row) => row.ticker)
       .filter((ticker) => !ticker.includes(':'));
     const underlyingCorrelation = buildCorrelationMatrix(underlyingTickers, marketData, options.underlyingLimit || options.exposureTopN || 12);

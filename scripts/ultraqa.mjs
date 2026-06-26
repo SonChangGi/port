@@ -44,8 +44,8 @@ record('duplicate ETF share rows aggregate before decomposition', () => {
   assert.equal(result.direct.length, 1);
   assert.equal(result.direct[0].inputShares, 3);
   assert.equal(result.totalKrw, 420000);
-  assert.equal(result.exposureRows[0].ticker, 'AAPL');
-  assert.equal(result.exposureRows[0].valueKrw, 420000);
+  assert.equal(result.primaryExposureRows[0].ticker, 'AAPL');
+  assert.equal(result.primaryExposureRows[0].valueKrw, 420000);
 });
 
 record('analysis universe filters conserve hidden exposure in OTHER bucket', () => {
@@ -55,10 +55,11 @@ record('analysis universe filters conserve hidden exposure in OTHER bucket', () 
     etfHoldings: { ETF: { sourceStatus: 'sample', holdings: [{ ticker: 'A', weight: 0.5 }, { ticker: 'B', weight: 0.3 }, { ticker: 'C', weight: 0.2 }] } },
   };
   const result = Core.calculatePortfolio([{ ticker: 'ETF', shares: 1, priceCurrency: 'USD' }], md, { exposureTopN: 1, includeTickers: 'B', excludeTickers: 'A' });
-  assert.ok(!result.exposureRows.find((row) => row.ticker === 'A'));
-  assert.ok(result.exposureRows.find((row) => row.ticker === 'B'));
-  assert.equal(Math.round(result.exposureRows.reduce((sum, row) => sum + row.valueKrw, 0)), result.totalKrw);
-  assert.ok(result.exposureRows.find((row) => row.ticker === 'ETF:OTHER'));
+  assert.ok(!result.primaryExposureRows.find((row) => row.ticker === 'A'));
+  assert.ok(result.primaryExposureRows.find((row) => row.ticker === 'B'));
+  assert.equal(Math.round([...result.primaryExposureRows, ...result.auditExposureRows].reduce((sum, row) => sum + row.valueKrw, 0)), result.totalKrw);
+  assert.ok(!result.primaryExposureRows.some((row) => row.ticker.includes(':')));
+  assert.ok(result.auditExposureRows.find((row) => row.ticker === 'ETF:OTHER'));
 });
 
 record('over-100% holding weights normalize without negative residual', () => {
@@ -68,9 +69,26 @@ record('over-100% holding weights normalize without negative residual', () => {
     etfHoldings: { ETF: { sourceStatus: 'sample', holdings: [{ ticker: 'A', weight: 0.8 }, { ticker: 'B', weight: 0.7 }] } },
   };
   const result = Core.calculatePortfolio([{ ticker: 'ETF', shares: 1, priceCurrency: 'USD' }], md);
-  assert.equal(Math.round(result.exposureRows.reduce((sum, row) => sum + row.valueKrw, 0)), result.totalKrw);
+  assert.equal(Math.round([...result.primaryExposureRows, ...result.auditExposureRows].reduce((sum, row) => sum + row.valueKrw, 0)), result.totalKrw);
   assert.equal(result.coverageRows[0].residualWeight, 0);
   assert.ok(result.coverageRows[0].coveredWeight <= 1);
+});
+
+record('ETF input maps to constituent stocks only in primary exposure rows', () => {
+  const md = {
+    fx: { rate: 1000 },
+    assets: {
+      SPY: { ticker: 'SPY', type: 'etf', currency: 'USD', price: 100, priceAsOf: '2026-06-24', leverage: 1, returns: [] },
+      AAPL: { ticker: 'AAPL', returns: mkReturns([0.01, 0.02, 0.03]) },
+      MSFT: { ticker: 'MSFT', returns: mkReturns([0.02, 0.01, 0.04]) },
+    },
+    etfHoldings: { SPY: { sourceStatus: 'official', holdings: [{ ticker: 'AAPL', name: 'Apple', weight: 0.7 }, { ticker: 'MSFT', name: 'Microsoft', weight: 0.2 }] } },
+  };
+  const result = Core.calculatePortfolio([{ ticker: 'SPY', shares: 10, priceCurrency: 'USD' }], md);
+  assert.deepEqual(result.primaryExposureRows.map((row) => row.ticker), ['AAPL', 'MSFT']);
+  assert.equal(result.primaryExposureRows.find((row) => row.ticker === 'AAPL').valueKrw, 700000);
+  assert.equal(result.primaryExposureRows.find((row) => row.ticker === 'MSFT').valueKrw, 200000);
+  assert.ok(result.auditExposureRows.find((row) => row.ticker === 'SPY:OTHER'));
 });
 
 record('malicious ticker is escaped by renderer contract and not treated as executable code', () => {
@@ -83,9 +101,16 @@ record('malicious ticker is escaped by renderer contract and not treated as exec
 });
 
 record('unknown ETF keeps residual/no-holdings state instead of fabricating holdings', () => {
-  const result = Core.calculatePortfolio([{ ticker: 'MYSTERYETF', amount: 1000, currency: 'USD', leverageOverride: 2 }], data);
-  assert.equal(result.coverageRows[0].status, 'direct');
-  assert.equal(result.exposureRows[0].ticker, 'MYSTERYETF');
+  const md = {
+    fx: { rate: 1000 },
+    assets: { MYSTERYETF: { ticker: 'MYSTERYETF', name: 'Mystery ETF', type: 'etf', currency: 'USD', price: 50, priceAsOf: '2026-06-24', returns: [] } },
+    etfHoldings: {},
+  };
+  const result = Core.calculatePortfolio([{ ticker: 'MYSTERYETF', shares: 2, priceCurrency: 'USD', leverageOverride: 2 }], md);
+  assert.equal(result.coverageRows[0].status, 'no_holdings');
+  assert.equal(result.primaryExposureRows.length, 0);
+  assert.equal(result.auditExposureRows[0].ticker, 'MYSTERYETF:UNMAPPED');
+  assert.equal(result.auditExposureRows[0].leveredValueKrw, 200000);
 });
 
 record('constant returns produce n/a correlation instead of divide-by-zero', () => {
@@ -96,7 +121,7 @@ record('constant returns produce n/a correlation instead of divide-by-zero', () 
 record('negative inverse leverage creates signed levered exposure', () => {
   const md = { fx: { rate: 1000 }, assets: { SQQQ: { ticker: 'SQQQ', type: 'etf', currency: 'USD', price: 20, priceAsOf: '2026-06-24', leverage: -3, returns: [] }, QQQ: { returns: [] } }, etfHoldings: { SQQQ: { holdings: [{ ticker: 'QQQ', weight: 1 }] } } };
   const result = Core.calculatePortfolio([{ ticker: 'SQQQ', shares: 5, priceCurrency: 'USD' }], md);
-  assert.equal(result.exposureRows[0].leveredValueKrw, -300000);
+  assert.equal(result.primaryExposureRows[0].leveredValueKrw, -300000);
 });
 
 record('dark visual contract has no light-mode regression marker', () => {
@@ -111,6 +136,17 @@ record('live refreshed data contains broad SPY/QQQ decomposition and explicit pr
   assert.ok(data.etfHoldings.QQQ.holdings.length >= 100);
   assert.equal(data.etfHoldings.TQQQ.sourceStatus, 'proxy');
   assert.ok(data.samplePortfolio.every((row) => Number.isFinite(row.shares) && row.priceCurrency));
+  const result = Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: 20 });
+  assert.ok(result.primaryExposureRows.length > 0);
+  assert.ok(result.primaryExposureRows.every((row) => !row.ticker.includes(':') && !['SPY', 'QQQ', 'TQQQ'].includes(row.ticker)), 'primary public-data exposure rows are constituent stocks, not ETF/bucket rows');
+});
+
+record('blank top-N default expands all public SPY constituents in primary rows', () => {
+  const result = Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: Infinity });
+  assert.ok(result.primaryExposureRows.length >= 400, `expected broad constituent expansion, got ${result.primaryExposureRows.length}`);
+  assert.equal(result.primaryExposureRows.filter((row) => row.ticker.includes(':') || row.ticker === 'SPY').length, 0);
+  assert.ok(result.auditExposureRows.every((row) => row.ticker.includes(':')), 'residual rows remain in audit rows');
+  assert.ok(result.mappedUnleveredKrw / result.totalKrw > 0.99, 'blank top-N maps nearly all SPY holdings into individual stocks');
 });
 
 record('refresh provider timeout falls back with explicit warning evidence', () => {

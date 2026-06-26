@@ -24,7 +24,7 @@ await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const { port } = server.address();
 const base = `http://127.0.0.1:${port}`;
 const checks = [
-  ['/', 'ETF 기초 노출'],
+  ['/', '개별 종목 매핑'],
   ['/assets/app.js', 'renderHeatmap'],
   ['/assets/portfolio-core.js', 'calculatePortfolio'],
   ['/assets/styles.css', '.heatmap'],

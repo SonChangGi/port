@@ -20,7 +20,8 @@
 ## Product goals
 - Goals:
   - KRW/USD 종가와 보유 주수를 한 기준 통화로 합산해 최종 포트폴리오 비중과 금액을 즉시 이해시킨다.
-  - SPY/QQQ처럼 holdings가 있는 ETF는 25개 top holdings가 아니라 가능한 전체 구성종목으로 분해한다.
+  - SPY/QQQ처럼 holdings가 있는 ETF는 25개 top holdings가 아니라 가능한 전체 구성종목으로 분해하고, ETF 투자금액을 각 개별 종목 비중에 매핑한다.
+  - 최종 look-through 표는 ETF 자체나 `ETF:OTHER` bucket이 아니라 개별 종목 행을 중심으로 보여준다.
   - ETF 보유비중을 가능한 최신 무료 데이터로 반영하되, 커버리지·proxy·누락을 명확히 보여준다.
   - 레버리지 ETF는 1x look-through와 leverage-adjusted exposure를 나란히 비교한다.
   - 사용자가 상위 N개, 최소 비중, 포함/제외 티커로 분석 universe를 정해 가독성을 유지한다.
@@ -51,7 +52,7 @@
   2. Portfolio share-count input and analysis universe controls.
   3. 핵심 KPI: total KRW/USD, FX date, ETF coverage, leverage exposure multiple.
   4. Instrument-level weights with 보유 주수/종가/종가 기준일.
-  5. ETF look-through: unlevered vs levered, hidden exposure in `ETF:OTHER`.
+  5. Individual-stock look-through: ETF 투자금액을 구성종목 비중으로 매핑한 unlevered vs levered 노출, hidden exposure는 별도 audit bucket.
   6. Correlation matrices.
   7. Holdings/data freshness and method caveats.
 
@@ -59,8 +60,9 @@
 - Principle 1: “숫자는 즉시, 한계는 바로 옆에” — every headline metric has nearby source/freshness/caveat context.
 - Principle 2: “두 관점 병렬 비교” — instrument vs look-through, leverage-excluded vs included, KRW vs USD are adjacent rather than hidden in tabs.
 - Principle 3: “정적 Pages 우선” — generated JSON first, browser computation second, external data fetch only in scripts/Actions.
-- Principle 4: “숨긴 노출도 합계에서 사라지지 않음” — filters improve readability but must preserve residual exposure.
-- Tradeoffs: Complete holdings coverage is secondary to transparent coverage; unknown or filtered holdings remain residual buckets instead of fabricated constituents.
+- Principle 4: “최종 표는 개별 종목, 감사 표는 미상/필터” — ETF 자체와 OTHER bucket은 최종 개별 종목 비중 표를 오염시키지 않고 별도 audit 영역에 둔다.
+- Principle 5: “숨긴 노출도 합계에서 사라지지 않음” — filters improve readability but must preserve residual exposure.
+- Tradeoffs: Complete holdings coverage is secondary to transparent coverage; unknown or filtered holdings remain audit buckets instead of fabricated constituents or primary portfolio rows.
 
 ## Visual language
 - Color: dark quant cockpit variant — base `#080a0f`, layered panels `rgba(15, 23, 42, .82)`, cyan accent `#7dd3fc`, violet accent `#c4b5fd`, amber warning, red danger. This keeps continuity with Quant Dashboard while fixing the bright internal page.
@@ -77,7 +79,8 @@
   - CSV textarea import in `ticker,shares,priceCurrency,leverage` format.
   - Analysis universe filter card: top-N, min weight, include tickers, exclude tickers.
   - KPI strip for total value/fx/freshness/leverage.
-  - Dual exposure cards for unlevered/levered views.
+  - Dual individual-stock exposure cards for unlevered/levered views.
+  - Separate audit bucket table for filtered, unknown, or unmapped ETF exposure.
   - Correlation heatmap with accessible text labels.
   - Holdings coverage/freshness table with 전체/표시/필터/미상 split.
 - Variants and states: loading, loaded, empty, stale, degraded/fallback, proxy, parse error, unsupported ETF holdings, no correlation overlap.
@@ -105,7 +108,7 @@
 
 ## Content voice
 - Tone: 한국어 중심, 신중하고 명료한 리서치 도구 톤.
-- Terminology: “보유 주수”, “종가”, “종가 통화”, “비중”, “평가금액”, “기초 노출”, “레버리지 제외/포함”, “데이터 기준일”, “커버리지”, “분석 universe”.
+- Terminology: “보유 주수”, “종가”, “종가 통화”, “비중”, “평가금액”, “개별 종목 최종 비중”, “레버리지 제외/포함”, “감사 bucket”, “데이터 기준일”, “커버리지”, “분석 universe”.
 - Microcopy rules: Avoid “추천/매수/매도”; use “확인”, “추정”, “관찰”, “coverage”.
 
 ## Implementation constraints

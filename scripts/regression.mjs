@@ -46,24 +46,26 @@ assert.equal(result.totalKrw, 1680000, 'total KRW is normalized from share-count
 assert.equal(result.direct.length, 3, 'direct rows aggregate input holdings');
 assert.ok(Math.abs(result.direct.find((row) => row.ticker === 'TQQQ').weight - (70000 / 1680000)) < 1e-12, 'direct weight is normalized');
 
-const aapl = result.exposureRows.find((row) => row.ticker === 'AAPL');
+const aapl = result.primaryExposureRows.find((row) => row.ticker === 'AAPL');
 assert.ok(aapl, 'look-through contains AAPL');
 assert.equal(Math.round(aapl.valueKrw), 875000, 'unlevered AAPL exposure combines SPY and TQQQ holdings');
 assert.equal(Math.round(aapl.leveredValueKrw), 945000, 'levered AAPL exposure scales TQQQ component by 3x');
-const spyResidual = result.exposureRows.find((row) => row.ticker === 'SPY:OTHER');
-assert.ok(spyResidual && Math.round(spyResidual.valueKrw) === 280000, 'residual bucket preserves uncovered SPY holdings weight');
+assert.ok(!result.primaryExposureRows.some((row) => row.ticker.includes(':')), 'primary look-through rows contain only individual stock tickers');
+const spyResidual = result.auditExposureRows.find((row) => row.ticker === 'SPY:OTHER');
+assert.ok(spyResidual && Math.round(spyResidual.valueKrw) === 280000, 'residual bucket preserves uncovered SPY holdings weight in audit rows');
+assert.ok(result.auditExposureRows.find((row) => row.ticker === 'TQQQ:OTHER'), 'leveraged ETF residual is audited separately from primary rows');
 assert.ok(result.leveredGrossKrw > result.unleveredGrossKrw, 'levered gross exposure exceeds unlevered exposure');
 
 const filtered = Core.calculatePortfolio([{ ticker: 'SPY', shares: 2, priceCurrency: 'USD' }], marketData, { exposureTopN: 1 });
-assert.deepEqual(filtered.exposureRows.map((row) => row.ticker), ['AAPL', 'SPY:OTHER'], 'top-N filter hides non-selected holdings into OTHER bucket');
-assert.equal(Math.round(filtered.exposureRows.find((row) => row.ticker === 'SPY:OTHER').valueKrw), 560000, 'filtered plus residual weight is conserved');
+assert.deepEqual(filtered.primaryExposureRows.map((row) => row.ticker), ['AAPL'], 'top-N filter keeps primary rows individual-stock only');
+assert.equal(Math.round(filtered.auditExposureRows.find((row) => row.ticker === 'SPY:OTHER').valueKrw), 560000, 'filtered plus residual weight is conserved in audit bucket');
 assert.equal(filtered.coverageRows[0].displayedHoldings, 1, 'coverage reports displayed holdings count');
 assert.ok(Math.abs(filtered.coverageRows[0].filteredWeight - 0.2) < 1e-12, 'coverage reports filtered weight separately');
 
 const includeExclude = Core.calculatePortfolio([{ ticker: 'SPY', shares: 2, priceCurrency: 'USD' }], marketData, { exposureTopN: 1, includeTickers: 'MSFT', excludeTickers: 'AAPL' });
-assert.ok(includeExclude.exposureRows.find((row) => row.ticker === 'MSFT'), 'include list can force a holding into analysis universe');
-assert.ok(!includeExclude.exposureRows.find((row) => row.ticker === 'AAPL'), 'exclude list removes a holding from displayed universe');
-assert.ok(includeExclude.exposureRows.find((row) => row.ticker === 'SPY:OTHER'), 'excluded exposure is preserved in OTHER bucket');
+assert.ok(includeExclude.primaryExposureRows.find((row) => row.ticker === 'MSFT'), 'include list can force a holding into analysis universe');
+assert.ok(!includeExclude.primaryExposureRows.find((row) => row.ticker === 'AAPL'), 'exclude list removes a holding from displayed universe');
+assert.ok(includeExclude.auditExposureRows.find((row) => row.ticker === 'SPY:OTHER'), 'excluded exposure is preserved in audit OTHER bucket');
 
 const identity = Core.correlationBetween('SPY', 'SPY', marketData);
 assert.equal(identity.value, 1, 'self correlation is one');

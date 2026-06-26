@@ -26,6 +26,7 @@ for (const path of [
 assert(contains(files.html, 'https://sonchanggi.github.io/quant-dashboard/'), 'Port page links back to Quant Dashboard');
 assert(contains(files.html, 'id="portfolio-input"'), 'portfolio input section exists');
 assert(contains(files.html, 'id="exposure"'), 'look-through exposure section exists');
+assert(contains(files.html, 'id="exposure-audit-rows"'), 'separate residual audit table exists');
 assert(contains(files.html, 'id="correlation"'), 'correlation section exists');
 assert(contains(files.html, '투자, 세무, 법률 또는 매매 조언이 아닙니다'), 'non-advice disclaimer exists');
 assert(contains(files.html, 'data/market-data.json'), 'generated JSON link exists');
@@ -35,10 +36,14 @@ assert(contains(files.html, 'id="filter-top-n"'), 'top-N universe filter exists'
 assert(contains(files.html, 'id="filter-min-weight"'), 'minimum weight universe filter exists');
 assert(contains(files.html, 'id="filter-include"'), 'include ticker universe filter exists');
 assert(contains(files.html, 'id="filter-exclude"'), 'exclude ticker universe filter exists');
+assert(contains(files.html, '개별 종목 최종 비중'), 'look-through copy is individual-stock centered');
 
 assert(contains(files.core, 'calculatePortfolio'), 'portfolio calculation API exists');
 assert(contains(files.core, 'resolveShareValuation'), 'share-count valuation API exists');
 assert(contains(files.core, 'computeLookThrough'), 'ETF look-through API exists');
+assert(contains(files.core, 'primaryExposureRows'), 'primary ETF look-through rows are explicitly named');
+assert(contains(files.core, 'auditExposureRows'), 'ETF residuals are separated from primary exposure rows');
+assert(contains(files.core, 'stockBucket'), 'primary exposure bucket is individual-stock focused');
 assert(contains(files.core, 'filtered_residual'), 'filtered residual bucket preserves hidden holdings');
 assert(contains(files.core, 'inferLeverage'), 'leverage inference API exists');
 assert(contains(files.core, 'buildCorrelationMatrix'), 'correlation API exists');
@@ -46,6 +51,9 @@ assert(contains(files.core, 'classifyFreshness'), 'freshness API exists');
 assert(contains(files.app, 'shares-input'), 'share input is wired');
 assert(contains(files.app, 'price-currency-input'), 'price currency input is wired');
 assert(contains(files.app, 'readAnalysisOptions'), 'analysis filter reader is wired');
+assert(contains(files.app, 'DEFAULT_ANALYSIS_TOP_N'), 'malformed top-N falls back without becoming full-universe');
+assert(contains(files.app, ': Infinity'), 'blank top-N expands the full constituent universe');
+assert(contains(files.app, 'exposure-audit-rows'), 'audit row renderer is wired');
 assert(contains(files.app, 'renderHeatmap'), 'heatmap renderer exists');
 assert(contains(files.app, 'FALLBACK_MARKET_DATA'), 'fallback load state exists');
 assert(contains(files.app, 'parsePortfolioText'), 'CSV import is wired');
@@ -89,6 +97,7 @@ assert(contains(files.readme, '보유 주수'), 'README documents share-count in
 assert(contains(files.readme, 'State Street'), 'README documents SPY provider source');
 assert(contains(files.readme, 'Invesco'), 'README documents QQQ provider source');
 assert(contains(files.readme, '레버리지 제외'), 'README documents leverage views');
+assert(contains(files.readme, '개별 종목'), 'README documents individual stock look-through');
 assert(contains(files.refresh, 'Frankfurter'), 'refresh script uses Frankfurter FX');
 assert(contains(files.refresh, 'Yahoo Chart'), 'refresh script uses Yahoo Chart');
 assert(contains(files.refresh, 'State Street official holdings XLSX'), 'refresh script uses SPY official holdings');
