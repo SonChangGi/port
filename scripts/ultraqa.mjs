@@ -192,6 +192,29 @@ record('new DRAM ticker calculates from shares and decomposes into individual me
   assert.ok(result.mappedUnleveredKrw / result.totalKrw > 0.999);
 });
 
+record('popular US and Korean ETF universe calculates from provider-backed closes', () => {
+  for (const ticker of ['VOO', 'SCHD', 'IWM', 'SMH']) {
+    const asset = data.assets[ticker];
+    assert.ok(asset?.price > 0 && asset.currency === 'USD' && asset.type === 'etf', `${ticker} has USD ETF price`);
+    assert.ok(asset.priceSynthetic !== true && asset.valuationEligible !== false, `${ticker} price is valuation eligible`);
+    assert.ok(data.etfHoldings?.[ticker]?.holdings?.length > 0, `${ticker} has public holdings summary`);
+    const result = Core.calculatePortfolio([{ ticker, shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: Infinity });
+    assert.ok(result.totalKrw > 0, `${ticker} share valuation succeeds`);
+    assert.ok(result.primaryExposureRows.length > 0, `${ticker} maps at least public holdings into primary rows`);
+  }
+  for (const rawTicker of ['069500', '360750', '133690']) {
+    const ticker = Core.normalizeTicker(rawTicker);
+    const asset = data.assets[ticker];
+    assert.ok(asset?.price > 0 && asset.currency === 'KRW' && asset.type === 'etf', `${ticker} has KRW ETF price`);
+    assert.ok(asset.priceSynthetic !== true && asset.valuationEligible !== false, `${ticker} price is valuation eligible`);
+    assert.equal(data.etfHoldings?.[ticker]?.sourceStatus, 'no_holdings', `${ticker} has explicit no_holdings state`);
+    const result = Core.calculatePortfolio([{ ticker: rawTicker, shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: Infinity });
+    assert.equal(result.direct[0].ticker, ticker, `${rawTicker} canonicalizes to ${ticker}`);
+    assert.equal(result.direct[0].priceCurrency, 'KRW', `${ticker} uses KRW asset currency over stale UI currency`);
+    assert.ok(result.auditExposureRows.some((row) => row.ticker === `${ticker}:UNMAPPED`), `${ticker} remains transparent in audit rows without fabricated holdings`);
+  }
+});
+
 record('0167A0 alias and RAM ETF calculate from refreshed provider close prices', () => {
   const korean = data.assets['0167A0.KS'];
   const ram = data.assets.RAM;

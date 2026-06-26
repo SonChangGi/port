@@ -10,7 +10,7 @@
 - 최종 종목별 보유 주수, 종가, 종가 기준일, 평가금액, 비중을 보여줍니다.
 - SPY/QQQ처럼 holdings가 있는 ETF는 ETF 자체를 최종 노출 행으로 보지 않고, `ETF 평가금액 × 구성종목 비중`으로 개별 종목별 금액과 비중을 계산합니다.
 - DRAM 같은 Roundhill ETF는 Roundhill 공식 DailyNAV/holdings CSV를 사용해 종가와 구성종목을 가져오고, swap·현금성 항목을 개별 기초 주식 티커로 병합하거나 잔여 노출로 분리합니다.
-- 0167A0처럼 한국 거래소 알파뉴메릭 ETF는 `0167A0.KS`로 정규화하고, RAM 같은 ETF는 기본 갱신 universe에 포함해 종가를 확보합니다.
+- 0167A0/069500처럼 한국 거래소 6자리 ETF 코드는 `.KS`로 정규화하고, 미국·한국 주요 ETF seed universe(VOO/VTI/SCHD/IWM/SMH/SOXX, KODEX/TIGER 대표 ETF 등)는 기본 갱신 대상에 포함해 종가를 확보합니다.
 - TQQQ 같은 레버리지 ETF는 QQQ 구성종목 proxy를 사용하고 **레버리지 제외(NAV 기준)** / **레버리지 포함(배율 반영)** 노출을 모두 표시합니다.
 - 분석 universe를 직접 제어할 수 있습니다: 최대 종목수(공백이면 전체), 최소 비중, 강제 포함 티커, 제외 티커.
 - 사용자가 필터로 숨긴 구성종목, holdings 합계가 100%에 못 미치는 현금·파생·반올림 잔여분, holdings를 못 가져온 ETF는 주 노출 표에 `ETF:OTHER`처럼 섞지 않고 별도 잔여 노출 표에만 표시합니다.
@@ -33,7 +33,7 @@ npm run refresh:data
 npm test
 ```
 
-화면의 **데이터 업데이트 → 새 티커 종가 추가·업데이트** 패널에서도 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 명령을 만들 수 있습니다. `현재 입력 티커로 채우기`를 누르면 포트폴리오 행의 티커가 refresh 입력으로 정규화되고, `명령 복사`로 로컬 명령을 복사할 수 있습니다. GitHub Actions의 `Update portfolio dashboard data` 워크플로도 `extra_symbols`/`extra_etfs` 입력을 받아 같은 갱신을 실행합니다.
+화면의 **데이터 업데이트 → 새 티커 종가 추가·업데이트** 패널에서도 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 명령을 만들 수 있습니다. `현재 입력 티커로 채우기`를 누르면 포트폴리오 행의 티커가 refresh 입력으로 정규화되고, 새 ETF일 가능성을 고려해 종가 대상과 holdings 대상에 함께 넣습니다. 계산 중 종가 누락 오류가 나도 현재 입력 티커를 업데이트 패널에 자동 제안합니다. `명령 복사`로 로컬 명령을 복사할 수 있고, GitHub Actions의 `Update portfolio dashboard data` 워크플로도 `extra_symbols`/`extra_etfs` 입력을 받아 같은 갱신을 실행합니다.
 
 네트워크 없이 deterministic sample JSON을 다시 만들려면:
 
@@ -66,13 +66,14 @@ TQQQ,2,USD,3
 
 - FX: Frankfurter `USD/KRW`
 - 가격/종가/수익률: Yahoo Chart daily history
-- 한국 상장 알파뉴메릭 티커 fallback: Naver Finance chart (`0167A0` → `0167A0.KS`)
+- 한국 상장 6자리 ETF/종목 fallback: Yahoo `.KS` 우선, 실패 시 Naver Finance chart (`0167A0`/`069500` → `.KS`)
 - SPY holdings: State Street official holdings XLSX
 - QQQ holdings: Invesco QQQ holdings API
 - DRAM holdings/price: Roundhill official DailyNAV CSV + Roundhill official holdings CSV
 - RAM price/returns: Yahoo Chart, RAM holdings: StockAnalysis 공개 ETF holdings 페이지 best-effort
 - TQQQ holdings: QQQ/Nasdaq-100 구성종목 proxy + TQQQ leverage metadata
-- 기타 ETF holdings: StockAnalysis 공개 ETF holdings 페이지를 best-effort로 파싱
+- 기타 미국 ETF holdings: StockAnalysis 공개 ETF holdings 페이지를 best-effort로 파싱(무료 페이지는 보통 일부/top holdings만 제공할 수 있음)
+- 한국 ETF holdings: 현재 무료 정적 refresh에서는 종가/수익률을 우선 확보하고, holdings는 조작하지 않고 명시적 `no_holdings`/잔여 노출로 표시
 - 실패 시: 수동 fallback/sample holdings 또는 deterministic sample returns
 
 `PORT_MAX_HOLDING_PRICE_SYMBOLS` 환경변수로 ETF 구성종목 중 가격/수익률을 가져올 최대 종목 수를 조절할 수 있습니다. 기본값은 180개이며, 노출 비중 계산에는 전체 holdings가 사용되고 상관관계 계산에는 가격/수익률이 확보된 universe가 사용됩니다.
@@ -80,12 +81,12 @@ TQQQ,2,USD,3
 기본 JSON에 없는 티커를 Pages에서 바로 계산하려면 먼저 refresh 단계에 티커를 포함해야 합니다.
 
 ```bash
-PORT_EXTRA_SYMBOLS="0167A0.KS RAM BRK-B 000660.KS" npm run refresh:data
-PORT_EXTRA_SYMBOLS="0167A0.KS RAM" PORT_EXTRA_ETFS="0167A0.KS RAM" npm run refresh:data
+PORT_EXTRA_SYMBOLS="VOO SCHD 069500 360750 0167A0 RAM" npm run refresh:data
+PORT_EXTRA_SYMBOLS="VOO SCHD 069500 360750 0167A0 RAM" PORT_EXTRA_ETFS="VOO SCHD 069500 360750 0167A0 RAM" npm run refresh:data
 ```
 
 - `PORT_EXTRA_SYMBOLS`: 종가/수익률을 추가로 가져올 주식·ETF 티커입니다.
-- `PORT_EXTRA_ETFS`: holdings 파싱도 시도할 ETF 티커입니다. 공식 parser가 없는 ETF는 StockAnalysis 공개 holdings 페이지를 best-effort로 사용합니다.
+- `PORT_EXTRA_ETFS`: holdings 파싱도 시도할 ETF 티커입니다. 공식 parser가 없는 미국 ETF는 StockAnalysis 공개 holdings 페이지를 best-effort로 사용하고, 한국 ETF는 holdings 미지원 상태를 명확히 남깁니다.
 - refresh 후에도 종가가 확보되지 않은 티커를 보유 주수로 입력하면, 화면은 임의 가격을 만들지 않고 “종가 없음 / refresh에 티커 포함” 오류를 표시합니다.
 - 보유 주수 직접 평가는 현재 `USD`/`KRW` 종가만 KRW 기준으로 환산합니다. DRAM 구성종목처럼 JPY/TWD/CNY 현지통화 종가가 데이터에 들어온 해외 기초종목은 ETF look-through 비중에는 사용되지만, 해당 현지통화 티커를 직접 보유 row로 넣으면 USD/KRW 환산 가격을 확보하기 전까지 오류로 막습니다.
 

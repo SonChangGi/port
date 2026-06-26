@@ -15,6 +15,7 @@ const marketData = {
     NVDA: { ticker: 'NVDA', name: 'Nvidia', type: 'stock', currency: 'USD', price: 150, priceAsOf: '2026-06-24', returns: mkReturns([-0.01, 0.03, 0.02, 0.01]) },
     '005930.KS': { ticker: '005930.KS', name: 'Samsung Electronics', type: 'stock', currency: 'KRW', price: 70000, priceAsOf: '2026-06-24', returns: mkReturns([0.004, 0.006, -0.002, 0.005]) },
     '0167A0.KS': { ticker: '0167A0.KS', name: 'SOL AI Semiconductor TOP2 Plus ETF', type: 'etf', currency: 'KRW', price: 26025, priceAsOf: '2026-06-26', returns: mkReturns([0.02, -0.03, 0.01, -0.02]) },
+    '069500.KS': { ticker: '069500.KS', name: 'KODEX 200', type: 'etf', currency: 'KRW', price: 137380, priceAsOf: '2026-06-26', returns: mkReturns([0.01, -0.01, 0.02, -0.005]) },
   },
   etfHoldings: {
     SPY: { ticker: 'SPY', sourceStatus: 'official', asOf: '2026-06-24', holdings: [{ ticker: 'AAPL', name: 'Apple', weight: 0.6 }, { ticker: 'MSFT', name: 'Microsoft', weight: 0.2 }] },
@@ -41,9 +42,13 @@ assert.equal(shareOnly.direct.find((row) => row.ticker === '005930.KS').priceCur
 const krwWrongUiCurrency = Core.calculatePortfolio([{ ticker: '005930.KS', shares: 1, priceCurrency: 'USD' }], marketData);
 assert.equal(krwWrongUiCurrency.totalKrw, 70000, 'fetched asset currency overrides stale manual UI currency for KRW tickers');
 assert.equal(Core.normalizeTicker('0167A0'), '0167A0.KS', '0167A0 alias normalizes to KRX/Yahoo symbol');
+assert.equal(Core.normalizeTicker('069500'), '069500.KS', 'generic six-character Korean ETF code normalizes to .KS');
 const aliasedKoreanEtf = Core.calculatePortfolio([{ ticker: '0167A0', shares: 2, priceCurrency: 'USD' }], marketData);
 assert.equal(aliasedKoreanEtf.direct[0].ticker, '0167A0.KS', 'aliased Korean ETF direct row uses canonical ticker');
 assert.equal(aliasedKoreanEtf.totalKrw, 52050, 'aliased Korean ETF uses KRW asset close price');
+const rawKoreanEtf = Core.calculatePortfolio([{ ticker: '069500', shares: 1, priceCurrency: 'USD' }], marketData);
+assert.equal(rawKoreanEtf.direct[0].ticker, '069500.KS', 'raw Korean ETF direct row uses canonical .KS ticker');
+assert.equal(rawKoreanEtf.totalKrw, 137380, 'raw Korean ETF uses KRW asset close price');
 assert.throws(() => Core.calculatePortfolio([{ ticker: 'NO_PRICE', shares: 1, priceCurrency: 'USD' }], marketData), /close price/i, 'share-count rows require a fetched close price');
 
 const result = Core.calculatePortfolio(imported, marketData);

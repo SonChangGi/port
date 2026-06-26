@@ -20,7 +20,15 @@
 
   function normalizeTicker(value) {
     const raw = String(value || '').trim().toUpperCase();
-    return TICKER_ALIASES.get(raw) || raw;
+    if (!raw) return '';
+    if (TICKER_ALIASES.has(raw)) return TICKER_ALIASES.get(raw);
+    if (isPotentialKrxCode(raw)) return `${raw}.KS`;
+    return raw;
+  }
+
+  function isPotentialKrxCode(value) {
+    const raw = String(value || '').trim().toUpperCase();
+    return /^[0-9A-Z]{6}$/.test(raw) && /\d/.test(raw);
   }
 
   function asNumber(value, fallback = 0) {

@@ -228,8 +228,8 @@
             <p class="eyebrow">Refresh</p>
             <h3 id="data-update-title">새 티커 종가 추가·업데이트</h3>
             <p>
-              브라우저는 외부 금융 API를 직접 호출하지 않습니다. 0167A0처럼 한국 ETF는 <code>0167A0.KS</code>로 정규화하고,
-              RAM 같은 ETF는 종가와 holdings 파싱 대상에 함께 넣어 Actions 또는 로컬 refresh에서 생성 JSON을 갱신합니다.
+              브라우저는 외부 금융 API를 직접 호출하지 않습니다. 한국 ETF 6자리 코드(예: <code>069500</code>, <code>0167A0</code>)는 <code>.KS</code>로 정규화하고,
+              새 ETF는 종가와 holdings 파싱 대상에 함께 넣어 Actions 또는 로컬 refresh에서 생성 JSON을 갱신합니다.
             </p>
           </div>
           <a id="open-actions-update" class="primary-button" href="https://github.com/SonChangGi/port/actions/workflows/update-data.yml" target="_blank" rel="noopener noreferrer">Actions에서 실행</a>
@@ -237,11 +237,11 @@
         <div class="update-grid">
           <label>
             종가/수익률 추가 티커
-            <input id="update-symbols" value="0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
+            <input id="update-symbols" value="VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
           </label>
           <label>
             holdings도 시도할 ETF 티커
-            <input id="update-etfs" value="0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
+            <input id="update-etfs" value="VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
           </label>
         </div>
         <div class="manual-update-actions">
@@ -268,7 +268,7 @@
         <div class="manual-update-actions">
           <a class="primary-button" href="https://github.com/SonChangGi/port/actions/workflows/update-data.yml" target="_blank" rel="noopener noreferrer">GitHub Actions에서 데이터 갱신</a>
           <a class="secondary-button" href="#data-update">새 티커 입력 만들기</a>
-          <code class="code-pill">PORT_EXTRA_SYMBOLS="0167A0.KS RAM" PORT_EXTRA_ETFS="0167A0.KS RAM" npm run refresh:data && npm test</code>
+          <code class="code-pill">PORT_EXTRA_SYMBOLS="VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM" PORT_EXTRA_ETFS="VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM" npm run refresh:data && npm test</code>
         </div>
       </article>
     </section>

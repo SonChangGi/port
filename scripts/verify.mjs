@@ -43,7 +43,7 @@ assert(contains(files.html, 'id="data-update"'), 'data update panel exists');
 assert(contains(files.html, 'id="update-symbols"'), 'extra price ticker input exists');
 assert(contains(files.html, 'id="update-etfs"'), 'extra ETF holdings input exists');
 assert(contains(files.html, 'id="copy-refresh-command"'), 'refresh command copy button exists');
-assert(contains(files.html, '0167A0.KS RAM'), '0167A0/RAM refresh preset is visible');
+assert(contains(files.html, 'VOO SCHD 069500.KS'), 'US/KR ETF refresh preset is visible');
 
 assert(contains(files.core, 'calculatePortfolio'), 'portfolio calculation API exists');
 assert(contains(files.core, 'resolveShareValuation'), 'share-count valuation API exists');
@@ -57,6 +57,7 @@ assert(contains(files.core, 'inferLeverage'), 'leverage inference API exists');
 assert(contains(files.core, 'buildCorrelationMatrix'), 'correlation API exists');
 assert(contains(files.core, 'classifyFreshness'), 'freshness API exists');
 assert(contains(files.core, "'0167A0', '0167A0.KS'"), 'core normalizes 0167A0 alias to Yahoo/KRX symbol');
+assert(contains(files.core, 'isPotentialKrxCode'), 'core normalizes generic six-character Korean codes to .KS');
 assert(contains(files.core, 'RAM: 2'), 'RAM leverage metadata exists');
 assert(contains(files.app, 'shares-input'), 'share input is wired');
 assert(contains(files.app, 'price-currency-input'), 'price currency input is wired');
@@ -70,6 +71,7 @@ assert(contains(files.app, 'parsePortfolioText'), 'CSV import is wired');
 assert(contains(files.app, 'no-store'), 'browser JSON fetch avoids stale cache');
 assert(contains(files.app, 'buildRefreshCommand'), 'data update command builder is wired');
 assert(contains(files.app, 'canonicalTickerText'), 'data update ticker canonicalization is wired');
+assert(contains(files.app, 'suggestRefreshForCurrentRows'), 'missing close-price errors auto-suggest data refresh');
 assert(contains(files.app, 'ACTIONS_UPDATE_URL'), 'Actions update URL is centralized');
 
 assert(contains(files.css, ':root'), 'CSS tokens exist');
@@ -107,6 +109,20 @@ assert(files.data.assets.RAM?.currency === 'USD', 'RAM close price currency is U
 assert(files.data.assets.RAM?.leverage === 2, 'RAM leverage metadata is 2x');
 assert(Number.isFinite(files.data.assets.RAM?.price) && files.data.assets.RAM.price > 0, 'RAM close price exists');
 assert(files.data.assets.RAM?.priceSynthetic !== true, 'RAM close price is provider-backed');
+for (const ticker of ['VOO', 'VTI', 'SCHD', 'IWM', 'SMH', 'SOXX']) {
+  assert(files.data.assets[ticker]?.type === 'etf', `${ticker} popular US ETF is recognized as ETF`);
+  assert(files.data.assets[ticker]?.currency === 'USD', `${ticker} close price currency is USD`);
+  assert(Number.isFinite(files.data.assets[ticker]?.price) && files.data.assets[ticker].price > 0, `${ticker} close price exists`);
+  assert(files.data.assets[ticker]?.priceSynthetic !== true, `${ticker} close price is provider-backed`);
+  assert(files.data.etfHoldings?.[ticker]?.holdings?.length > 0, `${ticker} public holdings summary exists`);
+}
+for (const ticker of ['069500.KS', '102110.KS', '133690.KS', '360750.KS', '379800.KS']) {
+  assert(files.data.assets[ticker]?.type === 'etf', `${ticker} popular Korean ETF is recognized as ETF`);
+  assert(files.data.assets[ticker]?.currency === 'KRW', `${ticker} close price currency is KRW`);
+  assert(Number.isFinite(files.data.assets[ticker]?.price) && files.data.assets[ticker].price > 0, `${ticker} close price exists`);
+  assert(files.data.assets[ticker]?.priceSynthetic !== true, `${ticker} close price is provider-backed`);
+  assert(files.data.etfHoldings?.[ticker]?.sourceStatus === 'no_holdings', `${ticker} Korean ETF holdings are explicit no_holdings`);
+}
 assert(files.data.etfHoldings?.SPY?.holdings?.length >= 400, 'SPY decomposes into broad constituent set');
 assert(files.data.etfHoldings?.QQQ?.holdings?.length >= 100, 'QQQ decomposes into broad constituent set');
 assert(files.data.etfHoldings?.TQQQ?.sourceStatus === 'proxy', 'TQQQ uses explicit QQQ proxy status');
@@ -129,6 +145,8 @@ assert(contains(files.readme, 'State Street'), 'README documents SPY provider so
 assert(contains(files.readme, 'Invesco'), 'README documents QQQ provider source');
 assert(contains(files.readme, 'Roundhill'), 'README documents DRAM/Roundhill provider source');
 assert(contains(files.readme, 'Naver Finance'), 'README documents KR ticker fallback source');
+assert(contains(files.readme, '069500'), 'README documents generic Korean ETF examples');
+assert(contains(files.readme, 'StockAnalysis'), 'README documents public ETF holdings fallback limits');
 assert(contains(files.readme, 'extra_symbols'), 'README documents Actions manual inputs');
 assert(contains(files.readme, 'PORT_EXTRA_SYMBOLS'), 'README documents extra ticker refresh path');
 assert(contains(files.readme, '레버리지 제외'), 'README documents leverage views');
@@ -137,7 +155,9 @@ assert(contains(files.refresh, 'Frankfurter'), 'refresh script uses Frankfurter 
 assert(contains(files.refresh, 'Yahoo Chart'), 'refresh script uses Yahoo Chart');
 assert(contains(files.refresh, 'Naver Finance chart'), 'refresh script uses Naver Finance chart fallback');
 assert(contains(files.refresh, "'0167A0', '0167A0.KS'"), 'refresh script normalizes 0167A0 alias');
-assert(contains(files.refresh, "'RAM', '0167A0.KS'"), 'refresh script includes RAM and 0167A0.KS in built-in symbols/ETFs');
+assert(contains(files.refresh, 'isPotentialKrxCode'), 'refresh script normalizes generic Korean six-character codes');
+assert(contains(files.refresh, 'POPULAR_US_ETFS'), 'refresh script has popular US ETF seed universe');
+assert(contains(files.refresh, 'POPULAR_KR_ETFS'), 'refresh script has popular Korean ETF seed universe');
 assert(contains(files.refresh, 'State Street official holdings XLSX'), 'refresh script uses SPY official holdings');
 assert(contains(files.refresh, 'Invesco QQQ holdings API'), 'refresh script uses QQQ official holdings');
 assert(contains(files.refresh, 'Roundhill DailyNAV CSV'), 'refresh script uses Roundhill DailyNAV');

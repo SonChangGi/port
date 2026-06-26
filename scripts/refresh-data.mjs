@@ -15,8 +15,18 @@ const SPECIAL_ASSET_NAMES = {
   '0167A0.KS': 'SOL AI Semiconductor TOP2 Plus ETF',
   RAM: 'Roundhill T-REX 2X Long DRAM Daily Target ETF',
 };
-const BUILTIN_SYMBOLS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM', 'RAM', '0167A0.KS', 'AAPL', 'MSFT', 'NVDA', 'AMD', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', '005930.KS'];
-const BUILTIN_ETFS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM', 'RAM', '0167A0.KS'];
+const POPULAR_US_ETFS = [
+  'SPY', 'IVV', 'VOO', 'VTI', 'QQQ', 'SCHD', 'DIA', 'IWM',
+  'XLK', 'XLF', 'XLE', 'XLV', 'XLY', 'XLP', 'XLI', 'XLU', 'VNQ',
+  'SMH', 'SOXX', 'ARKK', 'TLT', 'AGG', 'BND', 'GLD',
+  'TQQQ', 'QLD', 'SSO', 'UPRO', 'SOXL', 'DRAM', 'RAM',
+];
+const POPULAR_KR_ETFS = [
+  '0167A0.KS', '069500.KS', '102110.KS', '133690.KS', '360750.KS', '379800.KS',
+  '305540.KS', '278540.KS', '229200.KS', '232080.KS', '091160.KS', '091230.KS',
+];
+const BUILTIN_SYMBOLS = [...POPULAR_US_ETFS, ...POPULAR_KR_ETFS, 'AAPL', 'MSFT', 'NVDA', 'AMD', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', '005930.KS'];
+const BUILTIN_ETFS = [...POPULAR_US_ETFS, ...POPULAR_KR_ETFS];
 const EXTRA_SYMBOLS = parseSymbolListEnv(process.env.PORT_EXTRA_SYMBOLS);
 const EXTRA_ETFS = parseSymbolListEnv(process.env.PORT_EXTRA_ETFS);
 const DEFAULT_SYMBOLS = uniqueSymbols([...BUILTIN_SYMBOLS, ...EXTRA_SYMBOLS, ...EXTRA_ETFS]);
@@ -65,7 +75,15 @@ function uniqueSymbols(values) {
 
 function canonicalSymbol(value) {
   const raw = String(value || '').trim().toUpperCase();
-  return TICKER_ALIASES.get(raw) || raw;
+  if (!raw) return '';
+  if (TICKER_ALIASES.has(raw)) return TICKER_ALIASES.get(raw);
+  if (isPotentialKrxCode(raw)) return `${raw}.KS`;
+  return raw;
+}
+
+function isPotentialKrxCode(value) {
+  const raw = String(value || '').trim().toUpperCase();
+  return /^[0-9A-Z]{6}$/.test(raw) && /\d/.test(raw);
 }
 
 function todayIso() {
@@ -301,6 +319,7 @@ async function fetchHoldings(symbol) {
   else if (symbol === 'QQQ') promise = fetchQqqOfficialHoldings('QQQ');
   else if (symbol === 'TQQQ') promise = fetchTqqqProxyHoldings();
   else if (ROUNDHILL_ETFS.has(symbol)) promise = fetchRoundhillHoldings(symbol);
+  else if (isKrxSymbol(symbol)) promise = Promise.resolve(fetchNoHoldingsRecord(symbol, 'Korean ETF holdings are not scraped by this free-source refresh; price/returns still use Yahoo/Naver and exposure remains transparent in audit rows.'));
   else promise = fetchPublicHoldingsFallback(symbol);
 
   const guarded = promise.catch((error) => fetchFallbackHoldings(symbol, error));
@@ -467,6 +486,10 @@ function roundhillCurrency(rawTicker) {
   return undefined;
 }
 
+function isKrxSymbol(symbol) {
+  return /^([0-9A-Z]{6})\.(KS|KQ)$/.test(canonicalSymbol(symbol));
+}
+
 function inferCurrency(symbol) {
   const normalized = String(symbol || '').toUpperCase();
   if (/\.(KS|KQ)$/.test(normalized)) return 'KRW';
@@ -542,6 +565,20 @@ function fetchFallbackHoldings(symbol, error) {
     sourceUrl: url,
     sourceStatus: sample.length ? 'fallback' : 'no_holdings',
     holdings: sample.map(([ticker, name, weight]) => ({ ticker, name, weight })),
+  };
+}
+
+function fetchNoHoldingsRecord(symbol, detail) {
+  const code = naverSymbolCode(symbol);
+  const url = code ? `https://finance.naver.com/item/main.naver?code=${code}` : `https://stockanalysis.com/etf/${symbol.toLowerCase()}/holdings/`;
+  sources.push({ name: `${symbol} holdings unavailable`, url, status: 'no_holdings', asOf: '', detail });
+  return {
+    ticker: symbol,
+    asOf: '',
+    source: 'unavailable',
+    sourceUrl: url,
+    sourceStatus: 'no_holdings',
+    holdings: [],
   };
 }
 
@@ -790,7 +827,7 @@ async function main() {
     dataAsOf,
     baseCurrency: 'KRW',
     fx,
-    sourcePolicy: 'Best-effort free/no-key data. Browser UI reads this generated JSON only; live provider calls happen in refresh scripts or Actions.',
+    sourcePolicy: 'Best-effort free/no-key data. Browser UI reads this generated JSON only; live provider calls happen in refresh scripts or Actions. Popular US/KR ETF seed universe plus PORT_EXTRA_SYMBOLS/PORT_EXTRA_ETFS are refreshed when available; Korean ETF holdings may remain explicit no_holdings unless a free holdings source is parseable.',
     sources,
     warnings,
     assets,

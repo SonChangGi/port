@@ -6,8 +6,8 @@
   const QUANT_DASHBOARD_URL = 'https://sonchanggi.github.io/quant-dashboard/';
   const ACTIONS_UPDATE_URL = 'https://github.com/SonChangGi/port/actions/workflows/update-data.yml';
   const DEFAULT_ANALYSIS_TOP_N = 120;
-  const DEFAULT_UPDATE_SYMBOLS = '0167A0.KS RAM';
-  const DEFAULT_UPDATE_ETFS = '0167A0.KS RAM';
+  const DEFAULT_UPDATE_SYMBOLS = 'VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM';
+  const DEFAULT_UPDATE_ETFS = 'VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM';
   const state = { marketData: null, latestResult: null };
   const $ = (selector) => document.querySelector(selector);
 
@@ -186,16 +186,14 @@
   function fillRefreshInputsFromPortfolio() {
     const tickers = uniqueTickers(readTickerInputsFromDom());
     const symbols = tickers.length ? tickers.join(' ') : DEFAULT_UPDATE_SYMBOLS;
-    const etfs = tickers.filter((ticker) => {
-      const asset = state.marketData?.assets?.[ticker];
-      return asset?.type === 'etf' || state.marketData?.etfHoldings?.[ticker] || ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM', 'RAM', '0167A0.KS'].includes(ticker);
-    }).join(' ') || DEFAULT_UPDATE_ETFS;
+    const etfs = tickers.length ? tickers.join(' ') : DEFAULT_UPDATE_ETFS;
+    const count = tickers.length || uniqueTickers(DEFAULT_UPDATE_SYMBOLS.split(/\s+/)).length;
     const symbolsInput = $('#update-symbols');
     const etfsInput = $('#update-etfs');
     if (symbolsInput) symbolsInput.value = symbols;
     if (etfsInput) etfsInput.value = etfs;
     renderRefreshCommand();
-    setStatus('update-status', `${tickers.length || 2}개 티커 기준으로 refresh 입력을 만들었습니다. Actions 입력칸 또는 로컬 명령에 사용하세요.`, 'success');
+    setStatus('update-status', `${count}개 티커 기준으로 refresh 입력을 만들었습니다. Actions 입력칸 또는 로컬 명령에 사용하세요.`, 'success');
   }
 
   function readTickerInputsFromDom() {
@@ -225,8 +223,10 @@
 
   function buildRefreshCommand(symbols, etfs) {
     const envParts = [];
-    if (canonicalTickerText(symbols)) envParts.push(`PORT_EXTRA_SYMBOLS=${shellQuote(canonicalTickerText(symbols))}`);
-    if (canonicalTickerText(etfs)) envParts.push(`PORT_EXTRA_ETFS=${shellQuote(canonicalTickerText(etfs))}`);
+    const canonicalSymbols = canonicalTickerText(symbols);
+    const canonicalEtfs = canonicalTickerText(etfs);
+    if (canonicalSymbols) envParts.push(`PORT_EXTRA_SYMBOLS=${shellQuote(canonicalSymbols)}`);
+    if (canonicalEtfs) envParts.push(`PORT_EXTRA_ETFS=${shellQuote(canonicalEtfs)}`);
     return `${envParts.join(' ')}${envParts.length ? ' ' : ''}npm run refresh:data && npm test`;
   }
 
@@ -269,8 +269,21 @@
       setStatus('input-status', `${rows.length}개 입력 종목 계산 완료 · 개별 종목 ${result.primaryExposureRows.length}개 · 잔여 노출 ${result.auditExposureRows.length}개 · 데이터 생성 ${formatDateTime(state.marketData.generatedAt)}`, 'success');
     } catch (error) {
       setStatus('input-status', `계산 오류: ${error.message}`, 'error');
+      suggestRefreshForCurrentRows(error);
       renderCalculationError(error.message);
     }
+  }
+
+  function suggestRefreshForCurrentRows(error) {
+    const tickers = uniqueTickers(readTickerInputsFromDom());
+    if (!tickers.length || !/close price|종가|PORT_EXTRA_SYMBOLS|fallback\/synthetic/i.test(error?.message || '')) return;
+    const tickerText = tickers.join(' ');
+    const symbolsInput = $('#update-symbols');
+    const etfsInput = $('#update-etfs');
+    if (symbolsInput) symbolsInput.value = tickerText;
+    if (etfsInput) etfsInput.value = tickerText;
+    renderRefreshCommand();
+    setStatus('update-status', `${tickerText} 종가가 캐시에 없으면 데이터 업데이트 패널의 Actions 실행 또는 명령 복사로 JSON을 갱신하세요. 새 ETF일 수 있으므로 holdings 대상에도 함께 넣었습니다.`, 'error');
   }
 
   function renderCalculationError(message) {
@@ -506,5 +519,5 @@
     };
   }
 
-  window.__PORT_APP_TESTS__ = { loadMarketData, renderHeatmap, readAnalysisOptions, buildRefreshCommand, canonicalTickerText, FALLBACK_MARKET_DATA, QUANT_DASHBOARD_URL, ACTIONS_UPDATE_URL };
+  window.__PORT_APP_TESTS__ = { loadMarketData, renderHeatmap, readAnalysisOptions, buildRefreshCommand, canonicalTickerText, suggestRefreshForCurrentRows, FALLBACK_MARKET_DATA, QUANT_DASHBOARD_URL, ACTIONS_UPDATE_URL };
 })();
