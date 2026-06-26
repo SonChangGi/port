@@ -9,6 +9,7 @@
 - 여러 ETF/주식 티커와 **보유 주수**를 입력하고, 종가 통화(`USD`/`KRW`)를 명시해 KRW 기준 평가금액으로 환산합니다.
 - 최종 종목별 보유 주수, 종가, 종가 기준일, 평가금액, 비중을 보여줍니다.
 - SPY/QQQ처럼 holdings가 있는 ETF는 ETF 자체를 최종 노출 행으로 보지 않고, `ETF 평가금액 × 구성종목 비중`으로 개별 종목별 금액과 비중을 계산합니다.
+- DRAM 같은 Roundhill ETF는 Roundhill 공식 DailyNAV/holdings CSV를 사용해 종가와 구성종목을 가져오고, swap·현금성 항목을 개별 기초 주식 티커로 병합하거나 잔여 노출로 분리합니다.
 - TQQQ 같은 레버리지 ETF는 QQQ 구성종목 proxy를 사용하고 **레버리지 제외(NAV 기준)** / **레버리지 포함(배율 반영)** 노출을 모두 표시합니다.
 - 분석 universe를 직접 제어할 수 있습니다: 최대 종목수(공백이면 전체), 최소 비중, 강제 포함 티커, 제외 티커.
 - 사용자가 필터로 숨긴 구성종목, holdings 합계가 100%에 못 미치는 현금·파생·반올림 잔여분, holdings를 못 가져온 ETF는 주 노출 표에 `ETF:OTHER`처럼 섞지 않고 별도 잔여 노출 표에만 표시합니다.
@@ -64,11 +65,24 @@ TQQQ,2,USD,3
 - 가격/종가/수익률: Yahoo Chart daily history
 - SPY holdings: State Street official holdings XLSX
 - QQQ holdings: Invesco QQQ holdings API
+- DRAM holdings/price: Roundhill official DailyNAV CSV + Roundhill official holdings CSV
 - TQQQ holdings: QQQ/Nasdaq-100 구성종목 proxy + TQQQ leverage metadata
 - 기타 ETF holdings: StockAnalysis 공개 ETF holdings 페이지를 best-effort로 파싱
 - 실패 시: 수동 fallback/sample holdings 또는 deterministic sample returns
 
 `PORT_MAX_HOLDING_PRICE_SYMBOLS` 환경변수로 ETF 구성종목 중 가격/수익률을 가져올 최대 종목 수를 조절할 수 있습니다. 기본값은 180개이며, 노출 비중 계산에는 전체 holdings가 사용되고 상관관계 계산에는 가격/수익률이 확보된 universe가 사용됩니다.
+
+기본 JSON에 없는 티커를 Pages에서 바로 계산하려면 먼저 refresh 단계에 티커를 포함해야 합니다.
+
+```bash
+PORT_EXTRA_SYMBOLS="BRK-B 000660.KS" npm run refresh:data
+PORT_EXTRA_ETFS="VTI SCHD" npm run refresh:data
+```
+
+- `PORT_EXTRA_SYMBOLS`: 종가/수익률을 추가로 가져올 주식·ETF 티커입니다.
+- `PORT_EXTRA_ETFS`: holdings 파싱도 시도할 ETF 티커입니다. 공식 parser가 없는 ETF는 StockAnalysis 공개 holdings 페이지를 best-effort로 사용합니다.
+- refresh 후에도 종가가 확보되지 않은 티커를 보유 주수로 입력하면, 화면은 임의 가격을 만들지 않고 “종가 없음 / refresh에 티커 포함” 오류를 표시합니다.
+- 보유 주수 직접 평가는 현재 `USD`/`KRW` 종가만 KRW 기준으로 환산합니다. DRAM 구성종목처럼 JPY/TWD/CNY 현지통화 종가가 데이터에 들어온 해외 기초종목은 ETF look-through 비중에는 사용되지만, 해당 현지통화 티커를 직접 보유 row로 넣으면 USD/KRW 환산 가격을 확보하기 전까지 오류로 막습니다.
 
 무료 공개 데이터는 지연, throttling, 구조 변경, 누락이 있을 수 있습니다. 화면은 source 상태와 warnings를 숨기지 않도록 설계되어 있습니다.
 

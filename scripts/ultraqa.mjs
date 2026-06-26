@@ -24,7 +24,33 @@ record('fractional shares use close price and explicit currency', () => {
 });
 
 record('share-count input never silently falls back to entered shares as cash amount', () => {
-  assert.throws(() => Core.calculatePortfolio([{ ticker: 'MISSING_PRICE', shares: 100, priceCurrency: 'USD' }], { fx: { rate: 1400 }, assets: {} }), /close price/i);
+  assert.throws(
+    () => Core.calculatePortfolio([{ ticker: 'MISSING_PRICE', shares: 100, priceCurrency: 'USD' }], { fx: { rate: 1400 }, assets: {} }),
+    /close price.*PORT_EXTRA_SYMBOLS|종가/
+  );
+});
+
+record('share-count valuation rejects generated synthetic fallback prices', () => {
+  const md = {
+    fx: { rate: 1400 },
+    assets: {
+      FALLBACK: {
+        ticker: 'FALLBACK',
+        type: 'stock',
+        currency: 'USD',
+        price: 123,
+        priceAsOf: '2026-06-25',
+        source: 'fallback sample',
+        sourceStatus: 'fallback',
+        priceSynthetic: true,
+        valuationEligible: false,
+      },
+    },
+  };
+  assert.throws(
+    () => Core.calculatePortfolio([{ ticker: 'FALLBACK', shares: 1, priceCurrency: 'USD' }], md),
+    /fallback\/synthetic|임의 fallback/
+  );
 });
 
 record('fetched KRW asset currency overrides stale USD selector value', () => {
@@ -32,6 +58,14 @@ record('fetched KRW asset currency overrides stale USD selector value', () => {
   const result = Core.calculatePortfolio([{ ticker: '005930.KS', shares: 1, priceCurrency: 'USD' }], md);
   assert.equal(result.totalKrw, 358500);
   assert.equal(result.direct[0].priceCurrency, 'KRW');
+});
+
+record('foreign local-currency asset does not get misread as USD share valuation', () => {
+  const md = { fx: { rate: 1500 }, assets: { '285A.T': { ticker: '285A.T', currency: 'JPY', price: 103850, priceAsOf: '2026-06-25', returns: [] } } };
+  assert.throws(
+    () => Core.calculatePortfolio([{ ticker: '285A.T', shares: 1, priceCurrency: 'USD' }], md),
+    /currency JPY.*not supported|USD\/KRW/
+  );
 });
 
 record('duplicate ETF share rows aggregate before decomposition', () => {
@@ -135,10 +169,27 @@ record('live refreshed data contains broad SPY/QQQ decomposition and explicit pr
   assert.ok(data.etfHoldings.SPY.holdings.length >= 400);
   assert.ok(data.etfHoldings.QQQ.holdings.length >= 100);
   assert.equal(data.etfHoldings.TQQQ.sourceStatus, 'proxy');
+  assert.equal(data.assets.DRAM.source, 'Roundhill DailyNAV CSV');
+  assert.equal(data.etfHoldings.DRAM.source, 'Roundhill official holdings CSV');
   assert.ok(data.samplePortfolio.every((row) => Number.isFinite(row.shares) && row.priceCurrency));
   const result = Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: 20 });
   assert.ok(result.primaryExposureRows.length > 0);
   assert.ok(result.primaryExposureRows.every((row) => !row.ticker.includes(':') && !['SPY', 'QQQ', 'TQQQ'].includes(row.ticker)), 'primary public-data exposure rows are constituent stocks, not ETF/bucket rows');
+});
+
+record('new DRAM ticker calculates from shares and decomposes into individual memory stocks', () => {
+  const result = Core.calculatePortfolio([{ ticker: 'DRAM', shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: Infinity });
+  assert.ok(result.totalKrw > 0);
+  assert.equal(result.direct[0].ticker, 'DRAM');
+  assert.equal(result.direct[0].type, 'etf');
+  assert.equal(result.direct[0].priceCurrency, 'USD');
+  assert.ok(result.primaryExposureRows.length >= 10);
+  assert.ok(result.primaryExposureRows.some((row) => row.ticker === 'MU'));
+  assert.ok(result.primaryExposureRows.some((row) => row.ticker === '005930.KS'));
+  assert.ok(result.primaryExposureRows.some((row) => row.ticker === '000660.KS'));
+  assert.equal(result.primaryExposureRows.filter((row) => row.ticker === 'DRAM' || row.ticker.includes(':')).length, 0);
+  assert.equal(result.auditExposureRows.filter((row) => row.ticker.startsWith('DRAM:')).length, 0);
+  assert.ok(result.mappedUnleveredKrw / result.totalKrw > 0.999);
 });
 
 record('blank top-N default expands all public SPY constituents in primary rows', () => {
@@ -158,7 +209,7 @@ record('refresh provider timeout falls back with explicit warning evidence', () 
     const result = spawnSync(process.execPath, ['scripts/refresh-data.mjs'], {
       cwd: tmp,
       encoding: 'utf8',
-      env: { ...process.env, PORT_REQUEST_TIMEOUT_MS: '1', PORT_MAX_HOLDING_PRICE_SYMBOLS: '0', PORT_PRICE_CONCURRENCY: '12' },
+      env: { ...process.env, PORT_FORCE_PROVIDER_TIMEOUT: '1', PORT_REQUEST_TIMEOUT_MS: '1', PORT_MAX_HOLDING_PRICE_SYMBOLS: '0', PORT_PRICE_CONCURRENCY: '12' },
       timeout: 20000,
     });
     assert.equal(result.status, 0, result.stderr || result.stdout);
@@ -179,6 +230,7 @@ record('offline refresh produces valid deterministic share-based JSON', () => {
     const generated = JSON.parse(readFileSync(join(tmp, 'data/market-data.json'), 'utf8'));
     assert.equal(generated.schemaVersion, 1);
     assert.ok(generated.fx.rate > 0);
+    assert.ok(Object.values(generated.assets).every((asset) => asset.priceSynthetic === true && asset.valuationEligible === false));
     assert.ok(generated.samplePortfolio.every((row) => Number.isFinite(row.shares)));
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 });

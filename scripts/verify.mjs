@@ -14,6 +14,7 @@ const files = {
 const checks = [];
 const assert = (condition, label) => checks.push({ ok: Boolean(condition), label });
 const contains = (file, needle) => file.includes(needle);
+const knownPriceCurrencies = new Set(['KRW', 'USD', 'JPY', 'TWD', 'CNY', 'HKD', 'GBP', 'EUR', 'CAD']);
 
 for (const path of [
   'index.html', 'assets/styles.css', 'assets/app.js', 'assets/portfolio-core.js', 'data/market-data.json',
@@ -40,6 +41,7 @@ assert(contains(files.html, '개별 종목 최종 비중'), 'look-through copy i
 
 assert(contains(files.core, 'calculatePortfolio'), 'portfolio calculation API exists');
 assert(contains(files.core, 'resolveShareValuation'), 'share-count valuation API exists');
+assert(contains(files.core, 'priceSynthetic'), 'share-count valuation rejects synthetic fallback prices');
 assert(contains(files.core, 'computeLookThrough'), 'ETF look-through API exists');
 assert(contains(files.core, 'primaryExposureRows'), 'primary ETF look-through rows are explicitly named');
 assert(contains(files.core, 'auditExposureRows'), 'ETF residuals are separated from primary exposure rows');
@@ -76,13 +78,20 @@ assert(typeof files.data.generatedAt === 'string' && files.data.generatedAt.leng
 assert(files.data.assets && Object.keys(files.data.assets).length >= 100, 'broad asset records exist');
 for (const [ticker, asset] of Object.entries(files.data.assets)) {
   assert(Number.isFinite(asset.price) && asset.price > 0, `${ticker} close price exists`);
-  assert(['KRW', 'USD'].includes(asset.currency), `${ticker} price currency is explicit`);
+  assert(knownPriceCurrencies.has(asset.currency), `${ticker} price currency is explicit`);
   assert(typeof asset.priceAsOf === 'string' && asset.priceAsOf.length >= 10, `${ticker} close price date exists`);
 }
 assert(files.data.assets.TQQQ?.leverage === 3, 'TQQQ leverage metadata exists');
+assert(files.data.assets.DRAM?.type === 'etf', 'DRAM is recognized as an ETF');
+assert(files.data.assets.DRAM?.source === 'Roundhill DailyNAV CSV', 'DRAM price comes from Roundhill DailyNAV');
+assert(Number.isFinite(files.data.assets.DRAM?.price) && files.data.assets.DRAM.price > 0, 'DRAM close price exists');
 assert(files.data.etfHoldings?.SPY?.holdings?.length >= 400, 'SPY decomposes into broad constituent set');
 assert(files.data.etfHoldings?.QQQ?.holdings?.length >= 100, 'QQQ decomposes into broad constituent set');
 assert(files.data.etfHoldings?.TQQQ?.sourceStatus === 'proxy', 'TQQQ uses explicit QQQ proxy status');
+assert(files.data.etfHoldings?.DRAM?.source === 'Roundhill official holdings CSV', 'DRAM uses Roundhill official holdings');
+assert(files.data.etfHoldings?.DRAM?.holdings?.length >= 10, 'DRAM decomposes into individual memory-stock holdings');
+assert(files.data.etfHoldings?.DRAM?.holdings?.some((row) => row.ticker === 'MU'), 'DRAM holdings map Micron exposure to MU');
+assert(files.data.etfHoldings?.DRAM?.holdings?.some((row) => row.ticker === '005930.KS'), 'DRAM holdings map Samsung exposure to 005930.KS');
 assert(Array.isArray(files.data.samplePortfolio) && files.data.samplePortfolio.every((row) => Number.isFinite(row.shares)), 'sample portfolio is share-count based');
 assert(Array.isArray(files.data.sources) && files.data.sources.length > 0, 'source provenance exists');
 assert(Array.isArray(files.data.warnings), 'warnings array exists');
@@ -96,13 +105,19 @@ assert(contains(files.readme, 'npm run refresh:data'), 'README documents refresh
 assert(contains(files.readme, '보유 주수'), 'README documents share-count input');
 assert(contains(files.readme, 'State Street'), 'README documents SPY provider source');
 assert(contains(files.readme, 'Invesco'), 'README documents QQQ provider source');
+assert(contains(files.readme, 'Roundhill'), 'README documents DRAM/Roundhill provider source');
+assert(contains(files.readme, 'PORT_EXTRA_SYMBOLS'), 'README documents extra ticker refresh path');
 assert(contains(files.readme, '레버리지 제외'), 'README documents leverage views');
 assert(contains(files.readme, '개별 종목'), 'README documents individual stock look-through');
 assert(contains(files.refresh, 'Frankfurter'), 'refresh script uses Frankfurter FX');
 assert(contains(files.refresh, 'Yahoo Chart'), 'refresh script uses Yahoo Chart');
 assert(contains(files.refresh, 'State Street official holdings XLSX'), 'refresh script uses SPY official holdings');
 assert(contains(files.refresh, 'Invesco QQQ holdings API'), 'refresh script uses QQQ official holdings');
+assert(contains(files.refresh, 'Roundhill DailyNAV CSV'), 'refresh script uses Roundhill DailyNAV');
+assert(contains(files.refresh, 'FilepointRoundhill.40RU.RU_Holdings'), 'refresh script can fetch Roundhill holdings files');
 assert(contains(files.refresh, 'REQUEST_TIMEOUT_MS'), 'refresh script defines provider request timeout');
+assert(contains(files.refresh, 'PORT_FORCE_PROVIDER_TIMEOUT'), 'refresh script supports deterministic provider-timeout tests');
+assert(contains(files.refresh, 'valuationEligible: false'), 'refresh fallback prices are marked ineligible for direct share valuation');
 assert(contains(files.refresh, 'AbortController'), 'refresh script aborts stalled provider requests');
 assert(!contains(files.refresh, 'slice(0, 40)'), 'refresh script no longer caps parsed holdings at 40');
 assert(!contains(files.refresh, 'record.holdings.slice(0, 12)'), 'refresh script no longer truncates ETF holdings to 12 for exposure data');

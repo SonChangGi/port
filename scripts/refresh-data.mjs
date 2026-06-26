@@ -7,8 +7,15 @@ const RANGE = process.env.PORT_PRICE_RANGE || '6mo';
 const MAX_HOLDING_PRICE_SYMBOLS = Number(process.env.PORT_MAX_HOLDING_PRICE_SYMBOLS || 180);
 const REQUEST_TIMEOUT_MS = Math.max(1000, Number(process.env.PORT_REQUEST_TIMEOUT_MS || 15000));
 const PRICE_FETCH_CONCURRENCY = Math.max(1, Math.min(12, Number(process.env.PORT_PRICE_CONCURRENCY || 6)));
-const DEFAULT_SYMBOLS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'AAPL', 'MSFT', 'NVDA', 'AMD', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', '005930.KS'];
-const DEFAULT_ETFS = ['SPY', 'QQQ', 'TQQQ', 'SOXL'];
+const FORCE_PROVIDER_TIMEOUT = process.env.PORT_FORCE_PROVIDER_TIMEOUT === '1';
+const BUILTIN_SYMBOLS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM', 'AAPL', 'MSFT', 'NVDA', 'AMD', 'GOOGL', 'AMZN', 'META', 'AVGO', 'TSLA', '005930.KS'];
+const BUILTIN_ETFS = ['SPY', 'QQQ', 'TQQQ', 'SOXL', 'DRAM'];
+const EXTRA_SYMBOLS = parseSymbolListEnv(process.env.PORT_EXTRA_SYMBOLS);
+const EXTRA_ETFS = parseSymbolListEnv(process.env.PORT_EXTRA_ETFS);
+const DEFAULT_SYMBOLS = uniqueSymbols([...BUILTIN_SYMBOLS, ...EXTRA_SYMBOLS, ...EXTRA_ETFS]);
+const DEFAULT_ETFS = uniqueSymbols([...BUILTIN_ETFS, ...EXTRA_ETFS]);
+const ROUNDHILL_ETFS = new Set(['DRAM']);
+const ROUNDHILL_DAILY_NAV_URL = 'https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_DailyNAV.csv';
 const LEVERAGE = { TQQQ: 3, SQQQ: -3, SOXL: 3, SOXS: -3, UPRO: 3, SPXL: 3, SPXS: -3, QLD: 2, SSO: 2 };
 const OFFICIAL_HOLDINGS_URLS = {
   SPY: 'https://www.ssga.com/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx',
@@ -38,6 +45,17 @@ const sources = [];
 const holdingsCache = new Map();
 const offline = process.argv.includes('--offline-sample');
 
+function parseSymbolListEnv(value) {
+  return String(value || '')
+    .split(/[\s,;]+/)
+    .map((symbol) => symbol.trim().toUpperCase())
+    .filter(Boolean);
+}
+
+function uniqueSymbols(values) {
+  return Array.from(new Set(values.map((symbol) => String(symbol || '').trim().toUpperCase()).filter(Boolean)));
+}
+
 function todayIso() {
   return new Date().toISOString();
 }
@@ -51,6 +69,10 @@ function dateOnly(value) {
 function parseProviderDate(value) {
   if (!value) return '';
   const text = String(value).trim();
+  const slashDate = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (slashDate) {
+    return new Date(Date.UTC(Number(slashDate[3]), Number(slashDate[1]) - 1, Number(slashDate[2]))).toISOString().slice(0, 10);
+  }
   const shortMonth = text.match(/^(\d{1,2})[-\s]([A-Za-z]{3})[-\s](\d{4})$/);
   if (shortMonth) {
     const months = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
@@ -62,6 +84,7 @@ function parseProviderDate(value) {
 
 async function fetchWithTimeout(url, label) {
   if (offline) throw new Error('offline-sample mode');
+  if (FORCE_PROVIDER_TIMEOUT) throw new Error(`${label} timed out after ${REQUEST_TIMEOUT_MS}ms (forced)`);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
   try {
@@ -136,7 +159,7 @@ async function fetchYahooChart(symbol, range = RANGE) {
     ticker: symbol,
     name: meta.longName || meta.shortName || symbol,
     type: /ETF|FUND/i.test(meta.instrumentType || '') ? 'etf' : 'stock',
-    currency: meta.currency || (symbol.endsWith('.KS') ? 'KRW' : 'USD'),
+    currency: meta.currency || inferCurrency(symbol),
     price: latest.close,
     priceAsOf: latest.date,
     returns,
@@ -144,6 +167,50 @@ async function fetchYahooChart(symbol, range = RANGE) {
     sourceUrl: url,
     sourceStatus: 'live',
   };
+}
+
+async function fetchAsset(symbol) {
+  if (ROUNDHILL_ETFS.has(symbol)) {
+    try {
+      const asset = await fetchRoundhillDailyNavAsset(symbol);
+      asset.leverage = LEVERAGE[symbol] || 1;
+      asset.type = 'etf';
+      return asset;
+    } catch (error) {
+      warnings.push(`${symbol} Roundhill DailyNAV failed: ${error.message}; trying Yahoo Chart fallback.`);
+    }
+  }
+
+  const asset = await fetchYahooChart(symbol);
+  asset.leverage = LEVERAGE[symbol] || 1;
+  if (DEFAULT_ETFS.includes(symbol)) asset.type = 'etf';
+  sources.push({ name: `Yahoo Chart ${symbol}`, url: asset.sourceUrl, status: 'live', asOf: asset.priceAsOf, detail: `${asset.returns.length} daily returns loaded.` });
+  return asset;
+}
+
+async function fetchRoundhillDailyNavAsset(symbol) {
+  const rows = parseCsvRows(await fetchText(ROUNDHILL_DAILY_NAV_URL, `Roundhill DailyNAV ${symbol}`));
+  const row = rows.find((candidate) => String(candidate['Fund Ticker'] || '').trim().toUpperCase() === symbol);
+  if (!row) throw new Error(`${symbol} not found in Roundhill DailyNAV CSV`);
+  const marketPrice = parseNumeric(row['Market Price']);
+  const nav = parseNumeric(row.NAV);
+  const price = Number.isFinite(marketPrice) && marketPrice > 0 ? marketPrice : nav;
+  if (!Number.isFinite(price) || price <= 0) throw new Error(`${symbol} Roundhill DailyNAV missing market price/NAV`);
+  const asOf = parseProviderDate(row['Rate Date']);
+  const asset = {
+    ticker: symbol,
+    name: String(row['Fund Name'] || symbol).trim() || symbol,
+    type: 'etf',
+    currency: 'USD',
+    price,
+    priceAsOf: asOf,
+    returns: [],
+    source: 'Roundhill DailyNAV CSV',
+    sourceUrl: ROUNDHILL_DAILY_NAV_URL,
+    sourceStatus: 'official',
+  };
+  sources.push({ name: `Roundhill ${symbol} DailyNAV CSV`, url: ROUNDHILL_DAILY_NAV_URL, status: 'official', asOf, detail: `Official ${symbol} market price/NAV row parsed from Roundhill DailyNAV CSV.` });
+  return asset;
 }
 
 function fallbackAsset(symbol) {
@@ -159,13 +226,15 @@ function fallbackAsset(symbol) {
     ticker: symbol,
     name: symbol,
     type: DEFAULT_ETFS.includes(symbol) ? 'etf' : 'stock',
-    currency: symbol.endsWith('.KS') ? 'KRW' : 'USD',
+    currency: inferCurrency(symbol),
     price: symbol.endsWith('.KS') ? 70000 : 100 + base * 8,
     priceAsOf: returns.at(-1).date,
     leverage,
     returns,
     source: 'fallback sample',
     sourceStatus: 'fallback',
+    priceSynthetic: true,
+    valuationEligible: false,
   };
 }
 
@@ -176,6 +245,7 @@ async function fetchHoldings(symbol) {
   if (symbol === 'SPY') promise = fetchSpyOfficialHoldings();
   else if (symbol === 'QQQ') promise = fetchQqqOfficialHoldings('QQQ');
   else if (symbol === 'TQQQ') promise = fetchTqqqProxyHoldings();
+  else if (ROUNDHILL_ETFS.has(symbol)) promise = fetchRoundhillHoldings(symbol);
   else promise = fetchPublicHoldingsFallback(symbol);
 
   const guarded = promise.catch((error) => fetchFallbackHoldings(symbol, error));
@@ -260,6 +330,118 @@ async function fetchTqqqProxyHoldings() {
   return record;
 }
 
+async function fetchRoundhillHoldings(symbol) {
+  const attempts = roundhillHoldingDateCandidates(new Date(), 15);
+  let lastError = null;
+  for (const date of attempts) {
+    const url = roundhillHoldingsUrl(date);
+    try {
+      const rows = parseCsvRows(await fetchText(url, `Roundhill holdings ${symbol}`))
+        .filter((row) => String(row.Account || '').trim().toUpperCase() === symbol);
+      if (!rows.length) throw new Error(`${symbol} account rows missing`);
+      const asOf = parseProviderDate(rows.find((row) => row.Date)?.Date) || date.toISOString().slice(0, 10);
+      const holdings = parseRoundhillEquityHoldings(rows);
+      if (holdings.length < 6) throw new Error(`Roundhill ${symbol} parse produced only ${holdings.length} equity holdings`);
+      const record = {
+        ticker: symbol,
+        asOf,
+        source: 'Roundhill official holdings CSV',
+        sourceUrl: url,
+        sourceStatus: 'official',
+        holdings,
+      };
+      sources.push({ name: `Roundhill ${symbol} official holdings CSV`, url, status: 'official', asOf, detail: `${holdings.length} merged equity holdings parsed from Roundhill holdings CSV.` });
+      return record;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || new Error(`Roundhill ${symbol} holdings unavailable`);
+}
+
+function parseRoundhillEquityHoldings(rows) {
+  const equityRows = rows
+    .map((row) => ({
+      ticker: normalizeRoundhillTicker(row.StockTicker, row.SecurityName, row.CUSIP),
+      name: String(row.SecurityName || row.StockTicker || '').trim(),
+      weight: parsePercentWeight(row.Weightings),
+      currency: roundhillCurrency(row.StockTicker),
+      moneyMarketFlag: String(row.MoneyMarketFlag || '').trim().toUpperCase(),
+    }))
+    .filter((row) => row.ticker && row.moneyMarketFlag !== 'Y' && isTradableTicker(row.ticker) && Number.isFinite(row.weight) && row.weight > 0)
+    .map(({ moneyMarketFlag, ...row }) => row);
+  return normalizeNearFullWeights(mergeHoldings(equityRows));
+}
+
+function roundhillHoldingsUrl(date) {
+  const mm = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(date.getUTCDate()).padStart(2, '0');
+  const yyyy = date.getUTCFullYear();
+  return `https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_Holdings_${mm}${dd}${yyyy}.csv`;
+}
+
+function roundhillHoldingDateCandidates(anchor, days) {
+  const midnight = new Date(Date.UTC(anchor.getUTCFullYear(), anchor.getUTCMonth(), anchor.getUTCDate()));
+  return Array.from({ length: days }, (_, index) => new Date(midnight.getTime() - index * 86400000));
+}
+
+function normalizeRoundhillTicker(rawTicker, securityName = '', cusip = '') {
+  const raw = String(rawTicker || '').trim().toUpperCase();
+  const name = String(securityName || '').trim().toUpperCase();
+  const id = String(cusip || '').trim().toUpperCase();
+  if (!raw || /^CASH|CASH&OTHER|USD|KRW|CNY|TWD|HKD|JPY|EUR$/.test(raw)) return '';
+  if (/TREASURY|GOVERNMENT OBLIGATIONS|MONEY MARKET/.test(name)) return '';
+  if (/MICRON/.test(name) || raw.startsWith('595112103') || id.startsWith('595112103')) return 'MU';
+  if (/SK HYNIX/.test(name) || raw.startsWith('6450267') || id.startsWith('6450267')) return '000660.KS';
+  if (/SAMSUNG ELECTRONICS/.test(name) || raw.startsWith('6771720') || id.startsWith('6771720')) return '005930.KS';
+  const parts = raw.split(/\s+/);
+  const base = parts[0];
+  const exchange = parts[1] || '';
+  const suffixes = { KS: '.KS', KQ: '.KQ', TT: '.TW', TW: '.TW', JP: '.T', JT: '.T', C1: '.SS', C2: '.SZ', HK: '.HK', LN: '.L' };
+  if (/^\d+[A-Z]?$/.test(base) && suffixes[exchange]) return `${base}${suffixes[exchange]}`;
+  if (/^[A-Z]{1,5}$/.test(raw)) return raw;
+  return '';
+}
+
+function roundhillCurrency(rawTicker) {
+  const exchange = String(rawTicker || '').trim().toUpperCase().split(/\s+/)[1] || '';
+  if (exchange === 'KS' || exchange === 'KQ') return 'KRW';
+  if (exchange === 'TT' || exchange === 'TW') return 'TWD';
+  if (exchange === 'JP' || exchange === 'JT') return 'JPY';
+  if (exchange === 'C1' || exchange === 'C2') return 'CNY';
+  return undefined;
+}
+
+function inferCurrency(symbol) {
+  const normalized = String(symbol || '').toUpperCase();
+  if (/\.(KS|KQ)$/.test(normalized)) return 'KRW';
+  if (/\.T$/.test(normalized)) return 'JPY';
+  if (/\.TW$/.test(normalized)) return 'TWD';
+  if (/\.(SS|SZ)$/.test(normalized)) return 'CNY';
+  if (/\.HK$/.test(normalized)) return 'HKD';
+  if (/\.L$/.test(normalized)) return 'GBP';
+  return 'USD';
+}
+
+function mergeHoldings(rows) {
+  const merged = new Map();
+  for (const row of rows) {
+    const existing = merged.get(row.ticker) || { ticker: row.ticker, name: row.name || row.ticker, weight: 0, currency: row.currency };
+    existing.weight += row.weight;
+    existing.currency ||= row.currency;
+    merged.set(row.ticker, existing);
+  }
+  return Array.from(merged.values()).sort((a, b) => b.weight - a.weight);
+}
+
+function normalizeNearFullWeights(rows) {
+  const total = rows.reduce((sum, row) => sum + Number(row.weight || 0), 0);
+  if (total >= 0.995 && total <= 1.005) {
+    return rows.map((row) => ({ ...row, weight: row.weight / total }));
+  }
+  return rows;
+}
+
 async function fetchPublicHoldingsFallback(symbol) {
   const url = `https://stockanalysis.com/etf/${symbol.toLowerCase()}/holdings/`;
   try {
@@ -304,6 +486,40 @@ function parseStockAnalysisHoldings(html) {
     rows.push({ ticker, name, weight });
   }
   return rows;
+}
+
+function parseCsvRows(text) {
+  const lines = String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/).filter((line) => line.trim().length);
+  if (!lines.length) return [];
+  const headers = parseCsvLine(lines[0]).map((header) => header.trim());
+  return lines.slice(1).map((line) => {
+    const cells = parseCsvLine(line);
+    return Object.fromEntries(headers.map((header, index) => [header, cells[index] ?? '']));
+  });
+}
+
+function parseCsvLine(line) {
+  const cells = [];
+  let current = '';
+  let inQuotes = false;
+  const value = String(line || '');
+  for (let index = 0; index < value.length; index += 1) {
+    const char = value[index];
+    const next = value[index + 1];
+    if (char === '"' && inQuotes && next === '"') {
+      current += '"';
+      index += 1;
+    } else if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      cells.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  cells.push(current);
+  return cells.map((cell) => cell.trim());
 }
 
 function readZipEntries(buffer) {
@@ -383,6 +599,12 @@ function parsePercentWeight(value) {
   if (value === null || value === undefined || value === '') return NaN;
   const numeric = Number(String(value).trim().replace(/,/g, '').replace(/%/g, ''));
   return Number.isFinite(numeric) ? numeric / 100 : NaN;
+}
+
+function parseNumeric(value) {
+  if (value === null || value === undefined || value === '') return NaN;
+  const numeric = Number(String(value).trim().replace(/,/g, '').replace(/%/g, ''));
+  return Number.isFinite(numeric) ? numeric : NaN;
 }
 
 function parseWeight(value) {
@@ -477,11 +699,8 @@ async function main() {
   const assets = {};
   await mapLimit(Array.from(symbols), PRICE_FETCH_CONCURRENCY, async (symbol) => {
     try {
-      const asset = await fetchYahooChart(symbol);
-      asset.leverage = LEVERAGE[symbol] || 1;
-      if (DEFAULT_ETFS.includes(symbol)) asset.type = 'etf';
+      const asset = await fetchAsset(symbol);
       assets[symbol] = asset;
-      sources.push({ name: `Yahoo Chart ${symbol}`, url: asset.sourceUrl, status: 'live', asOf: asset.priceAsOf, detail: `${asset.returns.length} daily returns loaded.` });
     } catch (error) {
       const asset = fallbackAsset(symbol);
       assets[symbol] = asset;

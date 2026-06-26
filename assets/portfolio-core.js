@@ -38,6 +38,12 @@
     return SUPPORTED_CURRENCIES.has(currency) ? currency : 'USD';
   }
 
+  function explicitSupportedCurrency(value, ticker) {
+    const currency = String(value || '').trim().toUpperCase() || 'USD';
+    if (SUPPORTED_CURRENCIES.has(currency)) return currency;
+    throw new Error(`${normalizeTicker(ticker)} price currency ${currency} is not supported for share valuation. 현재 보유 주수 계산은 USD/KRW 종가만 환산합니다. refresh 데이터에 해외 현지통화 가격만 있으면 USD/KRW 기준 가격을 별도로 공급해야 합니다.`);
+  }
+
   function getFxRate(marketData) {
     return asPositiveNumber(marketData?.fx?.rate, DEFAULT_FX);
   }
@@ -117,10 +123,13 @@
     const shares = asNumber(input.shares ?? input.quantity ?? input.units, NaN);
     if (!Number.isFinite(shares) || shares === 0) return null;
     const price = asPositiveNumber(input.price ?? asset.price ?? asset.close ?? asset.lastClose, NaN);
-    if (!Number.isFinite(price) || price <= 0) {
-      throw new Error(`${normalizeTicker(input.ticker)} share valuation requires a fetched close price.`);
+    if (asset.priceSynthetic || asset.valuationEligible === false) {
+      throw new Error(`${normalizeTicker(input.ticker)} close price is provider fallback/synthetic data. 보유 주수 계산에 임의 fallback 가격을 사용하지 않습니다. npm run refresh:data로 실제 종가를 확보하거나 USD/KRW 기준 가격을 명시적으로 공급하세요.`);
     }
-    const priceCurrency = asCurrency(asset.currency || input.priceCurrency || input.currency || 'USD');
+    if (!Number.isFinite(price) || price <= 0) {
+      throw new Error(`${normalizeTicker(input.ticker)} close price is unavailable. data/market-data.json에 종가가 없어 보유 주수 계산을 할 수 없습니다. npm run refresh:data 또는 PORT_EXTRA_SYMBOLS/PORT_EXTRA_ETFS로 티커를 포함해 데이터를 갱신하세요.`);
+    }
+    const priceCurrency = explicitSupportedCurrency(asset.currency || input.priceCurrency || input.currency || 'USD', input.ticker);
     const converted = convertAmount(shares * price, priceCurrency, marketData);
     return {
       mode: 'shares',
