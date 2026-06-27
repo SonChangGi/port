@@ -215,6 +215,34 @@ record('popular US and Korean ETF universe calculates from provider-backed close
   }
 });
 
+record('single-stock leveraged ETFs TSLL and SNXX use provider-backed prices and transparent proxy exposure', () => {
+  for (const [ticker, underlying] of [['TSLL', 'TSLA'], ['SNXX', 'SNDK']]) {
+    const asset = data.assets[ticker];
+    const holdings = data.etfHoldings?.[ticker];
+    assert.ok(asset?.price > 0 && asset.currency === 'USD' && asset.type === 'etf', `${ticker} has provider-backed USD ETF price`);
+    assert.equal(asset.leverage, 2, `${ticker} has 2x leverage metadata`);
+    assert.ok(asset.priceSynthetic !== true && asset.valuationEligible !== false, `${ticker} price is valuation eligible`);
+    assert.equal(holdings?.sourceStatus, 'proxy', `${ticker} uses explicit proxy status`);
+    assert.equal(holdings?.holdings?.[0]?.ticker, underlying, `${ticker} maps to ${underlying}`);
+    assert.equal(holdings?.holdings?.[0]?.weight, 1, `${ticker} proxy is 100% underlying before leverage`);
+    const result = Core.calculatePortfolio([{ ticker, shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: Infinity });
+    assert.ok(result.primaryExposureRows.some((row) => row.ticker === underlying), `${ticker} appears as underlying stock exposure`);
+    assert.ok(result.primaryExposureRows.find((row) => row.ticker === underlying).leveredValueKrw > result.primaryExposureRows.find((row) => row.ticker === underlying).valueKrw, `${ticker} leverage-adjusted exposure is larger`);
+  }
+});
+
+record('ticker input auto-refresh wiring exists without requiring the manual fill button', () => {
+  const app = readFileSync('assets/app.js', 'utf8');
+  const html = readFileSync('index.html', 'utf8');
+  const server = readFileSync('scripts/dev-server.mjs', 'utf8');
+  assert.ok(app.includes('scheduleAutoRefreshFromPortfolio'));
+  assert.ok(app.includes('autoRefreshCandidates'));
+  assert.ok(app.includes('/api/refresh-data'));
+  assert.ok(app.includes('workflow_dispatch') || app.includes('ACTIONS_DISPATCH_URL'));
+  assert.ok(html.includes('id="actions-token"'));
+  assert.ok(server.includes('POST') && server.includes('/api/refresh-data'));
+});
+
 record('0167A0 alias and RAM ETF calculate from refreshed provider close prices', () => {
   const korean = data.assets['0167A0.KS'];
   const ram = data.assets.RAM;

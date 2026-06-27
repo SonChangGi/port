@@ -229,7 +229,7 @@
             <h3 id="data-update-title">새 티커 종가 추가·업데이트</h3>
             <p>
               브라우저는 외부 금융 API를 직접 호출하지 않습니다. 한국 ETF 6자리 코드(예: <code>069500</code>, <code>0167A0</code>)는 <code>.KS</code>로 정규화하고,
-              새 ETF는 종가와 holdings 파싱 대상에 함께 넣어 Actions 또는 로컬 refresh에서 생성 JSON을 갱신합니다.
+              새 ETF는 종가와 holdings 파싱 대상에 함께 넣습니다. 로컬 <code>npm run dev</code>에서는 티커 입력만으로 refresh/test가 자동 실행됩니다.
             </p>
           </div>
           <a id="open-actions-update" class="primary-button" href="https://github.com/SonChangGi/port/actions/workflows/update-data.yml" target="_blank" rel="noopener noreferrer">Actions에서 실행</a>
@@ -237,11 +237,15 @@
         <div class="update-grid">
           <label>
             종가/수익률 추가 티커
-            <input id="update-symbols" value="VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
+            <input id="update-symbols" value="VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
           </label>
           <label>
             holdings도 시도할 ETF 티커
-            <input id="update-etfs" value="VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
+            <input id="update-etfs" value="VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
+          </label>
+          <label>
+            공개 Pages 자동 Actions token(선택)
+            <input id="actions-token" type="password" value="" autocomplete="off" spellcheck="false" aria-describedby="update-help" placeholder="fine-grained token, session only" />
           </label>
         </div>
         <div class="manual-update-actions">
@@ -250,10 +254,10 @@
           <code id="refresh-command" class="code-pill command-pill">npm run refresh:data && npm test</code>
         </div>
         <p id="update-help" class="muted refresh-help">
-          로컬에서는 위 명령을 실행하고, Actions에서는 <strong>Run workflow</strong> 입력칸의
-          <code>extra_symbols</code>/<code>extra_etfs</code>에 같은 값을 넣으세요. 갱신 후 Pages의 JSON을 다시 읽으면 보유 주수 계산에 실제 종가가 사용됩니다.
+          로컬 자동 갱신은 <code>npm run dev</code>로 연 페이지에서 동작합니다. 공개 Pages에서 자동 실행하려면 GitHub Actions write 권한 token을 세션에만 입력해야 하며,
+          token이 없으면 보안상 Actions를 무인 실행할 수 없습니다. 갱신 후 생성 JSON을 다시 읽으면 보유 주수 계산에 실제 종가가 사용됩니다.
         </p>
-        <p id="update-status" class="status-line" role="status" aria-live="polite">0167A0 → 0167A0.KS 별칭과 RAM ETF 갱신 입력을 준비했습니다.</p>
+        <p id="update-status" class="status-line" role="status" aria-live="polite">TSLL/SNXX/0167A0/RAM ETF 갱신 입력과 자동 refresh 감지를 준비했습니다.</p>
       </article>
 
       <article class="panel">
@@ -268,7 +272,7 @@
         <div class="manual-update-actions">
           <a class="primary-button" href="https://github.com/SonChangGi/port/actions/workflows/update-data.yml" target="_blank" rel="noopener noreferrer">GitHub Actions에서 데이터 갱신</a>
           <a class="secondary-button" href="#data-update">새 티커 입력 만들기</a>
-          <code class="code-pill">PORT_EXTRA_SYMBOLS="VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM" PORT_EXTRA_ETFS="VOO SCHD 069500.KS 360750.KS 0167A0.KS RAM" npm run refresh:data && npm test</code>
+          <code class="code-pill">PORT_EXTRA_SYMBOLS="VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM" PORT_EXTRA_ETFS="VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM" npm run refresh:data && npm test</code>
         </div>
       </article>
     </section>

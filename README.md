@@ -29,11 +29,12 @@ python3 -m http.server 8080
 데이터를 최신 무료 소스 기준으로 갱신하려면 다음 명령을 실행합니다.
 
 ```bash
+npm run dev
 npm run refresh:data
 npm test
 ```
 
-화면의 **데이터 업데이트 → 새 티커 종가 추가·업데이트** 패널에서도 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 명령을 만들 수 있습니다. `현재 입력 티커로 채우기`를 누르면 포트폴리오 행의 티커가 refresh 입력으로 정규화되고, 새 ETF일 가능성을 고려해 종가 대상과 holdings 대상에 함께 넣습니다. 계산 중 종가 누락 오류가 나도 현재 입력 티커를 업데이트 패널에 자동 제안합니다. `명령 복사`로 로컬 명령을 복사할 수 있고, GitHub Actions의 `Update portfolio dashboard data` 워크플로도 `extra_symbols`/`extra_etfs` 입력을 받아 같은 갱신을 실행합니다.
+화면의 **데이터 업데이트 → 새 티커 종가 추가·업데이트** 패널에서도 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 명령을 만들 수 있습니다. `npm run dev`로 로컬 서버를 열면 티커 입력만으로 누락 종목을 감지해 `/api/refresh-data`가 `npm run refresh:data && npm test`를 자동 실행하고, 생성 JSON을 다시 읽어 재계산합니다. 공개 GitHub Pages는 인증 없이 Actions를 무인 실행할 수 없으므로, 자동 workflow dispatch를 원하면 Actions write 권한 token을 브라우저 세션에만 입력해야 합니다. token이 없으면 같은 티커 목록이 패널과 명령에 자동 반영되며, GitHub Actions의 `extra_symbols`/`extra_etfs` 입력칸에 붙여 넣어 수동 갱신할 수 있습니다.
 
 네트워크 없이 deterministic sample JSON을 다시 만들려면:
 
@@ -70,7 +71,7 @@ TQQQ,2,USD,3
 - SPY holdings: State Street official holdings XLSX
 - QQQ holdings: Invesco QQQ holdings API
 - DRAM holdings/price: Roundhill official DailyNAV CSV + Roundhill official holdings CSV
-- RAM price/returns: Yahoo Chart, RAM holdings: StockAnalysis 공개 ETF holdings 페이지 best-effort
+- RAM/TSLL/SNXX price/returns: Yahoo Chart. TSLL/SNXX 같은 단일종목 레버리지 ETF는 issuer product page를 출처로 underlying proxy(TSLA/SNDK)를 명시하고 leverage multiplier를 별도 반영
 - TQQQ holdings: QQQ/Nasdaq-100 구성종목 proxy + TQQQ leverage metadata
 - 기타 미국 ETF holdings: StockAnalysis 공개 ETF holdings 페이지를 best-effort로 파싱(무료 페이지는 보통 일부/top holdings만 제공할 수 있음)
 - 한국 ETF holdings: 현재 무료 정적 refresh에서는 종가/수익률을 우선 확보하고, holdings는 조작하지 않고 명시적 `no_holdings`/잔여 노출로 표시
@@ -81,8 +82,8 @@ TQQQ,2,USD,3
 기본 JSON에 없는 티커를 Pages에서 바로 계산하려면 먼저 refresh 단계에 티커를 포함해야 합니다.
 
 ```bash
-PORT_EXTRA_SYMBOLS="VOO SCHD 069500 360750 0167A0 RAM" npm run refresh:data
-PORT_EXTRA_SYMBOLS="VOO SCHD 069500 360750 0167A0 RAM" PORT_EXTRA_ETFS="VOO SCHD 069500 360750 0167A0 RAM" npm run refresh:data
+PORT_EXTRA_SYMBOLS="VOO SCHD TSLL SNXX 069500 360750 0167A0 RAM" npm run refresh:data
+PORT_EXTRA_SYMBOLS="VOO SCHD TSLL SNXX 069500 360750 0167A0 RAM" PORT_EXTRA_ETFS="VOO SCHD TSLL SNXX 069500 360750 0167A0 RAM" npm run refresh:data
 ```
 
 - `PORT_EXTRA_SYMBOLS`: 종가/수익률을 추가로 가져올 주식·ETF 티커입니다.

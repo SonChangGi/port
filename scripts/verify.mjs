@@ -9,6 +9,8 @@ const files = {
   design: readFileSync('DESIGN.md', 'utf8'),
   readme: readFileSync('README.md', 'utf8'),
   refresh: readFileSync('scripts/refresh-data.mjs', 'utf8'),
+  devServer: readFileSync('scripts/dev-server.mjs', 'utf8'),
+  packageJson: readFileSync('package.json', 'utf8'),
   workflow: readFileSync('.github/workflows/update-data.yml', 'utf8'),
 };
 
@@ -19,8 +21,8 @@ const knownPriceCurrencies = new Set(['KRW', 'USD', 'JPY', 'TWD', 'CNY', 'HKD', 
 
 for (const path of [
   'index.html', 'assets/styles.css', 'assets/app.js', 'assets/portfolio-core.js', 'data/market-data.json',
-  'scripts/refresh-data.mjs', 'scripts/verify.mjs', 'scripts/regression.mjs', 'scripts/static-smoke.mjs', 'scripts/ultraqa.mjs',
-  'DESIGN.md', 'README.md', '.github/workflows/update-data.yml',
+  'scripts/refresh-data.mjs', 'scripts/dev-server.mjs', 'scripts/verify.mjs', 'scripts/regression.mjs', 'scripts/static-smoke.mjs', 'scripts/ultraqa.mjs',
+  'DESIGN.md', 'README.md', 'package.json', '.github/workflows/update-data.yml',
 ]) {
   assert(statSync(path).isFile(), `${path} exists`);
 }
@@ -42,8 +44,9 @@ assert(contains(files.html, '개별 종목 최종 비중'), 'look-through copy i
 assert(contains(files.html, 'id="data-update"'), 'data update panel exists');
 assert(contains(files.html, 'id="update-symbols"'), 'extra price ticker input exists');
 assert(contains(files.html, 'id="update-etfs"'), 'extra ETF holdings input exists');
+assert(contains(files.html, 'id="actions-token"'), 'optional Actions token input exists');
 assert(contains(files.html, 'id="copy-refresh-command"'), 'refresh command copy button exists');
-assert(contains(files.html, 'VOO SCHD 069500.KS'), 'US/KR ETF refresh preset is visible');
+assert(contains(files.html, 'VOO SCHD TSLL SNXX 069500.KS'), 'US/KR ETF refresh preset is visible');
 
 assert(contains(files.core, 'calculatePortfolio'), 'portfolio calculation API exists');
 assert(contains(files.core, 'resolveShareValuation'), 'share-count valuation API exists');
@@ -72,6 +75,9 @@ assert(contains(files.app, 'no-store'), 'browser JSON fetch avoids stale cache')
 assert(contains(files.app, 'buildRefreshCommand'), 'data update command builder is wired');
 assert(contains(files.app, 'canonicalTickerText'), 'data update ticker canonicalization is wired');
 assert(contains(files.app, 'suggestRefreshForCurrentRows'), 'missing close-price errors auto-suggest data refresh');
+assert(contains(files.app, 'autoRefreshCandidates'), 'ticker input auto-refresh detection is wired');
+assert(contains(files.app, '/api/refresh-data'), 'local auto-refresh endpoint is wired');
+assert(contains(files.app, 'ACTIONS_DISPATCH_URL'), 'Actions workflow dispatch URL is centralized');
 assert(contains(files.app, 'ACTIONS_UPDATE_URL'), 'Actions update URL is centralized');
 
 assert(contains(files.css, ':root'), 'CSS tokens exist');
@@ -109,6 +115,15 @@ assert(files.data.assets.RAM?.currency === 'USD', 'RAM close price currency is U
 assert(files.data.assets.RAM?.leverage === 2, 'RAM leverage metadata is 2x');
 assert(Number.isFinite(files.data.assets.RAM?.price) && files.data.assets.RAM.price > 0, 'RAM close price exists');
 assert(files.data.assets.RAM?.priceSynthetic !== true, 'RAM close price is provider-backed');
+for (const [ticker, underlying] of [['TSLL', 'TSLA'], ['SNXX', 'SNDK']]) {
+  assert(files.data.assets[ticker]?.type === 'etf', `${ticker} single-stock ETF is recognized as ETF`);
+  assert(files.data.assets[ticker]?.currency === 'USD', `${ticker} close price currency is USD`);
+  assert(files.data.assets[ticker]?.leverage === 2, `${ticker} leverage metadata is 2x`);
+  assert(Number.isFinite(files.data.assets[ticker]?.price) && files.data.assets[ticker].price > 0, `${ticker} close price exists`);
+  assert(files.data.assets[ticker]?.priceSynthetic !== true, `${ticker} close price is provider-backed`);
+  assert(files.data.etfHoldings?.[ticker]?.sourceStatus === 'proxy', `${ticker} uses explicit single-stock proxy status`);
+  assert(files.data.etfHoldings?.[ticker]?.holdings?.[0]?.ticker === underlying, `${ticker} maps proxy exposure to ${underlying}`);
+}
 for (const ticker of ['VOO', 'VTI', 'SCHD', 'IWM', 'SMH', 'SOXX']) {
   assert(files.data.assets[ticker]?.type === 'etf', `${ticker} popular US ETF is recognized as ETF`);
   assert(files.data.assets[ticker]?.currency === 'USD', `${ticker} close price currency is USD`);
@@ -140,6 +155,7 @@ for (const section of ['## Source of truth', '## Brand', '## Product goals', '##
 assert(contains(files.design, '보유 주수'), 'DESIGN.md documents share-count workflow');
 assert(contains(files.design, '다크'), 'DESIGN.md documents dark visual baseline');
 assert(contains(files.readme, 'npm run refresh:data'), 'README documents refresh command');
+assert(contains(files.readme, 'npm run dev'), 'README documents local auto refresh server');
 assert(contains(files.readme, '보유 주수'), 'README documents share-count input');
 assert(contains(files.readme, 'State Street'), 'README documents SPY provider source');
 assert(contains(files.readme, 'Invesco'), 'README documents QQQ provider source');
@@ -158,6 +174,9 @@ assert(contains(files.refresh, "'0167A0', '0167A0.KS'"), 'refresh script normali
 assert(contains(files.refresh, 'isPotentialKrxCode'), 'refresh script normalizes generic Korean six-character codes');
 assert(contains(files.refresh, 'POPULAR_US_ETFS'), 'refresh script has popular US ETF seed universe');
 assert(contains(files.refresh, 'POPULAR_KR_ETFS'), 'refresh script has popular Korean ETF seed universe');
+assert(contains(files.refresh, 'SINGLE_STOCK_ETF_PROXIES'), 'refresh script has single-stock ETF proxy metadata');
+assert(contains(files.refresh, 'TSLL'), 'refresh script includes TSLL ETF support');
+assert(contains(files.refresh, 'SNXX'), 'refresh script includes SNXX ETF support');
 assert(contains(files.refresh, 'State Street official holdings XLSX'), 'refresh script uses SPY official holdings');
 assert(contains(files.refresh, 'Invesco QQQ holdings API'), 'refresh script uses QQQ official holdings');
 assert(contains(files.refresh, 'Roundhill DailyNAV CSV'), 'refresh script uses Roundhill DailyNAV');
@@ -172,6 +191,8 @@ assert(contains(files.workflow, 'extra_symbols'), 'Actions workflow accepts extr
 assert(contains(files.workflow, 'extra_etfs'), 'Actions workflow accepts extra_etfs input');
 assert(contains(files.workflow, 'PORT_EXTRA_SYMBOLS'), 'Actions workflow passes extra_symbols to refresh script');
 assert(contains(files.workflow, 'PORT_EXTRA_ETFS'), 'Actions workflow passes extra_etfs to refresh script');
+assert(contains(files.devServer, 'POST') && contains(files.devServer, 'api/refresh-data'), 'dev server exposes local auto-refresh endpoint');
+assert(contains(files.packageJson, '"dev"'), 'npm dev script exists');
 
 const failed = checks.filter((check) => !check.ok);
 for (const check of checks) console.log(`${check.ok ? 'PASS' : 'FAIL'} ${check.label}`);

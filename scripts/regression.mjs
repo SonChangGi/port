@@ -10,6 +10,7 @@ const marketData = {
   assets: {
     SPY: { ticker: 'SPY', name: 'SPY ETF', type: 'etf', currency: 'USD', price: 500, priceAsOf: '2026-06-24', leverage: 1, returns: mkReturns([0.01, 0.02, -0.01, 0.03]) },
     TQQQ: { ticker: 'TQQQ', name: 'TQQQ ETF', type: 'etf', currency: 'USD', price: 50, priceAsOf: '2026-06-24', leverage: 3, returns: mkReturns([0.03, 0.06, -0.03, 0.09]) },
+    TSLL: { ticker: 'TSLL', name: 'TSLL ETF', type: 'etf', currency: 'USD', price: 10, priceAsOf: '2026-06-24', leverage: 2, returns: mkReturns([0.04, 0.01, -0.02, 0.03]) },
     AAPL: { ticker: 'AAPL', name: 'Apple', type: 'stock', currency: 'USD', price: 200, priceAsOf: '2026-06-24', returns: mkReturns([0.01, 0.02, -0.01, 0.03]) },
     MSFT: { ticker: 'MSFT', name: 'Microsoft', type: 'stock', currency: 'USD', price: 300, priceAsOf: '2026-06-24', returns: mkReturns([0.02, 0.01, -0.02, 0.02]) },
     NVDA: { ticker: 'NVDA', name: 'Nvidia', type: 'stock', currency: 'USD', price: 150, priceAsOf: '2026-06-24', returns: mkReturns([-0.01, 0.03, 0.02, 0.01]) },
@@ -20,6 +21,7 @@ const marketData = {
   etfHoldings: {
     SPY: { ticker: 'SPY', sourceStatus: 'official', asOf: '2026-06-24', holdings: [{ ticker: 'AAPL', name: 'Apple', weight: 0.6 }, { ticker: 'MSFT', name: 'Microsoft', weight: 0.2 }] },
     TQQQ: { ticker: 'TQQQ', sourceStatus: 'proxy', asOf: '2026-06-24', holdings: [{ ticker: 'AAPL', name: 'Apple', weight: 0.5 }, { ticker: 'NVDA', name: 'Nvidia', weight: 0.3 }] },
+    TSLL: { ticker: 'TSLL', sourceStatus: 'proxy', asOf: '2026-06-24', holdings: [{ ticker: 'TSLA', name: 'Tesla', weight: 1 }] },
   },
 };
 
@@ -33,6 +35,7 @@ assert.deepEqual(Core.convertAmount(100, 'USD', marketData), { amount: 100, curr
 assert.deepEqual(Core.convertAmount(140000, 'KRW', marketData), { amount: 140000, currency: 'KRW', valueKrw: 140000, valueUsd: 100, fxRate: 1400 }, 'KRW conversion uses inverse FX');
 assert.equal(Core.inferLeverage('TQQQ', {}), 3, 'TQQQ leverage is inferred');
 assert.equal(Core.inferLeverage('SQQQ', {}), -3, 'inverse leverage keeps sign');
+assert.equal(Core.inferLeverage('TSLL', {}), 2, 'TSLL leverage is inferred');
 
 const shareOnly = Core.calculatePortfolio([{ ticker: 'SPY', shares: 2, priceCurrency: 'USD' }, { ticker: '005930.KS', shares: 3, priceCurrency: 'KRW' }], marketData);
 assert.equal(shareOnly.totalKrw, 1610000, 'share-count valuation uses close price and explicit price currency');
@@ -65,6 +68,12 @@ const spyResidual = result.auditExposureRows.find((row) => row.ticker === 'SPY:O
 assert.ok(spyResidual && Math.round(spyResidual.valueKrw) === 280000, 'residual bucket preserves uncovered SPY holdings weight in audit rows');
 assert.ok(result.auditExposureRows.find((row) => row.ticker === 'TQQQ:OTHER'), 'leveraged ETF residual is audited separately from primary rows');
 assert.ok(result.leveredGrossKrw > result.unleveredGrossKrw, 'levered gross exposure exceeds unlevered exposure');
+
+const singleStockProxy = Core.calculatePortfolio([{ ticker: 'TSLL', shares: 2, priceCurrency: 'USD' }], marketData);
+const tsla = singleStockProxy.primaryExposureRows.find((row) => row.ticker === 'TSLA');
+assert.ok(tsla, 'single-stock leveraged ETF proxy maps to underlying stock');
+assert.equal(tsla.valueKrw, 28000, 'single-stock proxy maps 100% unlevered value to underlying');
+assert.equal(tsla.leveredValueKrw, 56000, 'single-stock proxy leverage is applied separately');
 
 const filtered = Core.calculatePortfolio([{ ticker: 'SPY', shares: 2, priceCurrency: 'USD' }], marketData, { exposureTopN: 1 });
 assert.deepEqual(filtered.primaryExposureRows.map((row) => row.ticker), ['AAPL'], 'top-N filter keeps primary rows individual-stock only');

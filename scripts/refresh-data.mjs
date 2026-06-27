@@ -14,12 +14,14 @@ const TICKER_ALIASES = new Map([
 const SPECIAL_ASSET_NAMES = {
   '0167A0.KS': 'SOL AI Semiconductor TOP2 Plus ETF',
   RAM: 'Roundhill T-REX 2X Long DRAM Daily Target ETF',
+  TSLL: 'Direxion Daily TSLA Bull 2X Shares',
+  SNXX: 'Tradr 2X Long SNXX Daily ETF',
 };
 const POPULAR_US_ETFS = [
   'SPY', 'IVV', 'VOO', 'VTI', 'QQQ', 'SCHD', 'DIA', 'IWM',
   'XLK', 'XLF', 'XLE', 'XLV', 'XLY', 'XLP', 'XLI', 'XLU', 'VNQ',
   'SMH', 'SOXX', 'ARKK', 'TLT', 'AGG', 'BND', 'GLD',
-  'TQQQ', 'QLD', 'SSO', 'UPRO', 'SOXL', 'DRAM', 'RAM',
+  'TQQQ', 'QLD', 'SSO', 'UPRO', 'SOXL', 'TSLL', 'SNXX', 'DRAM', 'RAM',
 ];
 const POPULAR_KR_ETFS = [
   '0167A0.KS', '069500.KS', '102110.KS', '133690.KS', '360750.KS', '379800.KS',
@@ -33,7 +35,23 @@ const DEFAULT_SYMBOLS = uniqueSymbols([...BUILTIN_SYMBOLS, ...EXTRA_SYMBOLS, ...
 const DEFAULT_ETFS = uniqueSymbols([...BUILTIN_ETFS, ...EXTRA_ETFS]);
 const ROUNDHILL_ETFS = new Set(['DRAM']);
 const ROUNDHILL_DAILY_NAV_URL = 'https://www.roundhillinvestments.com/assets/data/FilepointRoundhill.40RU.RU_DailyNAV.csv';
-const LEVERAGE = { TQQQ: 3, SQQQ: -3, SOXL: 3, SOXS: -3, UPRO: 3, SPXL: 3, SPXS: -3, QLD: 2, SSO: 2, RAM: 2 };
+const LEVERAGE = { TQQQ: 3, SQQQ: -3, SOXL: 3, SOXS: -3, UPRO: 3, SPXL: 3, SPXS: -3, QLD: 2, SSO: 2, RAM: 2, TSLL: 2, SNXX: 2 };
+const SINGLE_STOCK_ETF_PROXIES = {
+  TSLL: {
+    ticker: 'TSLA',
+    name: 'Tesla, Inc.',
+    source: 'Direxion single-stock ETF proxy',
+    sourceUrl: 'https://www.direxion.com/product/daily-tsla-bull-and-bear-leveraged-single-stock-etfs',
+    detail: 'Single-stock leveraged ETF exposure is represented as 100% TSLA notional before the ETF leverage multiplier.',
+  },
+  SNXX: {
+    ticker: 'SNDK',
+    name: 'Sandisk Corp.',
+    source: 'Tradr single-stock ETF proxy',
+    sourceUrl: 'https://www.tradretfs.com/snxx',
+    detail: 'Single-stock leveraged ETF exposure is represented as 100% SNDK notional before the ETF leverage multiplier.',
+  },
+};
 const OFFICIAL_HOLDINGS_URLS = {
   SPY: 'https://www.ssga.com/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx',
   QQQ: 'https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&interval=monthly&productType=ETF',
@@ -318,6 +336,7 @@ async function fetchHoldings(symbol) {
   if (symbol === 'SPY') promise = fetchSpyOfficialHoldings();
   else if (symbol === 'QQQ') promise = fetchQqqOfficialHoldings('QQQ');
   else if (symbol === 'TQQQ') promise = fetchTqqqProxyHoldings();
+  else if (SINGLE_STOCK_ETF_PROXIES[symbol]) promise = Promise.resolve(fetchSingleStockProxyHoldings(symbol));
   else if (ROUNDHILL_ETFS.has(symbol)) promise = fetchRoundhillHoldings(symbol);
   else if (isKrxSymbol(symbol)) promise = Promise.resolve(fetchNoHoldingsRecord(symbol, 'Korean ETF holdings are not scraped by this free-source refresh; price/returns still use Yahoo/Naver and exposure remains transparent in audit rows.'));
   else promise = fetchPublicHoldingsFallback(symbol);
@@ -579,6 +598,20 @@ function fetchNoHoldingsRecord(symbol, detail) {
     sourceUrl: url,
     sourceStatus: 'no_holdings',
     holdings: [],
+  };
+}
+
+function fetchSingleStockProxyHoldings(symbol) {
+  const proxy = SINGLE_STOCK_ETF_PROXIES[symbol];
+  sources.push({ name: `${symbol} single-stock ETF proxy`, url: proxy.sourceUrl, status: 'proxy', asOf: todayIso().slice(0, 10), detail: proxy.detail });
+  return {
+    ticker: symbol,
+    asOf: todayIso().slice(0, 10),
+    source: proxy.source,
+    sourceUrl: proxy.sourceUrl,
+    sourceStatus: 'proxy',
+    proxyFor: proxy.ticker,
+    holdings: [{ ticker: proxy.ticker, name: proxy.name, weight: 1 }],
   };
 }
 

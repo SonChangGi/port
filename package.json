@@ -4,6 +4,7 @@
   "private": true,
   "description": "Static portfolio exposure dashboard for KRW/USD ETF and stock positions.",
   "scripts": {
+    "dev": "node scripts/dev-server.mjs",
     "refresh:data": "node scripts/refresh-data.mjs",
     "refresh:data:offline": "node scripts/refresh-data.mjs --offline-sample",
     "test": "node --check assets/portfolio-core.js && node --check assets/app.js && node --check scripts/refresh-data.mjs && node --check scripts/verify.mjs && node --check scripts/regression.mjs && node --check scripts/static-smoke.mjs && node --check scripts/ultraqa.mjs && node scripts/verify.mjs && node scripts/regression.mjs && node scripts/static-smoke.mjs && node scripts/ultraqa.mjs"
