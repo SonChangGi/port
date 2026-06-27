@@ -34,7 +34,7 @@ npm run refresh:data
 npm test
 ```
 
-화면의 **데이터 업데이트 → 새 티커 종가 추가·업데이트** 패널에서도 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 명령을 만들 수 있습니다. `npm run dev`로 로컬 서버를 열면 티커 입력만으로 누락 종목을 감지해 `/api/refresh-data`가 `npm run refresh:data && npm test`를 자동 실행하고, 생성 JSON을 다시 읽어 재계산합니다. 공개 GitHub Pages는 인증 없이 Actions를 무인 실행할 수 없으므로, 자동 workflow dispatch를 원하면 Actions write 권한 token을 브라우저 세션에만 입력해야 합니다. token이 없으면 같은 티커 목록이 패널과 명령에 자동 반영되며, GitHub Actions의 `extra_symbols`/`extra_etfs` 입력칸에 붙여 넣어 수동 갱신할 수 있습니다.
+화면의 **데이터 업데이트 → 새 티커 종가 추가·업데이트** 패널에서도 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 명령을 만들 수 있습니다. `npm run dev`로 로컬 서버를 열면 티커 입력만으로 누락 종목을 감지해 localhost-only `/api/refresh-data`가 `npm run refresh:data && npm test`를 자동 실행하고, 생성 JSON을 다시 읽어 재계산합니다. 이 endpoint는 `127.0.0.1`에만 bind되고 same-origin/dev-token 검사를 통과해야 실행됩니다. 공개 GitHub Pages는 보안상 브라우저에서 GitHub Actions write token을 받지 않으며, 같은 티커 목록이 패널과 명령에 자동 반영되면 GitHub Actions의 `extra_symbols`/`extra_etfs` 입력칸에 붙여 넣어 수동 갱신합니다.
 
 네트워크 없이 deterministic sample JSON을 다시 만들려면:
 
@@ -71,7 +71,7 @@ TQQQ,2,USD,3
 - SPY holdings: State Street official holdings XLSX
 - QQQ holdings: Invesco QQQ holdings API
 - DRAM holdings/price: Roundhill official DailyNAV CSV + Roundhill official holdings CSV
-- RAM/TSLL/SNXX price/returns: Yahoo Chart. TSLL/SNXX 같은 단일종목 레버리지 ETF는 issuer product page를 출처로 underlying proxy(TSLA/SNDK)를 명시하고 leverage multiplier를 별도 반영
+- RAM/TSLL/SNXX price/returns: Yahoo Chart. TSLL/SNXX 같은 단일종목 레버리지 ETF는 issuer product page를 출처로 underlying proxy(TSLA/SNDK)를 명시하고 leverage multiplier를 별도 반영합니다. 주 노출 표에는 `proxy` 상태와 “배율 반영 표는 명목 노출” 안내를 함께 표시해 실제 보유종목 파일과 구분합니다.
 - TQQQ holdings: QQQ/Nasdaq-100 구성종목 proxy + TQQQ leverage metadata
 - 기타 미국 ETF holdings: StockAnalysis 공개 ETF holdings 페이지를 best-effort로 파싱(무료 페이지는 보통 일부/top holdings만 제공할 수 있음)
 - 한국 ETF holdings: 현재 무료 정적 refresh에서는 종가/수익률을 우선 확보하고, holdings는 조작하지 않고 명시적 `no_holdings`/잔여 노출로 표시
@@ -100,7 +100,7 @@ PORT_EXTRA_SYMBOLS="VOO SCHD TSLL SNXX 069500 360750 0167A0 RAM" PORT_EXTRA_ETFS
 3. ETF holdings가 있으면 `ETF 평가금액 × 보유종목 비중`으로 **개별 구성종목** 노출을 계산합니다. ETF 자체는 주 노출 표의 최종 행이 아닙니다.
 4. 사용자가 분석 universe를 제한하면 숨겨진 구성종목은 별도 `ETF:OTHER` 잔여 노출로 보존하되, 개별 종목 최종 비중 표에는 섞지 않습니다.
 5. 보유비중 합계가 100% 미만이면 잔여 노출로 남겨 누락을 조작하지 않습니다.
-6. 레버리지 포함 노출은 각 개별 구성종목 노출에 ETF 배율을 곱합니다. inverse ETF는 음수 배율을 유지합니다.
+6. 레버리지 포함 노출은 각 개별 구성종목 노출에 ETF 배율을 곱한 **명목 노출**입니다. inverse ETF는 음수 배율을 유지합니다.
 7. 상관관계는 개별 종목 최종 비중 표의 분석 universe 중 생성 JSON에 일별 수익률이 있는 종목만 사용하며 표본 수가 부족하면 `n/a`로 표시합니다.
 
 ## 검증

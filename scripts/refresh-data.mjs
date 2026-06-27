@@ -114,6 +114,27 @@ function dateOnly(value) {
   return Number.isNaN(date.getTime()) ? String(value).slice(0, 10) : date.toISOString().slice(0, 10);
 }
 
+function computeDataAsOf(generatedAt, fx, assets, etfHoldings) {
+  const generatedDate = dateOnly(generatedAt);
+  const datedSources = [
+    ['FX', fx?.asOf],
+    ...Object.values(assets || {}).map((asset) => [`${asset.ticker || 'asset'} price`, asset.priceAsOf]),
+    ...Object.values(etfHoldings || {}).map((record) => [`${record.ticker || 'ETF'} holdings`, record.asOf]),
+  ];
+  const dates = [];
+  for (const [label, value] of datedSources) {
+    const date = dateOnly(value);
+    if (!date) continue;
+    if (generatedDate && date > generatedDate) {
+      warnings.push(`${label} as-of ${date} is after generated date ${generatedDate}; global dataAsOf is capped to generated date.`);
+      dates.push(generatedDate);
+    } else {
+      dates.push(date);
+    }
+  }
+  return dates.sort().at(-1) || generatedDate;
+}
+
 function parseProviderDate(value) {
   if (!value) return '';
   const text = String(value).trim();
@@ -853,7 +874,7 @@ async function main() {
     }
   });
 
-  const dataAsOf = [fx.asOf, ...Object.values(assets).map((asset) => asset.priceAsOf), ...Object.values(etfHoldings).map((record) => record.asOf)].filter(Boolean).sort().at(-1) || generatedAt.slice(0, 10);
+  const dataAsOf = computeDataAsOf(generatedAt, fx, assets, etfHoldings);
   const payload = {
     schemaVersion: 1,
     generatedAt,

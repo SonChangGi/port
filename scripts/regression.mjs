@@ -74,6 +74,7 @@ const tsla = singleStockProxy.primaryExposureRows.find((row) => row.ticker === '
 assert.ok(tsla, 'single-stock leveraged ETF proxy maps to underlying stock');
 assert.equal(tsla.valueKrw, 28000, 'single-stock proxy maps 100% unlevered value to underlying');
 assert.equal(tsla.leveredValueKrw, 56000, 'single-stock proxy leverage is applied separately');
+assert.ok(tsla.coverageStatuses.includes('proxy'), 'single-stock proxy provenance is retained in primary exposure rows');
 
 const filtered = Core.calculatePortfolio([{ ticker: 'SPY', shares: 2, priceCurrency: 'USD' }], marketData, { exposureTopN: 1 });
 assert.deepEqual(filtered.primaryExposureRows.map((row) => row.ticker), ['AAPL'], 'top-N filter keeps primary rows individual-stock only');

@@ -5,18 +5,14 @@
   const DATA_URL = 'data/market-data.json';
   const QUANT_DASHBOARD_URL = 'https://sonchanggi.github.io/quant-dashboard/';
   const ACTIONS_UPDATE_URL = 'https://github.com/SonChangGi/port/actions/workflows/update-data.yml';
-  const ACTIONS_DISPATCH_URL = 'https://api.github.com/repos/SonChangGi/port/actions/workflows/update-data.yml/dispatches';
   const DEFAULT_ANALYSIS_TOP_N = 120;
   const DEFAULT_UPDATE_SYMBOLS = 'VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM';
   const DEFAULT_UPDATE_ETFS = 'VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM';
   const AUTO_REFRESH_DEBOUNCE_MS = 900;
-  const AUTO_REFRESH_POLL_MS = 25000;
-  const AUTO_REFRESH_MAX_POLLS = 8;
   const state = {
     marketData: null,
     latestResult: null,
-    actionsToken: '',
-    autoRefresh: { timer: null, running: false, lastKey: '', lastAttemptAt: 0 },
+    autoRefresh: { timer: null, running: false, lastKey: '', lastAttemptAt: 0, devToken: '' },
   };
   const $ = (selector) => document.querySelector(selector);
 
@@ -132,12 +128,6 @@
     });
     ['#update-symbols', '#update-etfs'].forEach((selector) => {
       $(selector)?.addEventListener('input', renderRefreshCommand);
-    });
-    $('#actions-token')?.addEventListener('input', (event) => {
-      state.actionsToken = event.target.value.trim();
-      setStatus('update-status', state.actionsToken
-        ? 'Actions token을 이 브라우저 세션에서만 사용합니다. 새 티커를 입력하면 workflow_dispatch를 자동 요청합니다.'
-        : '토큰 없이 공개 Pages에서는 Actions를 자동 실행할 수 없습니다. 로컬 자동 실행은 npm run dev에서 동작합니다.', state.actionsToken ? 'success' : '');
     });
     $('#update-from-portfolio')?.addEventListener('click', fillRefreshInputsFromPortfolio);
     $('#copy-refresh-command')?.addEventListener('click', copyRefreshCommand);
@@ -272,9 +262,6 @@
       if (mode === 'local') {
         await reloadMarketData();
         setStatus('update-status', `${key} 로컬 자동 refresh/test 완료. 생성 JSON을 다시 읽어 계산했습니다.`, 'success');
-      } else if (mode === 'actions') {
-        setStatus('update-status', `${key} Actions 자동 실행을 요청했습니다. Pages 배포가 끝나면 데이터를 자동 재확인합니다.`, 'success');
-        await pollForRefreshedData(canonical, state.marketData?.generatedAt || '');
       }
     } catch (error) {
       setStatus('update-status', `${key} 자동 갱신 대기: ${error.message}`, 'error');
@@ -300,11 +287,7 @@
         if (!/404|Failed to fetch|NetworkError|Unexpected token/i.test(error.message)) throw error;
       }
     }
-    if (state.actionsToken) {
-      await dispatchActionsRefresh(symbols, etfs);
-      return 'actions';
-    }
-    throw new Error('공개 Pages는 GitHub 인증 토큰 없이는 Actions를 무인 실행할 수 없습니다. 로컬에서는 `npm run dev`로 열면 티커 입력만으로 refresh가 실행됩니다.');
+    throw new Error('보안상 공개 Pages는 브라우저에서 Actions write token을 받지 않습니다. 자동 갱신은 로컬 `npm run dev`에서만 실행되고, 공개 Pages에서는 Actions 링크/명령 복사를 사용하세요.');
   }
 
   function isLocalOrigin() {
@@ -312,9 +295,10 @@
   }
 
   async function postLocalRefresh(symbols, etfs, reason) {
+    const token = await ensureLocalRefreshToken();
     const response = await fetch('/api/refresh-data', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'x-port-dev-token': token },
       body: JSON.stringify({ symbols, etfs, reason }),
     });
     if (!response.ok) {
@@ -326,43 +310,14 @@
     return payload;
   }
 
-  async function dispatchActionsRefresh(symbols, etfs) {
-    const response = await fetch(ACTIONS_DISPATCH_URL, {
-      method: 'POST',
-      headers: {
-        accept: 'application/vnd.github+json',
-        authorization: `Bearer ${state.actionsToken}`,
-        'content-type': 'application/json',
-        'x-github-api-version': '2022-11-28',
-      },
-      body: JSON.stringify({ ref: 'main', inputs: { extra_symbols: symbols, extra_etfs: etfs } }),
-    });
-    if (!response.ok && response.status !== 204) {
-      const detail = await response.text();
-      throw new Error(`Actions dispatch ${response.status}: ${detail.slice(0, 240)}`);
-    }
-  }
-
-  async function pollForRefreshedData(tickers, previousGeneratedAt) {
-    for (let attempt = 1; attempt <= AUTO_REFRESH_MAX_POLLS; attempt += 1) {
-      await sleep(AUTO_REFRESH_POLL_MS);
-      const next = await loadMarketData();
-      const hasAll = tickers.every((ticker) => {
-        const asset = next.assets?.[ticker];
-        return asset?.price > 0 && asset.priceSynthetic !== true && asset.valuationEligible !== false;
-      });
-      const changed = next.generatedAt && next.generatedAt !== previousGeneratedAt;
-      if (hasAll && changed) {
-        state.marketData = next;
-        renderHeroStatus();
-        renderSources();
-        renderWarnings();
-        calculateAndRender();
-        setStatus('update-status', `${tickers.join(' ')} 갱신 데이터가 Pages에 반영되어 다시 계산했습니다.`, 'success');
-        return;
-      }
-      setStatus('update-status', `${tickers.join(' ')} Actions 배포 대기 중... (${attempt}/${AUTO_REFRESH_MAX_POLLS})`, 'warning');
-    }
+  async function ensureLocalRefreshToken() {
+    if (state.autoRefresh.devToken) return state.autoRefresh.devToken;
+    const response = await fetch('/api/refresh-data/status', { cache: 'no-store' });
+    if (!response.ok) throw new Error(`local refresh status ${response.status}`);
+    const payload = await response.json();
+    if (!payload.token) throw new Error('local refresh token unavailable');
+    state.autoRefresh.devToken = payload.token;
+    return state.autoRefresh.devToken;
   }
 
   async function copyRefreshCommand() {
@@ -434,7 +389,7 @@
     const tickerText = tickers.join(' ');
     setRefreshInputs(tickerText, tickerText);
     scheduleAutoRefreshFromPortfolio('calculation-error');
-    setStatus('update-status', `${tickerText} 종가가 캐시에 없으면 자동 갱신을 시도합니다. 로컬은 npm run dev, 공개 Pages는 세션 token이 필요합니다.`, 'error');
+    setStatus('update-status', `${tickerText} 종가가 캐시에 없으면 로컬 npm run dev에서 자동 갱신을 시도합니다. 공개 Pages는 Actions 링크/명령 복사로 수동 갱신하세요.`, 'error');
   }
 
   function renderCalculationError(message) {
@@ -512,7 +467,7 @@
         <td>${escapeHtml(row.name || row.ticker)}</td>
         <td class="number">${formatCurrency(row.valueKrw, 'KRW')}</td>
         <td class="number">${formatPercent(row.weight)}</td>
-        <td>${escapeHtml(row.sourceTickers.join(', ') || '-')}</td>
+        <td>${renderExposureSource(row)}</td>
       </tr>
     `).join('') || '<tr><td colspan="5">표시할 개별 종목 노출이 없습니다. ETF 보유종목 커버리지와 잔여 노출을 확인하세요.</td></tr>';
     $('#exposure-levered').innerHTML = rows.map((row) => `
@@ -521,7 +476,7 @@
         <td>${escapeHtml(row.name || row.ticker)}</td>
         <td class="number">${formatCurrency(row.leveredValueKrw, 'KRW')}</td>
         <td class="number">${formatPercent(row.leveredWeight)}</td>
-        <td>${escapeHtml(row.sourceTickers.join(', ') || '-')}</td>
+        <td>${renderExposureSource(row)}</td>
       </tr>
     `).join('') || '<tr><td colspan="5">표시할 개별 종목 노출이 없습니다. ETF 보유종목 커버리지와 잔여 노출을 확인하세요.</td></tr>';
     $('#exposure-audit-rows').innerHTML = auditExposureRows.map((row) => `
@@ -534,6 +489,15 @@
         <td>${escapeHtml(row.sourceTickers.join(', ') || '-')}</td>
       </tr>
     `).join('') || '<tr><td colspan="6">개별 종목 표에서 제외된 잔여 노출이 없습니다.</td></tr>';
+  }
+
+  function renderExposureSource(row) {
+    const sourceText = escapeHtml(row.sourceTickers?.join(', ') || '-');
+    const statuses = Array.from(new Set(row.coverageStatuses || (row.coverage ? [row.coverage] : []))).filter(Boolean);
+    const badges = statuses.map((status) => statusBadge(status)).join(' ');
+    const hasProxy = statuses.map((status) => String(status).toLowerCase()).includes('proxy');
+    const note = hasProxy ? '<br><span class="muted">proxy 가정 기반 · 배율 반영 표는 명목 노출</span>' : '';
+    return `${sourceText}${badges ? `<br>${badges}` : ''}${note}`;
   }
 
   function renderCoverageRows(rows) {
@@ -670,9 +634,5 @@
     };
   }
 
-  function sleep(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-  }
-
-  window.__PORT_APP_TESTS__ = { loadMarketData, renderHeatmap, readAnalysisOptions, buildRefreshCommand, canonicalTickerText, autoRefreshCandidates, suggestRefreshForCurrentRows, FALLBACK_MARKET_DATA, QUANT_DASHBOARD_URL, ACTIONS_UPDATE_URL, ACTIONS_DISPATCH_URL };
+  window.__PORT_APP_TESTS__ = { loadMarketData, renderHeatmap, readAnalysisOptions, buildRefreshCommand, canonicalTickerText, autoRefreshCandidates, suggestRefreshForCurrentRows, FALLBACK_MARKET_DATA, QUANT_DASHBOARD_URL, ACTIONS_UPDATE_URL };
 })();

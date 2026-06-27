@@ -83,7 +83,8 @@
   - Separate residual table for user-hidden holdings, issuer residual weight, or unmapped ETF exposure.
   - Correlation heatmap with accessible text labels.
   - Holdings coverage/freshness table with 전체/표시/필터/미상 split.
-  - Data update panel: `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 입력, 현재 포트폴리오 티커 정규화, 종가 누락 시 자동 refresh 제안, 로컬 `npm run dev` 자동 refresh 실행, 공개 Pages용 선택적 Actions token dispatch, 복사 가능한 refresh command, Actions 실행 링크.
+  - Data update panel: `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 입력, 현재 포트폴리오 티커 정규화, 종가 누락 시 자동 refresh 제안, 로컬 `npm run dev` 자동 refresh 실행, 공개 Pages에서는 token을 받지 않고 복사 가능한 refresh command와 Actions 실행 링크 제공.
+  - Exposure provenance badges: 주 노출 표의 매핑 출처/상태 열에서 official/proxy/no_holdings 등 coverage를 표시하고, proxy 기반 단일종목 ETF는 명목 노출 가정임을 바로 옆에 설명한다.
 - Variants and states: loading, loaded, empty, stale, degraded/fallback, proxy, parse error, unsupported ETF holdings, no correlation overlap.
 - Token/component ownership: `assets/styles.css` owns repo-native tokens; no new design-system dependency.
 
@@ -115,7 +116,7 @@
 ## Implementation constraints
 - Framework/styling system: vanilla HTML/CSS/JS, Node built-ins only for scripts/tests unless a later explicit need arises.
 - Design-token constraints: CSS custom properties in `assets/styles.css`; follow Quant Dashboard information architecture but keep the current dark cockpit palette.
-- Data constraints: browser reads generated JSON only; refresh script may use Frankfurter, Yahoo Chart, Naver Finance chart for KR alphanumeric fallback, State Street, Invesco, Roundhill official CSVs, issuer single-stock ETF pages, and best-effort public ETF pages. 기본 JSON에 없는 티커는 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS`로 refresh에 포함한 뒤 계산한다. 로컬 `npm run dev`는 same-origin API로 refresh/test를 실행할 수 있지만, 공개 Pages는 인증 token 없이는 Actions를 무인 실행하지 않는다. 한국 6자리 코드(예: `0167A0`, `069500`) 입력은 `.KS`로 정규화한다. 직접 보유 주수 평가는 USD/KRW 종가만 환산하며, ETF look-through 내부의 JPY/TWD/CNY 현지통화 기초종목은 개별 ETF 비중 계산용으로만 사용한다.
+- Data constraints: browser reads generated JSON only; refresh script may use Frankfurter, Yahoo Chart, Naver Finance chart for KR alphanumeric fallback, State Street, Invesco, Roundhill official CSVs, issuer single-stock ETF pages, and best-effort public ETF pages. 기본 JSON에 없는 티커는 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS`로 refresh에 포함한 뒤 계산한다. 로컬 `npm run dev`는 localhost-only same-origin API와 per-process dev token으로 refresh/test를 실행할 수 있지만, 공개 Pages는 브라우저에 Actions write token을 입력받지 않는다. 한국 6자리 코드(예: `0167A0`, `069500`) 입력은 `.KS`로 정규화한다. 직접 보유 주수 평가는 USD/KRW 종가만 환산하며, ETF look-through 내부의 JPY/TWD/CNY 현지통화 기초종목은 개별 ETF 비중 계산용으로만 사용한다. 글로벌 `dataAsOf`는 생성일 이후 provider 날짜로 미래 표시되지 않도록 cap한다.
 - Performance constraints: no client-side bulk finance crawling; full holdings are used for exposure, but price/return fetching for underlying correlation is bounded with `PORT_MAX_HOLDING_PRICE_SYMBOLS`.
 - Compatibility constraints: GitHub Pages static hosting from repository root; local `python3 -m http.server` or Node static smoke.
 - Test/screenshot expectations: node syntax checks, regression tests for share-count portfolio math/correlation/filter states, static smoke serving assets. Visual Ralph baseline is URL-derived from Quant Dashboard family, not a generated image requiring pixel-perfect clone.

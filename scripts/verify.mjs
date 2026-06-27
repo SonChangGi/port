@@ -10,6 +10,7 @@ const files = {
   readme: readFileSync('README.md', 'utf8'),
   refresh: readFileSync('scripts/refresh-data.mjs', 'utf8'),
   devServer: readFileSync('scripts/dev-server.mjs', 'utf8'),
+  devServerSecurity: readFileSync('scripts/dev-server-security.mjs', 'utf8'),
   packageJson: readFileSync('package.json', 'utf8'),
   workflow: readFileSync('.github/workflows/update-data.yml', 'utf8'),
 };
@@ -21,7 +22,7 @@ const knownPriceCurrencies = new Set(['KRW', 'USD', 'JPY', 'TWD', 'CNY', 'HKD', 
 
 for (const path of [
   'index.html', 'assets/styles.css', 'assets/app.js', 'assets/portfolio-core.js', 'data/market-data.json',
-  'scripts/refresh-data.mjs', 'scripts/dev-server.mjs', 'scripts/verify.mjs', 'scripts/regression.mjs', 'scripts/static-smoke.mjs', 'scripts/ultraqa.mjs',
+  'scripts/refresh-data.mjs', 'scripts/dev-server.mjs', 'scripts/dev-server-security.mjs', 'scripts/verify.mjs', 'scripts/regression.mjs', 'scripts/static-smoke.mjs', 'scripts/ultraqa.mjs',
   'DESIGN.md', 'README.md', 'package.json', '.github/workflows/update-data.yml',
 ]) {
   assert(statSync(path).isFile(), `${path} exists`);
@@ -44,9 +45,11 @@ assert(contains(files.html, '개별 종목 최종 비중'), 'look-through copy i
 assert(contains(files.html, 'id="data-update"'), 'data update panel exists');
 assert(contains(files.html, 'id="update-symbols"'), 'extra price ticker input exists');
 assert(contains(files.html, 'id="update-etfs"'), 'extra ETF holdings input exists');
-assert(contains(files.html, 'id="actions-token"'), 'optional Actions token input exists');
+assert(!contains(files.html, 'id="actions-token"'), 'public page does not ask for an Actions write token');
 assert(contains(files.html, 'id="copy-refresh-command"'), 'refresh command copy button exists');
 assert(contains(files.html, 'VOO SCHD TSLL SNXX 069500.KS'), 'US/KR ETF refresh preset is visible');
+assert(contains(files.html, '매핑 출처/상태'), 'primary exposure tables surface mapping provenance');
+assert(contains(files.html, '명목 노출'), 'leveraged exposure table is labeled as notional exposure');
 
 assert(contains(files.core, 'calculatePortfolio'), 'portfolio calculation API exists');
 assert(contains(files.core, 'resolveShareValuation'), 'share-count valuation API exists');
@@ -77,8 +80,11 @@ assert(contains(files.app, 'canonicalTickerText'), 'data update ticker canonical
 assert(contains(files.app, 'suggestRefreshForCurrentRows'), 'missing close-price errors auto-suggest data refresh');
 assert(contains(files.app, 'autoRefreshCandidates'), 'ticker input auto-refresh detection is wired');
 assert(contains(files.app, '/api/refresh-data'), 'local auto-refresh endpoint is wired');
-assert(contains(files.app, 'ACTIONS_DISPATCH_URL'), 'Actions workflow dispatch URL is centralized');
+assert(contains(files.app, 'x-port-dev-token'), 'local auto-refresh uses a dev token header');
+assert(!contains(files.app, 'ACTIONS_DISPATCH_URL'), 'public browser no longer dispatches Actions with a pasted token');
 assert(contains(files.app, 'ACTIONS_UPDATE_URL'), 'Actions update URL is centralized');
+assert(contains(files.app, 'renderExposureSource'), 'primary exposure renderer surfaces coverage status');
+assert(contains(files.app, 'proxy 가정 기반'), 'proxy exposure meaning is visible in the primary table');
 
 assert(contains(files.css, ':root'), 'CSS tokens exist');
 assert(contains(files.css, 'color-scheme: dark'), 'dark color scheme is declared');
@@ -96,6 +102,7 @@ assert(files.data.schemaVersion === 1, 'market data schemaVersion is 1');
 assert(files.data.baseCurrency === 'KRW', 'market data base currency is KRW');
 assert(Number.isFinite(files.data.fx?.rate) && files.data.fx.rate > 0, 'USD/KRW FX rate exists');
 assert(typeof files.data.generatedAt === 'string' && files.data.generatedAt.length > 0, 'generatedAt exists');
+assert(files.data.dataAsOf <= files.data.generatedAt.slice(0, 10), 'global dataAsOf is not after generatedAt date');
 assert(files.data.assets && Object.keys(files.data.assets).length >= 100, 'broad asset records exist');
 for (const [ticker, asset] of Object.entries(files.data.assets)) {
   assert(Number.isFinite(asset.price) && asset.price > 0, `${ticker} close price exists`);
@@ -185,6 +192,7 @@ assert(contains(files.refresh, 'REQUEST_TIMEOUT_MS'), 'refresh script defines pr
 assert(contains(files.refresh, 'PORT_FORCE_PROVIDER_TIMEOUT'), 'refresh script supports deterministic provider-timeout tests');
 assert(contains(files.refresh, 'valuationEligible: false'), 'refresh fallback prices are marked ineligible for direct share valuation');
 assert(contains(files.refresh, 'AbortController'), 'refresh script aborts stalled provider requests');
+assert(contains(files.refresh, 'computeDataAsOf'), 'refresh script caps future provider dates in global freshness');
 assert(!contains(files.refresh, 'slice(0, 40)'), 'refresh script no longer caps parsed holdings at 40');
 assert(!contains(files.refresh, 'record.holdings.slice(0, 12)'), 'refresh script no longer truncates ETF holdings to 12 for exposure data');
 assert(contains(files.workflow, 'extra_symbols'), 'Actions workflow accepts extra_symbols input');
@@ -192,7 +200,13 @@ assert(contains(files.workflow, 'extra_etfs'), 'Actions workflow accepts extra_e
 assert(contains(files.workflow, 'PORT_EXTRA_SYMBOLS'), 'Actions workflow passes extra_symbols to refresh script');
 assert(contains(files.workflow, 'PORT_EXTRA_ETFS'), 'Actions workflow passes extra_etfs to refresh script');
 assert(contains(files.devServer, 'POST') && contains(files.devServer, 'api/refresh-data'), 'dev server exposes local auto-refresh endpoint');
+assert(contains(files.devServer, '127.0.0.1'), 'dev server binds to localhost by default');
+assert(contains(files.devServer, 'x-port-dev-token'), 'dev server requires a per-process token');
+assert(contains(files.devServer, 'hasTrustedOrigin'), 'dev server validates Origin before side effects');
+assert(contains(files.devServer, 'application/json required'), 'dev server requires JSON POST bodies');
+assert(contains(files.devServerSecurity, 'cross-origin POST is rejected'), 'dev server security regression covers cross-origin rejection');
 assert(contains(files.packageJson, '"dev"'), 'npm dev script exists');
+assert(contains(files.packageJson, 'dev-server-security.mjs'), 'npm test runs dev server security regression');
 
 const failed = checks.filter((check) => !check.ok);
 for (const check of checks) console.log(`${check.ok ? 'PASS' : 'FAIL'} ${check.label}`);

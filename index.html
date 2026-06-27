@@ -159,17 +159,17 @@
           <div class="table-wrap">
             <table>
               <caption>ETF 투자금액을 구성종목 비중으로 매핑하되 레버리지 배율을 제외한 개별 종목 노출</caption>
-              <thead><tr><th>개별 종목</th><th>이름</th><th>금액(KRW)</th><th>비중</th><th>매핑 출처</th></tr></thead>
+              <thead><tr><th>개별 종목</th><th>이름</th><th>금액(KRW)</th><th>비중</th><th>매핑 출처/상태</th></tr></thead>
               <tbody id="exposure-unlevered"><tr><td colspan="5">계산 대기 중</td></tr></tbody>
             </table>
           </div>
         </article>
         <article class="panel">
-          <h3>레버리지 포함(배율 반영)</h3>
+          <h3>레버리지 포함(배율 반영 명목 노출)</h3>
           <div class="table-wrap">
             <table>
-              <caption>ETF 투자금액을 구성종목 비중과 레버리지 배율로 매핑한 개별 종목 노출</caption>
-              <thead><tr><th>개별 종목</th><th>이름</th><th>노출(KRW)</th><th>총자산 대비</th><th>매핑 출처</th></tr></thead>
+              <caption>ETF 투자금액을 구성종목 비중과 레버리지 배율로 매핑한 개별 종목 명목 노출</caption>
+              <thead><tr><th>개별 종목</th><th>이름</th><th>명목 노출(KRW)</th><th>총자산 대비</th><th>매핑 출처/상태</th></tr></thead>
               <tbody id="exposure-levered"><tr><td colspan="5">계산 대기 중</td></tr></tbody>
             </table>
           </div>
@@ -243,10 +243,6 @@
             holdings도 시도할 ETF 티커
             <input id="update-etfs" value="VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
           </label>
-          <label>
-            공개 Pages 자동 Actions token(선택)
-            <input id="actions-token" type="password" value="" autocomplete="off" spellcheck="false" aria-describedby="update-help" placeholder="fine-grained token, session only" />
-          </label>
         </div>
         <div class="manual-update-actions">
           <button id="update-from-portfolio" type="button" class="secondary-button">현재 입력 티커로 채우기</button>
@@ -254,8 +250,8 @@
           <code id="refresh-command" class="code-pill command-pill">npm run refresh:data && npm test</code>
         </div>
         <p id="update-help" class="muted refresh-help">
-          로컬 자동 갱신은 <code>npm run dev</code>로 연 페이지에서 동작합니다. 공개 Pages에서 자동 실행하려면 GitHub Actions write 권한 token을 세션에만 입력해야 하며,
-          token이 없으면 보안상 Actions를 무인 실행할 수 없습니다. 갱신 후 생성 JSON을 다시 읽으면 보유 주수 계산에 실제 종가가 사용됩니다.
+          로컬 자동 갱신은 <code>npm run dev</code>로 연 페이지에서만 동작합니다. 공개 Pages는 보안상 브라우저에서 GitHub Actions write token을 받지 않으므로,
+          새 티커가 감지되면 입력값과 명령을 자동으로 준비하고 Actions 링크/명령 복사로 갱신합니다. 갱신 후 생성 JSON을 다시 읽으면 보유 주수 계산에 실제 종가가 사용됩니다.
         </p>
         <p id="update-status" class="status-line" role="status" aria-live="polite">TSLL/SNXX/0167A0/RAM ETF 갱신 입력과 자동 refresh 감지를 준비했습니다.</p>
       </article>

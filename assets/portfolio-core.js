@@ -235,12 +235,14 @@
       leveredValueKrw: 0,
       holdingWeight: 0,
       coverage: item.coverage || 'unknown',
+      coverageSet: new Set([item.coverage || 'unknown']),
       type: item.type || 'stock',
     };
     existing.valueKrw += item.valueKrw || 0;
     existing.leveredValueKrw += item.leveredValueKrw || 0;
     existing.holdingWeight += item.holdingWeight || 0;
     if (item.sourceTicker) existing.sourceTicker.add(item.sourceTicker);
+    if (item.coverage) existing.coverageSet.add(item.coverage);
     if (['live', 'issuer', 'official', 'sample'].includes(item.coverage)) existing.coverage = item.coverage;
     bucket.set(ticker, existing);
   }
@@ -250,9 +252,11 @@
       .map((row) => ({
         ...row,
         sourceTickers: Array.from(row.sourceTicker).sort(),
+        coverageStatuses: Array.from(row.coverageSet || []).sort(),
         weight: totalKrw ? row.valueKrw / totalKrw : 0,
         leveredWeight: totalKrw ? row.leveredValueKrw / totalKrw : 0,
         sourceTicker: undefined,
+        coverageSet: undefined,
       }))
       .sort((a, b) => Math.abs(b.leveredValueKrw || b.valueKrw) - Math.abs(a.leveredValueKrw || a.valueKrw));
   }

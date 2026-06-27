@@ -227,7 +227,9 @@ record('single-stock leveraged ETFs TSLL and SNXX use provider-backed prices and
     assert.equal(holdings?.holdings?.[0]?.weight, 1, `${ticker} proxy is 100% underlying before leverage`);
     const result = Core.calculatePortfolio([{ ticker, shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: Infinity });
     assert.ok(result.primaryExposureRows.some((row) => row.ticker === underlying), `${ticker} appears as underlying stock exposure`);
-    assert.ok(result.primaryExposureRows.find((row) => row.ticker === underlying).leveredValueKrw > result.primaryExposureRows.find((row) => row.ticker === underlying).valueKrw, `${ticker} leverage-adjusted exposure is larger`);
+    const exposure = result.primaryExposureRows.find((row) => row.ticker === underlying);
+    assert.ok(exposure.leveredValueKrw > exposure.valueKrw, `${ticker} leverage-adjusted exposure is larger`);
+    assert.ok(exposure.coverageStatuses.includes('proxy'), `${ticker} primary exposure carries proxy provenance`);
   }
 });
 
@@ -238,9 +240,16 @@ record('ticker input auto-refresh wiring exists without requiring the manual fil
   assert.ok(app.includes('scheduleAutoRefreshFromPortfolio'));
   assert.ok(app.includes('autoRefreshCandidates'));
   assert.ok(app.includes('/api/refresh-data'));
-  assert.ok(app.includes('workflow_dispatch') || app.includes('ACTIONS_DISPATCH_URL'));
-  assert.ok(html.includes('id="actions-token"'));
+  assert.ok(app.includes('x-port-dev-token'));
+  assert.ok(!app.includes('ACTIONS_DISPATCH_URL'));
+  assert.ok(!html.includes('id="actions-token"'));
   assert.ok(server.includes('POST') && server.includes('/api/refresh-data'));
+  assert.ok(server.includes('127.0.0.1'));
+  assert.ok(server.includes('hasTrustedOrigin'));
+});
+
+record('global data freshness does not move into the future', () => {
+  assert.ok(data.dataAsOf <= data.generatedAt.slice(0, 10), `${data.dataAsOf} should be <= ${data.generatedAt.slice(0, 10)}`);
 });
 
 record('0167A0 alias and RAM ETF calculate from refreshed provider close prices', () => {
