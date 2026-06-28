@@ -41,6 +41,9 @@ assert(contains(files.html, '보유 주수'), 'share-count input copy exists');
 assert(contains(files.html, '종가 통화'), 'close-price currency copy exists');
 assert(contains(files.html, 'id="analysis-date"'), 'basis-date input exists');
 assert(contains(files.html, '분석 기준일'), 'basis-date copy exists');
+assert(contains(files.html, 'class="workflow-rail"'), 'hero workflow rail exists');
+assert(contains(files.html, 'id="analysis-map-title"'), 'analysis flow map exists');
+assert(contains(files.html, 'class="result-switchboard"'), 'result switchboard exists');
 assert(contains(files.html, 'id="filter-top-n"'), 'top-N universe filter exists');
 assert(contains(files.html, 'id="filter-min-weight"'), 'minimum weight universe filter exists');
 assert(contains(files.html, 'id="filter-include"'), 'include ticker universe filter exists');
@@ -102,6 +105,7 @@ assert(!contains(files.app, 'ACTIONS_DISPATCH_URL'), 'public browser no longer d
 assert(contains(files.app, 'ACTIONS_UPDATE_URL'), 'Actions update URL is centralized');
 assert(contains(files.app, 'renderExposureSource'), 'primary exposure renderer surfaces coverage status');
 assert(contains(files.app, 'proxy 가정 기반'), 'proxy exposure meaning is visible in the primary table');
+assert(contains(files.app, 'signal-card'), 'hero data signal cards are rendered');
 
 assert(contains(files.css, ':root'), 'CSS tokens exist');
 assert(contains(files.css, 'color-scheme: dark'), 'dark color scheme is declared');
@@ -110,6 +114,10 @@ assert(contains(files.css, '--bg: #080a0f'), 'dark cockpit background token exis
 assert(contains(files.css, '--accent: #7dd3fc'), 'dark cyan accent token exists');
 assert(contains(files.css, '.filter-card'), 'filter card styling exists');
 assert(contains(files.css, '.basis-date-card'), 'basis-date card styling exists');
+assert(contains(files.css, '.workflow-rail'), 'workflow rail styling exists');
+assert(contains(files.css, '.flow-card'), 'analysis flow card styling exists');
+assert(contains(files.css, '.result-switchboard'), 'result switchboard styling exists');
+assert(contains(files.css, 'td:first-child'), 'wide tables keep sticky row context');
 assert(contains(files.css, '@media (max-width: 720px)'), 'mobile breakpoint exists');
 assert(contains(files.css, '.heatmap'), 'correlation heatmap styling exists');
 assert(contains(files.css, '.table-wrap'), 'table overflow guard exists');
@@ -187,6 +195,8 @@ for (const section of ['## Source of truth', '## Brand', '## Product goals', '##
 }
 assert(contains(files.design, '보유 주수'), 'DESIGN.md documents share-count workflow');
 assert(contains(files.design, '다크'), 'DESIGN.md documents dark visual baseline');
+assert(contains(files.design, 'Analysis Flow'), 'DESIGN.md documents the improved analysis flow structure');
+assert(contains(files.design, 'Result switchboard'), 'DESIGN.md documents the result switchboard');
 assert(contains(files.readme, 'npm run refresh:data'), 'README documents refresh command');
 assert(contains(files.readme, '분석 기준일'), 'README documents basis-date workflow');
 assert(contains(files.readme, 'PORT_PRICE_RANGE'), 'README documents basis-date refresh range');

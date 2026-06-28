@@ -24,10 +24,10 @@ await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const { port } = server.address();
 const base = `http://127.0.0.1:${port}`;
 const checks = [
-  ['/', '새 티커 종가 추가·업데이트'],
+  ['/', 'Analysis Flow'],
   ['/assets/app.js', 'renderHeatmap'],
   ['/assets/portfolio-core.js', 'calculatePortfolio'],
-  ['/assets/styles.css', '.heatmap'],
+  ['/assets/styles.css', '.result-switchboard'],
   ['/data/market-data.json', 'schemaVersion'],
   ['/data/history-data.json', 'fxHistory'],
 ];

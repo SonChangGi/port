@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-06-28
+- Last refreshed: 2026-06-29
 - Primary product surfaces: `index.html` portfolio cockpit, `assets/app.js` interactive calculator, `assets/styles.css` visual system, generated `data/*.json` freshness/summary contracts.
 - Evidence reviewed:
   - `/Users/changgison/projects/quant-dashboard/index.html` and `assets/app.js`: Korean Research Cockpit, project cards, public JSON loading, data health/briefing/watchlist panels.
@@ -51,12 +51,14 @@
 - Core routes/screens: 단일 정적 페이지 `/port/` 또는 로컬 `index.html`.
 - Content hierarchy:
   1. Hero + data status + dashboard back link.
-  2. Portfolio share-count input, basis-date selector, and analysis universe controls.
-  3. 핵심 KPI: total KRW/USD, FX date, ETF coverage, leverage exposure multiple.
-  4. Instrument-level weights with 보유 주수/종가/종가 기준일.
-  5. Individual-stock look-through: ETF 투자금액을 구성종목 비중으로 매핑한 unlevered vs levered 노출, hidden/residual exposure는 별도 잔여 노출 표.
-  6. Correlation matrices.
-  7. 새 티커 종가 추가·업데이트 패널과 Holdings/data freshness/method caveats.
+  2. Analysis Flow 지도: 입력 → 기준일 → 개별 노출 → 상관관계로 이어지는 작업 경로와 섹션 anchor.
+  3. Portfolio share-count input, basis-date selector, and analysis universe controls.
+  4. 핵심 KPI: total KRW/USD, FX date, ETF coverage, leverage exposure multiple.
+  5. Result switchboard: 입력 평가, 핵심 look-through, 감사 잔여분, correlation 섹션으로 빠르게 이동.
+  6. Instrument-level weights with 보유 주수/종가/종가 기준일.
+  7. Individual-stock look-through: ETF 투자금액을 구성종목 비중으로 매핑한 unlevered vs levered 노출, hidden/residual exposure는 별도 잔여 노출 표.
+  8. Correlation matrices.
+  9. 새 티커 종가 추가·업데이트 패널과 Holdings/data freshness/method caveats.
 
 ## Design principles
 - Principle 1: “숫자는 즉시, 한계는 바로 옆에” — every headline metric has nearby source/freshness/caveat context.
@@ -77,6 +79,9 @@
 ## Components
 - Existing components to reuse: Quant Dashboard-style hero, top nav, panel/card, metric-row, table-wrap, status-line, skeleton-line, notice.
 - New/changed components:
+  - Hero data signal stack: FX/freshness, history window, ETF coverage를 별도 signal card로 분리해 오른쪽 패널의 빈 공간을 상태 요약으로 사용한다.
+  - Workflow rail and Analysis Flow cards: 긴 단일 페이지의 탐색 부담을 줄이기 위해 입력·기준일·개별 노출·상관관계의 순서를 anchor card로 노출한다.
+  - Result switchboard: KPI 바로 아래에서 입력 평가/개별 종목 최종 비중/감사/위험 섹션으로 이동하는 작은 결과 네비게이션.
   - Portfolio input grid/table with 보유 주수 and 종가 통화.
   - Basis-date selector: date input, history-range hint, missing historical price/FX auto-refresh trigger.
   - CSV textarea import in `ticker,shares,priceCurrency,leverage` format.
@@ -88,6 +93,7 @@
   - Holdings coverage/freshness table with 전체/표시/필터/미상 split.
   - Data update panel: `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS`/`PORT_PRICE_RANGE` 입력, 현재 포트폴리오 티커 정규화, 종가/환율 히스토리 누락 시 자동 refresh 제안, 로컬 `npm run dev` 자동 refresh 실행, 공개 Pages에서는 token을 받지 않고 복사 가능한 refresh command와 Actions 실행 링크 제공.
   - Exposure provenance badges: 주 노출 표의 매핑 출처/상태 열에서 official/proxy/no_holdings 등 coverage를 표시하고, proxy 기반 단일종목 ETF는 명목 노출 가정임을 바로 옆에 설명한다.
+  - Sticky first-column tables: 넓은 보유/노출/커버리지 표에서 티커 열을 고정해 수평 스크롤 중에도 행 문맥을 잃지 않게 한다.
 - Variants and states: loading, loaded, empty, stale, degraded/fallback, proxy, parse error, unsupported ETF holdings, no correlation overlap.
 - Token/component ownership: `assets/styles.css` owns repo-native tokens; no new design-system dependency.
 

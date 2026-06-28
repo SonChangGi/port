@@ -684,9 +684,21 @@
       ? `${data.historyManifest.historyRange || data.historyRange || '6mo'} ${state.history.loaded ? 'lazy history 로드됨' : 'snapshot 우선·history 분리'}`
       : `${data.historyRange || '6mo'} embedded`;
     $('#hero-data-status').innerHTML = `
-      <span class="badge ${badgeClass(fxFreshness.status)}">${escapeHtml(fxFreshness.status)}</span>
-      USD/KRW ${formatNumber(data.fx?.rate, 2)} · FX ${escapeHtml(data.fx?.asOf || 'unknown')} · 히스토리 ${escapeHtml(historyLabel)} · SPY ${formatNumber(spyCount, 0)}개 · QQQ ${formatNumber(qqqCount, 0)}개.
-      브라우저는 외부 금융 API를 직접 호출하지 않고 생성 JSON만 읽습니다.
+      <div class="signal-card">
+        <span>FX / Freshness</span>
+        <strong><span class="badge ${badgeClass(fxFreshness.status)}">${escapeHtml(fxFreshness.status)}</span> USD/KRW ${formatNumber(data.fx?.rate, 2)}</strong>
+        <small>FX ${escapeHtml(data.fx?.asOf || 'unknown')} · 생성 ${escapeHtml(data.dataAsOf || 'unknown')}</small>
+      </div>
+      <div class="signal-card">
+        <span>History Window</span>
+        <strong>${escapeHtml(historyLabel)}</strong>
+        <small>기준일·상관관계는 history JSON을 지연 로드해 계산합니다.</small>
+      </div>
+      <div class="signal-card">
+        <span>ETF Coverage</span>
+        <strong>SPY ${formatNumber(spyCount, 0)}개 · QQQ ${formatNumber(qqqCount, 0)}개</strong>
+        <small>브라우저는 외부 금융 API를 직접 호출하지 않고 생성 JSON만 읽습니다.</small>
+      </div>
     `;
   }
 

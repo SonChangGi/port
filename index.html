@@ -37,9 +37,18 @@
           <a class="secondary-button" href="data/history-data.json" target="_blank" rel="noopener noreferrer">히스토리 JSON</a>
         </div>
       </div>
-      <aside class="hero-note" aria-label="데이터 신호">
-        <strong>데이터 신호</strong>
-        <p id="hero-data-status">정적 JSON 생성시각, FX 기준일, 보유비중 커버리지, fallback 여부를 확인하는 중...</p>
+      <aside class="hero-note" aria-label="분석 상태와 진행 흐름">
+        <div class="hero-note-heading">
+          <span class="eyebrow">Live State</span>
+          <strong>데이터 신호</strong>
+        </div>
+        <div id="hero-data-status" class="data-signal-grid">정적 JSON 생성시각, FX 기준일, 보유비중 커버리지, fallback 여부를 확인하는 중...</div>
+        <div class="workflow-rail" aria-label="분석 흐름">
+          <a href="#portfolio-input"><span>01</span><strong>보유 주수</strong><small>티커 입력 · CSV</small></a>
+          <a href="#portfolio-input"><span>02</span><strong>기준일</strong><small>가격·환율 ≤ 선택일</small></a>
+          <a href="#exposure"><span>03</span><strong>개별 노출</strong><small>ETF 구성종목 분해</small></a>
+          <a href="#correlation"><span>04</span><strong>상관관계</strong><small>252거래일 위험 신호</small></a>
+        </div>
       </aside>
     </div>
   </header>
@@ -48,6 +57,36 @@
     <section class="section notice" aria-label="주의사항">
       <strong>중요:</strong> 이 화면은 개인 리서치용 포트폴리오 노출 관제 도구이며 투자, 세무, 법률 또는 매매 조언이 아닙니다.
       무료 데이터의 지연·누락·구조 변경, ETF 보유비중 잔여값, correlation 표본 부족을 반드시 함께 확인하세요.
+    </section>
+
+    <section class="section analysis-map" aria-labelledby="analysis-map-title">
+      <div class="section-heading">
+        <p class="eyebrow">Analysis Flow</p>
+        <h2 id="analysis-map-title">입력에서 결론까지 한 번에 따라가는 구조</h2>
+        <p>색감은 유지하면서 긴 대시보드에서 헤매지 않도록, 핵심 작업과 결과 섹션을 카드형 흐름으로 고정했습니다.</p>
+      </div>
+      <div class="flow-grid">
+        <a class="flow-card" href="#portfolio-input">
+          <span>01</span>
+          <strong>티커·보유 주수 입력</strong>
+          <small>새 ticker가 캐시에 없으면 로컬 dev에서 자동 refresh 대상이 됩니다.</small>
+        </a>
+        <a class="flow-card" href="#portfolio-input">
+          <span>02</span>
+          <strong>분석 기준일 선택</strong>
+          <small>해당 날짜 이전 가격·환율·수익률만 사용해 과거 보유 시나리오를 계산합니다.</small>
+        </a>
+        <a class="flow-card" href="#exposure">
+          <span>03</span>
+          <strong>개별 종목 비중 확인</strong>
+          <small>ETF 금액은 구성종목으로 매핑하고, 미지원/잔여분은 감사 표로 분리합니다.</small>
+        </a>
+        <a class="flow-card" href="#correlation">
+          <span>04</span>
+          <strong>집중위험 점검</strong>
+          <small>입력 종목과 선택 구성종목의 수익률 상관관계를 나란히 확인합니다.</small>
+        </a>
+      </div>
     </section>
 
     <section class="section input-section" id="portfolio-input" aria-labelledby="input-title">
@@ -126,6 +165,12 @@
         <h2 id="summary-title">총액·개별종목 매핑·레버리지 신호</h2>
         <p id="summary-subtitle">보유 주수를 계산하면 총액, 환율, ETF 구성종목 커버리지, 레버리지 노출이 표시됩니다.</p>
       </div>
+      <nav class="result-switchboard" aria-label="결과 섹션 바로가기">
+        <a href="#instrument-title"><span>입력 평가</span><strong>종목별 보유 주수·종가</strong></a>
+        <a href="#exposure"><span>핵심 결과</span><strong>개별 종목 최종 비중</strong></a>
+        <a href="#audit-title"><span>감사</span><strong>필터·잔여·미매핑 노출</strong></a>
+        <a href="#correlation"><span>위험</span><strong>수익률 상관관계</strong></a>
+      </nav>
       <div class="metric-row" id="summary-cards" aria-live="polite">
         <div class="skeleton-line">요약 지표를 준비하는 중...</div>
       </div>
