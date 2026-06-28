@@ -3,16 +3,21 @@
 
   const Core = window.PortfolioCore;
   const DATA_URL = 'data/market-data.json';
+  const HISTORY_URL = 'data/history-data.json';
   const QUANT_DASHBOARD_URL = 'https://sonchanggi.github.io/quant-dashboard/';
   const ACTIONS_UPDATE_URL = 'https://github.com/SonChangGi/port/actions/workflows/update-data.yml';
   const DEFAULT_ANALYSIS_TOP_N = 120;
   const DEFAULT_UPDATE_SYMBOLS = 'VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM';
   const DEFAULT_UPDATE_ETFS = 'VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM';
+  const DEFAULT_PRICE_RANGE = '6mo';
+  const PRICE_RANGE_ORDER = ['6mo', '1y', '2y', '5y', '10y', 'max'];
   const AUTO_REFRESH_DEBOUNCE_MS = 900;
   const state = {
     marketData: null,
     latestResult: null,
     autoRefresh: { timer: null, running: false, lastKey: '', lastAttemptAt: 0, devToken: '' },
+    history: { loaded: false, loading: null, failed: null },
+    analysisSeq: 0,
   };
   const $ = (selector) => document.querySelector(selector);
 
@@ -21,7 +26,7 @@
     generatedAt: new Date().toISOString(),
     dataAsOf: '',
     baseCurrency: 'KRW',
-    fx: { pair: 'USD/KRW', rate: 1400, asOf: '', source: 'fallback', sourceStatus: 'fallback' },
+    fx: { pair: 'USD/KRW', rate: 1400, asOf: '2026-06-24', source: 'fallback', sourceStatus: 'fallback', history: [{ date: '2026-06-24', rate: 1400 }] },
     sources: [{ name: 'fallback', status: 'fallback', asOf: '', detail: 'data/market-data.json을 읽지 못해 브라우저 내장 샘플을 표시합니다.' }],
     warnings: ['생성 JSON을 읽지 못했습니다. npm run refresh:data 후 다시 확인하세요.'],
     assets: {
@@ -56,11 +61,17 @@
   };
 
   function sampleAsset(ticker, name, type, leverage, price, currency = 'USD') {
+    let close = price * 0.94;
     const returns = Array.from({ length: 60 }, (_, index) => ({
       date: new Date(Date.UTC(2026, 3, 1 + index)).toISOString().slice(0, 10),
       value: Math.sin((index + ticker.length) / 4) / 100 + (index % 3 - 1) / 250,
     }));
-    return { ticker, name, type, currency, price, priceAsOf: '2026-06-24', leverage, sourceStatus: 'fallback', returns };
+    const prices = returns.map((point) => {
+      close = Math.max(0.01, close * (1 + point.value));
+      return { date: point.date, close };
+    });
+    prices.push({ date: '2026-06-24', close: price });
+    return { ticker, name, type, currency, price, priceAsOf: '2026-06-24', leverage, sourceStatus: 'fallback', prices, returns };
   }
 
   function sampleHoldings(ticker, status, rows) {
@@ -72,12 +83,16 @@
   async function init() {
     setStatus('input-status', '시장 데이터 로딩 중...', '');
     state.marketData = await loadMarketData();
+    state.history.loaded = Boolean(state.marketData.__historyLoaded);
+    initializeAnalysisDate();
+    initializeUpdateRange();
     renderHeroStatus();
     renderSources();
     renderWarnings();
     populateRows(state.marketData.samplePortfolio || []);
     bindEvents();
     calculateAndRender();
+    preloadHistoryAfterFirstPaint();
   }
 
   async function loadMarketData() {
@@ -86,20 +101,145 @@
       if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
       const data = await response.json();
       if (!data || data.schemaVersion !== 1 || !data.fx || !data.assets) throw new Error('market-data schema mismatch');
+      markHistoryState(data, !data.historyManifest && hasEmbeddedHistory(data));
       return data;
     } catch (error) {
       FALLBACK_MARKET_DATA.warnings = [...FALLBACK_MARKET_DATA.warnings, `로드 오류: ${error.message}`];
+      markHistoryState(FALLBACK_MARKET_DATA, true);
       return FALLBACK_MARKET_DATA;
     }
   }
 
+  function markHistoryState(data, loaded) {
+    Object.defineProperty(data, '__historyLoaded', { value: Boolean(loaded), writable: true, configurable: true });
+    return data;
+  }
+
+  function hasEmbeddedHistory(data) {
+    if (Array.isArray(data?.fx?.history) && data.fx.history.length) return true;
+    return Object.values(data?.assets || {}).some((asset) => (
+      Array.isArray(asset?.prices) && asset.prices.length
+    ) || (
+      Array.isArray(asset?.returns) && asset.returns.length
+    ));
+  }
+
+  async function loadHistoryData(marketData = state.marketData) {
+    const url = marketData?.historyManifest?.url || HISTORY_URL;
+    const response = await fetch(`${url}?v=${Date.now()}`, { cache: 'no-store' });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    const history = await response.json();
+    if (!history || history.schemaVersion !== 1 || !history.assets) throw new Error('history-data schema mismatch');
+    return history;
+  }
+
+  function mergeHistoryData(marketData, history) {
+    if (!marketData || !history) return marketData;
+    marketData.fx = {
+      ...(marketData.fx || {}),
+      history: Array.isArray(history.fxHistory) ? history.fxHistory : Array.isArray(history.fx?.history) ? history.fx.history : [],
+    };
+    for (const [ticker, series] of Object.entries(history.assets || {})) {
+      if (!marketData.assets[ticker]) marketData.assets[ticker] = { ticker };
+      if (Array.isArray(series.prices)) marketData.assets[ticker].prices = series.prices;
+      if (Array.isArray(series.returns)) marketData.assets[ticker].returns = series.returns;
+    }
+    marketData.__historyLoaded = true;
+    state.history.loaded = true;
+    state.history.failed = null;
+    return marketData;
+  }
+
+  async function ensureHistoryData(reason = 'analysis') {
+    if (!state.marketData || state.history.loaded || state.marketData.__historyLoaded) return state.marketData;
+    if (!state.marketData.historyManifest) {
+      state.history.loaded = true;
+      return state.marketData;
+    }
+    if (!state.history.loading) {
+      const historyUrl = state.marketData.historyManifest.url || HISTORY_URL;
+      setStatus('input-status', `${reason === 'basis-date' ? '기준일' : '상관관계'} 히스토리 JSON 로딩 중...`, 'warning');
+      state.history.loading = loadHistoryData(state.marketData)
+        .then((history) => {
+          mergeHistoryData(state.marketData, history);
+          state.marketData.sources = [
+            ...(Array.isArray(state.marketData.sources) ? state.marketData.sources : []),
+            {
+              name: 'Lazy basis-date history JSON',
+              url: historyUrl,
+              status: 'static',
+              asOf: history.dataAsOf || state.marketData.dataAsOf || '',
+              detail: `${history.historyRange || state.marketData.historyRange || '6mo'} price/FX/return histories loaded after the snapshot JSON.`,
+            },
+          ];
+          renderHeroStatus();
+          renderSources();
+          renderWarnings();
+          return state.marketData;
+        })
+        .catch((error) => {
+          state.history.failed = error;
+          state.marketData.warnings = [...(state.marketData.warnings || []), `히스토리 JSON 로드 실패: ${error.message}`];
+          renderWarnings();
+          throw error;
+        })
+        .finally(() => {
+          state.history.loading = null;
+        });
+    }
+    return state.history.loading;
+  }
+
+  function preloadHistoryAfterFirstPaint() {
+    if (!state.marketData?.historyManifest || state.history.loaded) return;
+    const run = async () => {
+      try {
+        await ensureHistoryData('correlation');
+        if (readRowsFromDom().length) calculateAndRender();
+      } catch {
+        setStatus('input-status', '스냅샷 데이터로 계산 중입니다. 기준일/상관관계 히스토리가 필요하면 데이터 업데이트를 실행하세요.', 'warning');
+      }
+    };
+    if ('requestIdleCallback' in window) window.requestIdleCallback(run, { timeout: 2500 });
+    else setTimeout(run, 350);
+  }
+
+  function initializeAnalysisDate(overwrite = true) {
+    const input = $('#analysis-date');
+    if (!input) return;
+    const current = normalizeDate(input.value);
+    const latest = latestAnalysisDate();
+    if (overwrite || !current) input.value = latest;
+    input.max = latest || '';
+  }
+
+  function initializeUpdateRange(overwrite = true) {
+    const rangeInput = $('#update-range');
+    if (!rangeInput) return;
+    const needed = rangeForBasisDate(readBasisDate() || latestAnalysisDate());
+    if (overwrite || !rangeInput.value || rangeRank(needed) > rangeRank(rangeInput.value)) rangeInput.value = needed;
+    renderRefreshCommand();
+  }
+
+  function latestAnalysisDate() {
+    return normalizeDate(state.marketData?.dataAsOf || state.marketData?.fx?.asOf || state.marketData?.generatedAt || new Date().toISOString());
+  }
+
+  function readBasisDate() {
+    return normalizeDate($('#analysis-date')?.value || latestAnalysisDate());
+  }
+
   async function reloadMarketData() {
     state.marketData = await loadMarketData();
+    state.history = { loaded: Boolean(state.marketData.__historyLoaded), loading: null, failed: null };
+    initializeAnalysisDate(false);
+    initializeUpdateRange(false);
     renderHeroStatus();
     renderSources();
     renderWarnings();
     for (const row of document.querySelectorAll('#portfolio-rows tr')) syncRowCurrencyFromTicker(row);
     calculateAndRender();
+    preloadHistoryAfterFirstPaint();
   }
 
   function bindEvents() {
@@ -126,8 +266,15 @@
     ['#filter-top-n', '#filter-min-weight', '#filter-include', '#filter-exclude'].forEach((selector) => {
       $(selector)?.addEventListener('input', debounce(calculateAndRender, 160));
     });
-    ['#update-symbols', '#update-etfs'].forEach((selector) => {
+    $('#analysis-date')?.addEventListener('change', () => {
+      const neededRange = rangeForBasisDate(readBasisDate());
+      promoteUpdateRange(neededRange);
+      scheduleAutoRefreshFromPortfolio('basis-date');
+      calculateAndRender();
+    });
+    ['#update-symbols', '#update-etfs', '#update-range'].forEach((selector) => {
       $(selector)?.addEventListener('input', renderRefreshCommand);
+      $(selector)?.addEventListener('change', renderRefreshCommand);
     });
     $('#update-from-portfolio')?.addEventListener('click', fillRefreshInputsFromPortfolio);
     $('#copy-refresh-command')?.addEventListener('click', copyRefreshCommand);
@@ -192,6 +339,8 @@
       ? (Number.isFinite(parsedTopN) && parsedTopN > 0 ? parsedTopN : DEFAULT_ANALYSIS_TOP_N)
       : Infinity;
     return {
+      asOfDate: readBasisDate(),
+      correlationLookbackDays: 252,
       exposureTopN,
       exposureMinWeight: Core.asNumber($('#filter-min-weight')?.value, 0) / 100,
       includeTickers: $('#filter-include')?.value || '',
@@ -210,6 +359,7 @@
     const etfsInput = $('#update-etfs');
     if (symbolsInput) symbolsInput.value = symbols;
     if (etfsInput) etfsInput.value = etfs;
+    promoteUpdateRange(rangeForBasisDate(readBasisDate()));
     renderRefreshCommand();
     setStatus('update-status', `${count}개 티커 기준으로 refresh 입력을 만들었습니다. Actions 입력칸 또는 로컬 명령에 사용하세요.`, 'success');
   }
@@ -221,7 +371,8 @@
   function renderRefreshCommand() {
     const symbols = canonicalTickerText($('#update-symbols')?.value || DEFAULT_UPDATE_SYMBOLS);
     const etfs = canonicalTickerText($('#update-etfs')?.value || DEFAULT_UPDATE_ETFS);
-    const command = buildRefreshCommand(symbols, etfs);
+    const range = normalizePriceRange($('#update-range')?.value || rangeForBasisDate(readBasisDate()));
+    const command = buildRefreshCommand(symbols, etfs, range);
     const commandElement = $('#refresh-command');
     if (commandElement) commandElement.textContent = command;
     const actionsLink = $('#open-actions-update');
@@ -231,37 +382,45 @@
 
   function scheduleAutoRefreshFromPortfolio(reason = 'ticker-input') {
     clearTimeout(state.autoRefresh.timer);
-    state.autoRefresh.timer = setTimeout(() => {
-      const tickers = autoRefreshCandidates(readTickerInputsFromDom());
-      if (tickers.length) runAutoDataRefresh(tickers, reason);
+    state.autoRefresh.timer = setTimeout(async () => {
+      const basisDate = readBasisDate();
+      if (needsHistoryForBasisDate(basisDate)) {
+        try { await ensureHistoryData('basis-date'); } catch { /* refresh candidates below will surface the missing range */ }
+      }
+      const tickers = autoRefreshCandidates(readTickerInputsFromDom(), basisDate);
+      if (tickers.length) runAutoDataRefresh(tickers, reason, rangeForBasisDate(basisDate));
     }, AUTO_REFRESH_DEBOUNCE_MS);
   }
 
-  function autoRefreshCandidates(values) {
+  function autoRefreshCandidates(values, basisDate = readBasisDate()) {
+    const fxMissing = !hasFxForBasisDate(state.marketData, basisDate);
     return uniqueTickers(values).filter((ticker) => {
       const asset = state.marketData?.assets?.[ticker];
       const holdings = state.marketData?.etfHoldings?.[ticker];
+      if (fxMissing) return true;
       if (!asset) return true;
       if (asset.priceSynthetic === true || asset.valuationEligible === false) return true;
+      if (!hasPriceForBasisDate(asset, basisDate)) return true;
       return asset.type === 'etf' && !holdings;
     });
   }
 
-  async function runAutoDataRefresh(tickers, reason = 'ticker-input') {
+  async function runAutoDataRefresh(tickers, reason = 'ticker-input', range = DEFAULT_PRICE_RANGE) {
     const canonical = uniqueTickers(tickers);
     if (!canonical.length || state.autoRefresh.running) return;
     const key = canonical.join(' ');
-    if (key === state.autoRefresh.lastKey && Date.now() - state.autoRefresh.lastAttemptAt < 120000) return;
+    const rangeKey = `${key}|${normalizePriceRange(range)}|${readBasisDate()}`;
+    if (rangeKey === state.autoRefresh.lastKey && Date.now() - state.autoRefresh.lastAttemptAt < 120000) return;
     state.autoRefresh.running = true;
-    state.autoRefresh.lastKey = key;
+    state.autoRefresh.lastKey = rangeKey;
     state.autoRefresh.lastAttemptAt = Date.now();
-    setRefreshInputs(key, key);
-    setStatus('update-status', `${key} 데이터가 캐시에 없어 자동 갱신을 시작합니다.`, 'warning');
+    setRefreshInputs(key, key, range);
+    setStatus('update-status', `${key} 데이터 또는 ${readBasisDate()} 기준일 히스토리가 캐시에 없어 자동 갱신을 시작합니다.`, 'warning');
     try {
-      const mode = await triggerAutoRefresh(key, key, reason);
+      const mode = await triggerAutoRefresh(key, key, reason, range);
       if (mode === 'local') {
         await reloadMarketData();
-        setStatus('update-status', `${key} 로컬 자동 refresh/test 완료. 생성 JSON을 다시 읽어 계산했습니다.`, 'success');
+        setStatus('update-status', `${key} 로컬 자동 refresh/test 완료. ${readBasisDate()} 기준 JSON을 다시 읽어 계산했습니다.`, 'success');
       }
     } catch (error) {
       setStatus('update-status', `${key} 자동 갱신 대기: ${error.message}`, 'error');
@@ -270,18 +429,19 @@
     }
   }
 
-  function setRefreshInputs(symbols, etfs) {
+  function setRefreshInputs(symbols, etfs, range = null) {
     const symbolsInput = $('#update-symbols');
     const etfsInput = $('#update-etfs');
     if (symbolsInput) symbolsInput.value = canonicalTickerText(symbols);
     if (etfsInput) etfsInput.value = canonicalTickerText(etfs);
+    if (range) promoteUpdateRange(range);
     renderRefreshCommand();
   }
 
-  async function triggerAutoRefresh(symbols, etfs, reason) {
+  async function triggerAutoRefresh(symbols, etfs, reason, range) {
     if (isLocalOrigin()) {
       try {
-        await postLocalRefresh(symbols, etfs, reason);
+        await postLocalRefresh(symbols, etfs, reason, range);
         return 'local';
       } catch (error) {
         if (!/404|Failed to fetch|NetworkError|Unexpected token/i.test(error.message)) throw error;
@@ -294,12 +454,12 @@
     return ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
   }
 
-  async function postLocalRefresh(symbols, etfs, reason) {
+  async function postLocalRefresh(symbols, etfs, reason, range) {
     const token = await ensureLocalRefreshToken();
     const response = await fetch('/api/refresh-data', {
       method: 'POST',
       headers: { 'content-type': 'application/json', 'x-port-dev-token': token },
-      body: JSON.stringify({ symbols, etfs, reason }),
+      body: JSON.stringify({ symbols, etfs, reason, range: normalizePriceRange(range || DEFAULT_PRICE_RANGE) }),
     });
     if (!response.ok) {
       const detail = await response.text();
@@ -330,12 +490,14 @@
     }
   }
 
-  function buildRefreshCommand(symbols, etfs) {
+  function buildRefreshCommand(symbols, etfs, range = DEFAULT_PRICE_RANGE) {
     const envParts = [];
     const canonicalSymbols = canonicalTickerText(symbols);
     const canonicalEtfs = canonicalTickerText(etfs);
+    const priceRange = normalizePriceRange(range);
     if (canonicalSymbols) envParts.push(`PORT_EXTRA_SYMBOLS=${shellQuote(canonicalSymbols)}`);
     if (canonicalEtfs) envParts.push(`PORT_EXTRA_ETFS=${shellQuote(canonicalEtfs)}`);
+    if (priceRange && priceRange !== DEFAULT_PRICE_RANGE) envParts.push(`PORT_PRICE_RANGE=${shellQuote(priceRange)}`);
     return `${envParts.join(' ')}${envParts.length ? ' ' : ''}npm run refresh:data && npm test`;
   }
 
@@ -355,19 +517,115 @@
     return tickers;
   }
 
+  function normalizeDate(value) {
+    if (!value) return '';
+    const text = String(value).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+    const date = new Date(text);
+    return Number.isNaN(date.getTime()) ? text.slice(0, 10) : date.toISOString().slice(0, 10);
+  }
+
+  function compareDate(left, right) {
+    const a = normalizeDate(left);
+    const b = normalizeDate(right);
+    if (!a && !b) return 0;
+    if (!a) return -1;
+    if (!b) return 1;
+    return a.localeCompare(b);
+  }
+
+  function historyPointOnOrBefore(points, basisDate, valueKeys = ['close', 'price', 'rate']) {
+    const target = normalizeDate(basisDate);
+    const candidates = (Array.isArray(points) ? points : [])
+      .map((point) => {
+        const date = normalizeDate(point?.date || point?.asOf);
+        const key = valueKeys.find((candidate) => Number.isFinite(Core.asNumber(point?.[candidate], NaN)));
+        return key ? { date, value: Core.asNumber(point[key], NaN) } : null;
+      })
+      .filter((point) => point?.date && Number.isFinite(point.value))
+      .sort((a, b) => compareDate(a.date, b.date));
+    if (!candidates.length) return null;
+    if (!target) return candidates.at(-1);
+    return candidates.filter((point) => compareDate(point.date, target) <= 0).at(-1) || null;
+  }
+
+  function hasPriceForBasisDate(asset, basisDate) {
+    if (!basisDate) return Number.isFinite(Core.asNumber(asset?.price, NaN));
+    if (historyPointOnOrBefore(asset?.prices || asset?.priceHistory, basisDate, ['close', 'price'])) return true;
+    const asOf = normalizeDate(asset?.priceAsOf || asset?.asOf);
+    if (state.marketData?.historyManifest && !state.history.failed && asOf && compareDate(asOf, basisDate) > 0) return true;
+    return Number.isFinite(Core.asNumber(asset?.price, NaN)) && (!asOf || compareDate(asOf, basisDate) <= 0);
+  }
+
+  function hasFxForBasisDate(marketData, basisDate) {
+    const fx = marketData?.fx || {};
+    if (!basisDate) return Number.isFinite(Core.asNumber(fx.rate, NaN));
+    if (historyPointOnOrBefore(fx.history, basisDate, ['rate', 'close', 'price'])) return true;
+    const asOf = normalizeDate(fx.asOf || marketData?.dataAsOf || marketData?.generatedAt);
+    if (marketData?.historyManifest && !state.history.failed && asOf && compareDate(asOf, basisDate) > 0) return true;
+    return Number.isFinite(Core.asNumber(fx.rate, NaN)) && (!asOf || compareDate(asOf, basisDate) <= 0);
+  }
+
+  function needsHistoryForBasisDate(basisDate) {
+    if (!state.marketData?.historyManifest || state.history.loaded || state.marketData.__historyLoaded) return false;
+    const basis = normalizeDate(basisDate || readBasisDate());
+    const latest = latestAnalysisDate();
+    return Boolean(basis && latest && compareDate(basis, latest) < 0);
+  }
+
+  function normalizePriceRange(value) {
+    const normalized = String(value || '').toLowerCase().trim();
+    return PRICE_RANGE_ORDER.includes(normalized) ? normalized : DEFAULT_PRICE_RANGE;
+  }
+
+  function rangeRank(range) {
+    const index = PRICE_RANGE_ORDER.indexOf(normalizePriceRange(range));
+    return index === -1 ? 0 : index;
+  }
+
+  function rangeForBasisDate(basisDate) {
+    const latest = latestAnalysisDate();
+    const basis = normalizeDate(basisDate || latest);
+    if (!basis || !latest) return DEFAULT_PRICE_RANGE;
+    const diffDays = Math.max(0, Math.ceil((new Date(`${latest}T00:00:00Z`) - new Date(`${basis}T00:00:00Z`)) / 86400000));
+    if (diffDays <= 170) return '6mo';
+    if (diffDays <= 365) return '1y';
+    if (diffDays <= 730) return '2y';
+    if (diffDays <= 1825) return '5y';
+    if (diffDays <= 3650) return '10y';
+    return 'max';
+  }
+
+  function promoteUpdateRange(range) {
+    const input = $('#update-range');
+    if (!input) return;
+    const target = normalizePriceRange(range);
+    if (!input.value || rangeRank(target) > rangeRank(input.value)) input.value = target;
+  }
+
   function shellQuote(value) {
     return `"${String(value || '').replace(/(["\\$`])/g, '\\$1')}"`;
   }
 
-  function calculateAndRender() {
+  async function calculateAndRender() {
     if (!state.marketData) return;
+    const seq = ++state.analysisSeq;
     const rows = readRowsFromDom();
     if (!rows.length) {
       renderEmpty();
       return;
     }
+    const options = readAnalysisOptions();
+    if (needsHistoryForBasisDate(options.asOfDate)) {
+      try {
+        await ensureHistoryData('basis-date');
+        if (seq !== state.analysisSeq) return;
+      } catch (error) {
+        setStatus('input-status', `기준일 히스토리 로드 오류: ${error.message}`, 'error');
+      }
+    }
     try {
-      const result = Core.calculatePortfolio(rows, state.marketData, readAnalysisOptions());
+      const result = Core.calculatePortfolio(rows, state.marketData, options);
       state.latestResult = result;
       renderSummary(result);
       renderInstrumentRows(result.direct);
@@ -375,7 +633,8 @@
       renderCoverageRows(result.coverageRows);
       renderHeatmap('instrument-correlation', result.instrumentCorrelation);
       renderHeatmap('underlying-correlation', result.underlyingCorrelation);
-      setStatus('input-status', `${rows.length}개 입력 종목 계산 완료 · 개별 종목 ${result.primaryExposureRows.length}개 · 잔여 노출 ${result.auditExposureRows.length}개 · 데이터 생성 ${formatDateTime(state.marketData.generatedAt)}`, 'success');
+      const historyStatus = state.marketData.historyManifest && !state.history.loaded ? ' · 상관관계 히스토리 로딩 전' : '';
+      setStatus('input-status', `${result.analysisAsOf || readBasisDate()} 기준 계산 완료 · 입력 ${rows.length}개 · 개별 종목 ${result.primaryExposureRows.length}개 · 잔여 노출 ${result.auditExposureRows.length}개 · 데이터 생성 ${formatDateTime(state.marketData.generatedAt)}${historyStatus}`, 'success');
     } catch (error) {
       setStatus('input-status', `계산 오류: ${error.message}`, 'error');
       suggestRefreshForCurrentRows(error);
@@ -385,11 +644,11 @@
 
   function suggestRefreshForCurrentRows(error) {
     const tickers = uniqueTickers(readTickerInputsFromDom());
-    if (!tickers.length || !/close price|종가|PORT_EXTRA_SYMBOLS|fallback\/synthetic/i.test(error?.message || '')) return;
+    if (!tickers.length || !/close price|종가|PORT_EXTRA_SYMBOLS|PORT_PRICE_RANGE|fallback\/synthetic|FX rate|환율|basis date|기준일/i.test(error?.message || '')) return;
     const tickerText = tickers.join(' ');
-    setRefreshInputs(tickerText, tickerText);
+    setRefreshInputs(tickerText, tickerText, rangeForBasisDate(readBasisDate()));
     scheduleAutoRefreshFromPortfolio('calculation-error');
-    setStatus('update-status', `${tickerText} 종가가 캐시에 없으면 로컬 npm run dev에서 자동 갱신을 시도합니다. 공개 Pages는 Actions 링크/명령 복사로 수동 갱신하세요.`, 'error');
+    setStatus('update-status', `${tickerText}의 ${readBasisDate()} 기준 종가/환율 히스토리가 캐시에 없으면 로컬 npm run dev에서 자동 갱신을 시도합니다. 공개 Pages는 Actions 링크/명령 복사로 수동 갱신하세요.`, 'error');
   }
 
   function renderCalculationError(message) {
@@ -421,9 +680,12 @@
     const fxFreshness = Core.classifyFreshness(data.fx?.asOf || data.dataAsOf || data.generatedAt);
     const spyCount = data.etfHoldings?.SPY?.holdings?.length || 0;
     const qqqCount = data.etfHoldings?.QQQ?.holdings?.length || 0;
+    const historyLabel = data.historyManifest
+      ? `${data.historyManifest.historyRange || data.historyRange || '6mo'} ${state.history.loaded ? 'lazy history 로드됨' : 'snapshot 우선·history 분리'}`
+      : `${data.historyRange || '6mo'} embedded`;
     $('#hero-data-status').innerHTML = `
       <span class="badge ${badgeClass(fxFreshness.status)}">${escapeHtml(fxFreshness.status)}</span>
-      USD/KRW ${formatNumber(data.fx?.rate, 2)} · FX ${escapeHtml(data.fx?.asOf || 'unknown')} · SPY ${formatNumber(spyCount, 0)}개 · QQQ ${formatNumber(qqqCount, 0)}개.
+      USD/KRW ${formatNumber(data.fx?.rate, 2)} · FX ${escapeHtml(data.fx?.asOf || 'unknown')} · 히스토리 ${escapeHtml(historyLabel)} · SPY ${formatNumber(spyCount, 0)}개 · QQQ ${formatNumber(qqqCount, 0)}개.
       브라우저는 외부 금융 API를 직접 호출하지 않고 생성 JSON만 읽습니다.
     `;
   }
@@ -435,13 +697,14 @@
     const leveragedRows = result.direct.filter((row) => Math.abs(row.leverage || 1) !== 1);
     const cards = [
       metricCard('총 평가금액', formatCurrency(result.totalKrw, 'KRW'), `${formatCurrency(result.totalUsd, 'USD')} · FX ${formatNumber(result.fxRate, 2)}`),
-      metricCard('입력 종가 기준', `USD/KRW ${formatNumber(result.fxRate, 2)}`, `${state.marketData.fx?.source || 'source'} · ${state.marketData.fx?.asOf || '기준일 없음'}`),
+      metricCard('분석 기준일', result.analysisAsOf || readBasisDate(), `가격·환율 ≤ 기준일 · 상관관계 최근 252거래일`),
+      metricCard('기준일 환율', `USD/KRW ${formatNumber(result.fxRate, 2)}`, `${result.fxSource || state.marketData.fx?.source || 'source'} · ${result.fxAsOf || state.marketData.fx?.asOf || '기준일 없음'}`),
       metricCard('ETF 구성종목', `${formatNumber(displayedHoldingCount, 0)}/${formatNumber(fullHoldingCount, 0)}`, '필터 통과/전체 구성종목 수'),
       metricCard('개별종목 매핑', formatPercent(result.mappedUnleveredKrw / (result.totalKrw || 1)), result.auditExposureRows.length ? `숨김/잔여 ${formatPercent(result.auditUnleveredKrw / (result.totalKrw || 1))}` : '숨김/잔여 없음'),
       metricCard('레버리지 총노출', `${formatPercent(result.leveredGrossKrw / (result.totalKrw || 1))}`, leveragedRows.length ? `${leveragedRows.map((row) => `${row.ticker} ${formatNumber(row.leverage, 1)}x`).join(' · ')}` : '레버리지 ETF 없음'),
     ];
     $('#summary-cards').innerHTML = cards.join('');
-    $('#summary-subtitle').textContent = `생성 데이터 기준일 ${state.marketData.dataAsOf || 'unknown'} · ETF 입력금액은 구성종목별 비중으로 매핑하고, 사용자가 숨긴 값이나 데이터 잔여분만 별도 잔여 노출 표에 표시합니다.`;
+    $('#summary-subtitle').textContent = `선택 기준일 ${result.analysisAsOf || readBasisDate()} · 생성 데이터 기준일 ${state.marketData.dataAsOf || 'unknown'} · ETF 입력금액은 기준일에 사용 가능한 구성종목별 비중으로 매핑합니다. no_historical_holdings, static proxy, supplemental Yahoo history, 사용자 필터/잔여/미매핑은 상태 배지와 잔여 노출 표에 분리 표시합니다.`;
   }
 
   function renderInstrumentRows(rows) {
@@ -451,7 +714,7 @@
         <td><strong>${escapeHtml(row.ticker)}</strong><br><span class="muted">${escapeHtml(row.type || '-')}</span></td>
         <td>${escapeHtml(row.name)}</td>
         <td class="number">${row.inputShares ? formatNumber(row.inputShares, 4) : '<span class="muted">amount</span>'}</td>
-        <td class="number">${formatPrice(row.price, row.priceCurrency)}<br><span class="muted">${escapeHtml(row.priceAsOf || 'as-of 없음')}</span></td>
+        <td class="number">${formatPrice(row.price, row.priceCurrency)}<br><span class="muted">${escapeHtml(row.priceAsOf || 'as-of 없음')}${row.priceSource ? ` · ${escapeHtml(row.priceSource)}` : ''}</span></td>
         <td class="number">${formatCurrency(row.valueKrw, 'KRW')}</td>
         <td class="number">${formatCurrency(row.valueUsd, 'USD')}</td>
         <td class="number">${formatPercent(row.weight)}</td>
@@ -510,7 +773,7 @@
         <td class="number">${formatPercent(row.displayedWeight)}</td>
         <td class="number">${formatPercent((row.filteredWeight || 0) + (row.residualWeight || 0))}</td>
         <td>${leverageBadge(row.leverage, 'coverage')}</td>
-        <td>${statusBadge(row.status)} <span class="muted">${escapeHtml(row.asOf || row.source || '')}</span></td>
+        <td>${statusBadge(row.status)} <span class="muted">${escapeHtml(row.asOf || row.source || '')}${row.basisAsOf ? ` · 기준 ${escapeHtml(row.basisAsOf)}` : ''}</span></td>
       </tr>
     `).join('') || '<tr><td colspan="8">커버리지 행이 없습니다.</td></tr>';
   }
@@ -530,7 +793,7 @@
         ${row.cells.map((cell) => heatmapCell(cell)).join('')}
       </div>
     `).join('');
-    container.innerHTML = `<div class="heatmap" role="table" aria-label="${escapeAttribute(elementId)} heatmap">${header}${rows}</div>`;
+    container.innerHTML = `<p class="muted heatmap-note">선택 기준일 이하의 최근 최대 252거래일 일별 수익률 교집합으로 계산합니다.</p><div class="heatmap" role="table" aria-label="${escapeAttribute(elementId)} heatmap">${header}${rows}</div>`;
   }
 
   function heatmapCell(cell) {
@@ -574,7 +837,7 @@
     const normalized = String(status || 'unknown').toLowerCase();
     let cls = 'badge';
     if (/fresh|live|issuer|official|ok|direct|sample/.test(normalized)) cls = 'badge success';
-    if (/fallback|watch|residual|filtered|no_holdings|unknown|degraded|proxy/.test(normalized)) cls = 'badge warning';
+    if (/fallback|watch|residual|filtered|no_holdings|no_historical|unknown|degraded|proxy/.test(normalized)) cls = 'badge warning';
     if (/error|fail|stale/.test(normalized)) cls = 'badge danger';
     return `<span class="${cls}">${escapeHtml(status || 'unknown')}</span>`;
   }
@@ -634,5 +897,5 @@
     };
   }
 
-  window.__PORT_APP_TESTS__ = { loadMarketData, renderHeatmap, readAnalysisOptions, buildRefreshCommand, canonicalTickerText, autoRefreshCandidates, suggestRefreshForCurrentRows, FALLBACK_MARKET_DATA, QUANT_DASHBOARD_URL, ACTIONS_UPDATE_URL };
+  window.__PORT_APP_TESTS__ = { loadMarketData, loadHistoryData, ensureHistoryData, mergeHistoryData, renderHeatmap, readAnalysisOptions, buildRefreshCommand, canonicalTickerText, autoRefreshCandidates, hasPriceForBasisDate, hasFxForBasisDate, rangeForBasisDate, suggestRefreshForCurrentRows, FALLBACK_MARKET_DATA, QUANT_DASHBOARD_URL, ACTIONS_UPDATE_URL };
 })();

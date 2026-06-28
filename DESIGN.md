@@ -2,7 +2,7 @@
 
 ## Source of truth
 - Status: Active
-- Last refreshed: 2026-06-27
+- Last refreshed: 2026-06-28
 - Primary product surfaces: `index.html` portfolio cockpit, `assets/app.js` interactive calculator, `assets/styles.css` visual system, generated `data/*.json` freshness/summary contracts.
 - Evidence reviewed:
   - `/Users/changgison/projects/quant-dashboard/index.html` and `assets/app.js`: Korean Research Cockpit, project cards, public JSON loading, data health/briefing/watchlist panels.
@@ -25,6 +25,7 @@
   - ETF 보유비중을 가능한 최신 무료 데이터로 반영하되, 커버리지·proxy·누락을 명확히 보여준다. DRAM은 Roundhill 공식 CSV로 가격과 구성종목을 지원하고, TSLL/SNXX 같은 단일종목 레버리지 ETF는 issuer proxy를 명시하며, 미국·한국 주요 ETF seed universe 및 자동 업데이트 패널을 통해 새 ETF를 refresh universe에 추가한다. 한국 6자리 코드는 `.KS`로 정규화하고 holdings 미지원은 명시적 잔여 노출로 둔다.
   - 레버리지 ETF는 1x look-through와 leverage-adjusted exposure를 나란히 비교한다.
   - 사용자가 상위 N개, 최소 비중, 포함/제외 티커로 분석 universe를 정해 가독성을 유지한다.
+  - 사용자가 분석 기준일을 선택하면 종가, USD/KRW, 수익률 상관관계, holdings 사용 가능성을 모두 그 날짜 기준으로 판정한다. 기준일 이전 holdings snapshot이 없으면 미래 구성종목으로 보정하지 않고 잔여 노출로 표시한다. 최신 스냅샷 JSON과 가격/환율/수익률 히스토리 JSON을 분리해 첫 로드를 가볍게 유지한다.
   - 종목/ETF 수익률 상관관계를 heatmap/table로 보여 위험 집중도를 빠르게 파악하게 한다.
   - Quant Dashboard 패밀리와 동일한 정적 Pages 운영 패턴을 따른다.
 - Non-goals:
@@ -38,6 +39,7 @@
 - Primary personas: 개인 퀀트 리서처, ETF/개별주 혼합 포트폴리오를 관리하는 투자자, 기존 Quant Dashboard 사용자.
 - User jobs:
   - 여러 통화의 종가 기반 평가액을 한 기준 통화로 합산한다.
+  - 특정 과거 날짜에 같은 보유 주수를 가지고 있었다면 평가액·노출·상관관계가 어떻게 보였을지 점검한다.
   - ETF가 실제로 어떤 기초종목에 노출되는지 확인한다.
   - 종목 수가 너무 많을 때 분석 universe를 줄여 핵심 노출만 본다.
   - 레버리지 포함 시 노출이 얼마나 커지는지 비교한다.
@@ -49,7 +51,7 @@
 - Core routes/screens: 단일 정적 페이지 `/port/` 또는 로컬 `index.html`.
 - Content hierarchy:
   1. Hero + data status + dashboard back link.
-  2. Portfolio share-count input and analysis universe controls.
+  2. Portfolio share-count input, basis-date selector, and analysis universe controls.
   3. 핵심 KPI: total KRW/USD, FX date, ETF coverage, leverage exposure multiple.
   4. Instrument-level weights with 보유 주수/종가/종가 기준일.
   5. Individual-stock look-through: ETF 투자금액을 구성종목 비중으로 매핑한 unlevered vs levered 노출, hidden/residual exposure는 별도 잔여 노출 표.
@@ -76,14 +78,15 @@
 - Existing components to reuse: Quant Dashboard-style hero, top nav, panel/card, metric-row, table-wrap, status-line, skeleton-line, notice.
 - New/changed components:
   - Portfolio input grid/table with 보유 주수 and 종가 통화.
+  - Basis-date selector: date input, history-range hint, missing historical price/FX auto-refresh trigger.
   - CSV textarea import in `ticker,shares,priceCurrency,leverage` format.
   - Analysis universe filter card: top-N, min weight, include tickers, exclude tickers.
   - KPI strip for total value/fx/freshness/leverage.
   - Dual individual-stock exposure cards for unlevered/levered views.
   - Separate residual table for user-hidden holdings, issuer residual weight, or unmapped ETF exposure.
-  - Correlation heatmap with accessible text labels.
+  - Correlation heatmap with accessible text labels and explicit “기준일 이하 최근 최대 252거래일” window copy.
   - Holdings coverage/freshness table with 전체/표시/필터/미상 split.
-  - Data update panel: `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 입력, 현재 포트폴리오 티커 정규화, 종가 누락 시 자동 refresh 제안, 로컬 `npm run dev` 자동 refresh 실행, 공개 Pages에서는 token을 받지 않고 복사 가능한 refresh command와 Actions 실행 링크 제공.
+  - Data update panel: `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS`/`PORT_PRICE_RANGE` 입력, 현재 포트폴리오 티커 정규화, 종가/환율 히스토리 누락 시 자동 refresh 제안, 로컬 `npm run dev` 자동 refresh 실행, 공개 Pages에서는 token을 받지 않고 복사 가능한 refresh command와 Actions 실행 링크 제공.
   - Exposure provenance badges: 주 노출 표의 매핑 출처/상태 열에서 official/proxy/no_holdings 등 coverage를 표시하고, proxy 기반 단일종목 ETF는 명목 노출 가정임을 바로 옆에 설명한다.
 - Variants and states: loading, loaded, empty, stale, degraded/fallback, proxy, parse error, unsupported ETF holdings, no correlation overlap.
 - Token/component ownership: `assets/styles.css` owns repo-native tokens; no new design-system dependency.
@@ -110,14 +113,14 @@
 
 ## Content voice
 - Tone: 한국어 중심, 신중하고 명료한 리서치 도구 톤.
-- Terminology: “보유 주수”, “종가”, “종가 통화”, “비중”, “평가금액”, “개별 종목 최종 비중”, “레버리지 제외/포함”, “잔여 노출”, “데이터 기준일”, “커버리지”, “분석 universe”.
+- Terminology: “보유 주수”, “종가”, “종가 통화”, “비중”, “평가금액”, “개별 종목 최종 비중”, “레버리지 제외/포함”, “잔여 노출”, “데이터 기준일”, “분석 기준일”, “커버리지”, “분석 universe”.
 - Microcopy rules: Avoid “추천/매수/매도”; use “확인”, “추정”, “관찰”, “coverage”.
 
 ## Implementation constraints
 - Framework/styling system: vanilla HTML/CSS/JS, Node built-ins only for scripts/tests unless a later explicit need arises.
 - Design-token constraints: CSS custom properties in `assets/styles.css`; follow Quant Dashboard information architecture but keep the current dark cockpit palette.
-- Data constraints: browser reads generated JSON only; refresh script may use Frankfurter, Yahoo Chart, Naver Finance chart for KR alphanumeric fallback, State Street, Invesco, Roundhill official CSVs, issuer single-stock ETF pages, and best-effort public ETF pages. 기본 JSON에 없는 티커는 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS`로 refresh에 포함한 뒤 계산한다. 로컬 `npm run dev`는 localhost-only same-origin API와 per-process dev token으로 refresh/test를 실행할 수 있지만, 공개 Pages는 브라우저에 Actions write token을 입력받지 않는다. 한국 6자리 코드(예: `0167A0`, `069500`) 입력은 `.KS`로 정규화한다. 직접 보유 주수 평가는 USD/KRW 종가만 환산하며, ETF look-through 내부의 JPY/TWD/CNY 현지통화 기초종목은 개별 ETF 비중 계산용으로만 사용한다. 글로벌 `dataAsOf`는 생성일 이후 provider 날짜로 미래 표시되지 않도록 cap한다.
-- Performance constraints: no client-side bulk finance crawling; full holdings are used for exposure, but price/return fetching for underlying correlation is bounded with `PORT_MAX_HOLDING_PRICE_SYMBOLS`.
+- Data constraints: browser reads generated JSON only; refresh script may use Frankfurter, Yahoo Chart, Naver Finance chart for KR alphanumeric fallback, State Street, Invesco, Roundhill official CSVs, issuer single-stock ETF pages, and best-effort public ETF pages. `data/market-data.json` is the latest snapshot and `data/history-data.json` is a lazy companion for price/FX/return histories. 기본 JSON에 없는 티커는 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS`로 refresh에 포함한 뒤 계산한다. 분석 기준일 가격/환율 히스토리가 부족하면 `PORT_PRICE_RANGE`를 넓힌다. 로컬 `npm run dev`는 localhost-only same-origin API와 per-process dev token으로 refresh/test를 실행할 수 있지만, 공개 Pages는 브라우저에 Actions write token을 입력받지 않는다. 한국 6자리 코드(예: `0167A0`, `069500`) 입력은 `.KS`로 정규화한다. 직접 보유 주수 평가는 USD/KRW 종가만 환산하며, ETF look-through 내부의 JPY/TWD/CNY 현지통화 기초종목은 개별 ETF 비중 계산용으로만 사용한다. 글로벌 `dataAsOf`는 생성일 이후 provider 날짜로 미래 표시되지 않도록 cap한다. 기준일 이전 ETF holdings snapshot이 없으면 최신 미래 holdings로 look-through를 만들지 않고 `no_historical_holdings` 감사 상태로 남긴다.
+- Performance constraints: no client-side bulk finance crawling; full holdings are used for exposure, but price/return fetching for underlying correlation is bounded with `PORT_MAX_HOLDING_PRICE_SYMBOLS`, and historical series are loaded from the companion JSON after the snapshot rather than inflating the first payload.
 - Compatibility constraints: GitHub Pages static hosting from repository root; local `python3 -m http.server` or Node static smoke.
 - Test/screenshot expectations: node syntax checks, regression tests for share-count portfolio math/correlation/filter states, static smoke serving assets. Visual Ralph baseline is URL-derived from Quant Dashboard family, not a generated image requiring pixel-perfect clone.
 

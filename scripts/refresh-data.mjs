@@ -3,7 +3,10 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { inflateRawSync } from 'node:zlib';
 
 const OUTPUT = new URL('../data/market-data.json', import.meta.url);
-const RANGE = process.env.PORT_PRICE_RANGE || '6mo';
+const HISTORY_OUTPUT = new URL('../data/history-data.json', import.meta.url);
+const HISTORY_PUBLIC_URL = 'data/history-data.json';
+const ALLOWED_PRICE_RANGES = new Set(['5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'max']);
+const RANGE = normalizePriceRange(process.env.PORT_PRICE_RANGE || '6mo');
 const MAX_HOLDING_PRICE_SYMBOLS = Number(process.env.PORT_MAX_HOLDING_PRICE_SYMBOLS || 180);
 const REQUEST_TIMEOUT_MS = Math.max(1000, Number(process.env.PORT_REQUEST_TIMEOUT_MS || 15000));
 const PRICE_FETCH_CONCURRENCY = Math.max(1, Math.min(12, Number(process.env.PORT_PRICE_CONCURRENCY || 6)));
@@ -99,6 +102,11 @@ function canonicalSymbol(value) {
   return raw;
 }
 
+function normalizePriceRange(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return ALLOWED_PRICE_RANGES.has(normalized) ? normalized : '6mo';
+}
+
 function isPotentialKrxCode(value) {
   const raw = String(value || '').trim().toUpperCase();
   return /^[0-9A-Z]{6}$/.test(raw) && /\d/.test(raw);
@@ -133,6 +141,46 @@ function computeDataAsOf(generatedAt, fx, assets, etfHoldings) {
     }
   }
   return dates.sort().at(-1) || generatedDate;
+}
+
+function splitHistoricalPayload(payload) {
+  const assetHistory = {};
+  const snapshotAssets = {};
+  for (const [ticker, asset] of Object.entries(payload.assets || {})) {
+    const { prices, priceHistory, returns, ...snapshot } = asset;
+    snapshotAssets[ticker] = snapshot;
+    assetHistory[ticker] = {
+      ticker,
+      prices: Array.isArray(prices) ? prices : Array.isArray(priceHistory) ? priceHistory : [],
+      returns: Array.isArray(returns) ? returns : [],
+    };
+  }
+  const fxHistory = Array.isArray(payload.fx?.history) ? payload.fx.history : [];
+  const snapshotFx = { ...(payload.fx || {}) };
+  delete snapshotFx.history;
+  const historyPayload = {
+    schemaVersion: payload.schemaVersion,
+    generatedAt: payload.generatedAt,
+    dataAsOf: payload.dataAsOf,
+    historyRange: payload.historyRange,
+    baseCurrency: payload.baseCurrency,
+    fxHistory,
+    assets: assetHistory,
+    sourcePolicy: 'Static companion history file for basis-date valuation and correlation. Public browser loads it lazily after the snapshot JSON; provider calls still happen only in refresh scripts, local dev server, or Actions.',
+  };
+  const snapshotPayload = {
+    ...payload,
+    fx: snapshotFx,
+    assets: snapshotAssets,
+    historyManifest: {
+      url: HISTORY_PUBLIC_URL,
+      historyRange: payload.historyRange,
+      fxHistoryPoints: fxHistory.length,
+      assetHistoryCount: Object.keys(assetHistory).length,
+      mode: 'lazy_companion_file',
+    },
+  };
+  return { snapshotPayload, historyPayload };
 }
 
 function parseProviderDate(value) {
@@ -184,13 +232,21 @@ async function fetchBuffer(url, label) {
 }
 
 async function fetchFx() {
+  let history = [];
+  try {
+    history = await fetchYahooFxHistory(RANGE);
+    sources.push({ name: 'Yahoo Chart KRW=X FX history', url: `https://query1.finance.yahoo.com/v8/finance/chart/KRW=X?range=${encodeURIComponent(RANGE)}&interval=1d`, status: 'live', asOf: history.at(-1)?.date || '', detail: `${history.length} USD/KRW daily FX history points loaded for basis-date analysis.` });
+  } catch (error) {
+    warnings.push(`Yahoo FX history failed: ${error.message}; basis-date USD/KRW may be limited to latest Frankfurter rate.`);
+  }
+
   const frankfurterUrl = 'https://api.frankfurter.app/latest?from=USD&to=KRW';
   try {
     const data = await fetchJson(frankfurterUrl, 'Frankfurter USD/KRW');
     const rate = Number(data?.rates?.KRW);
     if (!Number.isFinite(rate) || rate <= 0) throw new Error('Frankfurter response missing KRW rate');
     sources.push({ name: 'Frankfurter USD/KRW', url: frankfurterUrl, status: 'live', asOf: data.date, detail: 'No-key public FX reference used for USD to KRW conversion.' });
-    return { pair: 'USD/KRW', rate, asOf: data.date, source: 'Frankfurter', sourceStatus: 'live' };
+    return { pair: 'USD/KRW', rate, asOf: data.date, source: 'Frankfurter', sourceStatus: 'live', history: mergeFxHistory(history, [{ date: data.date, rate }]), historySource: 'Yahoo Chart KRW=X + Frankfurter latest' };
   } catch (error) {
     warnings.push(`Frankfurter FX failed: ${error.message}; trying Yahoo Chart KRW=X fallback.`);
   }
@@ -199,15 +255,15 @@ async function fetchFx() {
   try {
     const chart = await fetchYahooChart('KRW=X', '5d');
     sources.push({ name: 'Yahoo Chart KRW=X', url: yahooUrl, status: chart.status, asOf: chart.priceAsOf, detail: 'Fallback FX quote from Yahoo Chart.' });
-    return { pair: 'USD/KRW', rate: chart.price, asOf: chart.priceAsOf, source: 'Yahoo Chart KRW=X', sourceStatus: chart.status };
+    return { pair: 'USD/KRW', rate: chart.price, asOf: chart.priceAsOf, source: 'Yahoo Chart KRW=X', sourceStatus: chart.status, history: mergeFxHistory(history, chart.prices.map((point) => ({ date: point.date, rate: point.close }))), historySource: 'Yahoo Chart KRW=X' };
   } catch (error) {
     warnings.push(`Yahoo FX failed: ${error.message}; using static fallback 1400.`);
     sources.push({ name: 'Fallback USD/KRW', status: 'fallback', asOf: '', detail: 'Network FX sources unavailable.' });
-    return { pair: 'USD/KRW', rate: 1400, asOf: '', source: 'fallback', sourceStatus: 'fallback' };
+    return { pair: 'USD/KRW', rate: 1400, asOf: '', source: 'fallback', sourceStatus: 'fallback', history, historySource: history.length ? 'Yahoo Chart KRW=X' : 'fallback' };
   }
 }
 
-async function fetchYahooChart(symbol, range = RANGE) {
+async function fetchYahooClosePoints(symbol, range = RANGE) {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=${encodeURIComponent(range)}&interval=1d`;
   const data = await fetchJson(url, `Yahoo Chart ${symbol}`);
   const result = data?.chart?.result?.[0];
@@ -216,6 +272,27 @@ async function fetchYahooChart(symbol, range = RANGE) {
   const meta = result?.meta || {};
   const points = timestamps.map((ts, index) => ({ date: new Date(ts * 1000).toISOString().slice(0, 10), close: Number(close[index]) }))
     .filter((point) => point.date && Number.isFinite(point.close) && point.close > 0);
+  if (!points.length) throw new Error(`No close points for ${symbol}`);
+  return { points, meta, url };
+}
+
+async function fetchYahooFxHistory(range = RANGE) {
+  const { points } = await fetchYahooClosePoints('KRW=X', range);
+  return points.map((point) => ({ date: point.date, rate: point.close }));
+}
+
+function mergeFxHistory(...groups) {
+  const map = new Map();
+  for (const group of groups.flat()) {
+    const date = dateOnly(group?.date || group?.asOf);
+    const rate = Number(group?.rate ?? group?.close ?? group?.price);
+    if (date && Number.isFinite(rate) && rate > 0) map.set(date, { date, rate });
+  }
+  return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
+}
+
+async function fetchYahooChart(symbol, range = RANGE) {
+  const { points, meta, url } = await fetchYahooClosePoints(symbol, range);
   const returns = [];
   for (let index = 1; index < points.length; index += 1) {
     const previous = points[index - 1].close;
@@ -231,6 +308,7 @@ async function fetchYahooChart(symbol, range = RANGE) {
     currency: meta.currency || inferCurrency(symbol),
     price: latest.close,
     priceAsOf: latest.date,
+    prices: points,
     returns,
     source: 'Yahoo Chart',
     sourceUrl: url,
@@ -266,6 +344,7 @@ async function fetchNaverChart(symbol, range = RANGE) {
     currency: 'KRW',
     price: latest.close,
     priceAsOf: latest.date,
+    prices: points,
     returns,
     source: 'Naver Finance chart',
     sourceUrl: url,
@@ -316,32 +395,59 @@ async function fetchRoundhillDailyNavAsset(symbol) {
     currency: 'USD',
     price,
     priceAsOf: asOf,
+    prices: asOf ? [{ date: asOf, close: price }] : [],
     returns: [],
     source: 'Roundhill DailyNAV CSV',
     sourceUrl: ROUNDHILL_DAILY_NAV_URL,
     sourceStatus: 'official',
   };
+  try {
+    const yahoo = await fetchYahooChart(symbol);
+    asset.prices = mergePriceHistory(asset.prices, yahoo.prices);
+    asset.returns = yahoo.returns;
+    asset.historicalSource = 'Yahoo Chart';
+    sources.push({ name: `Yahoo Chart ${symbol} supplemental history`, url: yahoo.sourceUrl, status: yahoo.sourceStatus, asOf: yahoo.priceAsOf, detail: `${yahoo.prices.length} daily close points loaded so ${symbol} can be analyzed by selected basis date while latest price still uses Roundhill DailyNAV.` });
+  } catch (error) {
+    warnings.push(`${symbol} supplemental Yahoo history failed: ${error.message}; basis-date analysis is limited to Roundhill latest DailyNAV date.`);
+  }
   sources.push({ name: `Roundhill ${symbol} DailyNAV CSV`, url: ROUNDHILL_DAILY_NAV_URL, status: 'official', asOf, detail: `Official ${symbol} market price/NAV row parsed from Roundhill DailyNAV CSV.` });
   return asset;
+}
+
+function mergePriceHistory(...groups) {
+  const map = new Map();
+  for (const group of groups.flat()) {
+    const date = dateOnly(group?.date || group?.asOf);
+    const close = Number(group?.close ?? group?.price);
+    if (date && Number.isFinite(close) && close > 0) map.set(date, { date, close });
+  }
+  return Array.from(map.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function fallbackAsset(symbol) {
   const leverage = LEVERAGE[symbol] || 1;
   const base = symbol.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0) % 17;
+  const seedPrice = symbol.endsWith('.KS') ? 70000 : 100 + base * 8;
+  let close = seedPrice;
+  const prices = [{ date: '2026-01-01', close }];
   const returns = Array.from({ length: 80 }, (_, index) => {
     const date = new Date(Date.UTC(2026, 0, 2 + index)).toISOString().slice(0, 10);
     const cycle = Math.sin((index + base) / 5) / 100;
     const drift = ((index + base) % 5 - 2) / 600;
-    return { date, value: cycle + drift };
+    const value = cycle + drift;
+    close = Math.max(0.01, close * (1 + value));
+    prices.push({ date, close });
+    return { date, value };
   });
   return {
     ticker: symbol,
     name: SPECIAL_ASSET_NAMES[symbol] || symbol,
     type: DEFAULT_ETFS.includes(symbol) ? 'etf' : 'stock',
     currency: inferCurrency(symbol),
-    price: symbol.endsWith('.KS') ? 70000 : 100 + base * 8,
+    price: prices.at(-1).close,
     priceAsOf: returns.at(-1).date,
     leverage,
+    prices,
     returns,
     source: 'fallback sample',
     sourceStatus: 'fallback',
@@ -453,7 +559,12 @@ async function fetchRoundhillHoldings(symbol) {
       const rows = parseCsvRows(await fetchText(url, `Roundhill holdings ${symbol}`))
         .filter((row) => String(row.Account || '').trim().toUpperCase() === symbol);
       if (!rows.length) throw new Error(`${symbol} account rows missing`);
-      const asOf = parseProviderDate(rows.find((row) => row.Date)?.Date) || date.toISOString().slice(0, 10);
+      const fileAsOf = date.toISOString().slice(0, 10);
+      const rowAsOf = parseProviderDate(rows.find((row) => row.Date)?.Date);
+      const asOf = rowAsOf && rowAsOf <= fileAsOf ? rowAsOf : fileAsOf;
+      if (rowAsOf && rowAsOf > fileAsOf) {
+        warnings.push(`Roundhill ${symbol} holdings row date ${rowAsOf} is after file date ${fileAsOf}; using file date for historical basis-date safety.`);
+      }
       const holdings = parseRoundhillEquityHoldings(rows);
       if (holdings.length < 6) throw new Error(`Roundhill ${symbol} parse produced only ${holdings.length} equity holdings`);
       const record = {
@@ -631,6 +742,7 @@ function fetchSingleStockProxyHoldings(symbol) {
     source: proxy.source,
     sourceUrl: proxy.sourceUrl,
     sourceStatus: 'proxy',
+    historicalPolicy: 'static_underlying_proxy',
     proxyFor: proxy.ticker,
     holdings: [{ ticker: proxy.ticker, name: proxy.name, weight: 1 }],
   };
@@ -787,7 +899,10 @@ function isEquityHoldingCode(code) {
 }
 
 function isTradableTicker(symbol) {
-  return Boolean(symbol && symbol !== 'N/A' && symbol !== '-' && /^[A-Z0-9][A-Z0-9.-]{0,15}$/.test(symbol));
+  const normalized = String(symbol || '').toUpperCase();
+  if (!normalized || normalized === 'N/A' || normalized === '-') return false;
+  if (/^T-\d/.test(normalized)) return false;
+  return /^[A-Z0-9][A-Z0-9.-]{0,15}$/.test(normalized);
 }
 
 function yahooSymbol(symbol) {
@@ -879,9 +994,10 @@ async function main() {
     schemaVersion: 1,
     generatedAt,
     dataAsOf,
+    historyRange: RANGE,
     baseCurrency: 'KRW',
     fx,
-    sourcePolicy: 'Best-effort free/no-key data. Browser UI reads this generated JSON only; live provider calls happen in refresh scripts or Actions. Popular US/KR ETF seed universe plus PORT_EXTRA_SYMBOLS/PORT_EXTRA_ETFS are refreshed when available; Korean ETF holdings may remain explicit no_holdings unless a free holdings source is parseable.',
+    sourcePolicy: 'Best-effort free/no-key data. Browser UI reads generated static JSON only; live provider calls happen in refresh scripts, local dev server, or Actions. Latest snapshot data stays in market-data.json and price/FX/return histories are split into a lazy companion history-data.json for basis-date analysis. ETF holdings use the latest available dated snapshot unless a historical snapshot is present. Popular US/KR ETF seed universe plus PORT_EXTRA_SYMBOLS/PORT_EXTRA_ETFS are refreshed when available; Korean ETF holdings may remain explicit no_holdings unless a free holdings source is parseable.',
     sources,
     warnings,
     assets,
@@ -896,8 +1012,11 @@ async function main() {
     disclaimer: 'Personal research dashboard only. Not investment, tax, legal, or trading advice.',
   };
   await mkdir(new URL('../data/', import.meta.url), { recursive: true });
-  await writeFile(OUTPUT, `${JSON.stringify(payload, null, 2)}\n`);
+  const { snapshotPayload, historyPayload } = splitHistoricalPayload(payload);
+  await writeFile(OUTPUT, `${JSON.stringify(snapshotPayload, null, 2)}\n`);
+  await writeFile(HISTORY_OUTPUT, `${JSON.stringify(historyPayload, null, 2)}\n`);
   console.log(`Wrote ${OUTPUT.pathname}`);
+  console.log(`Wrote ${HISTORY_OUTPUT.pathname}`);
   console.log(`sources=${sources.length} warnings=${warnings.length} assets=${Object.keys(assets).length}`);
   console.log(`holdings=${Object.entries(etfHoldings).map(([ticker, record]) => `${ticker}:${record.holdings.length}`).join(' ')}`);
 }

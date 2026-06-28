@@ -5,7 +5,9 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import Core from '../assets/portfolio-core.js';
 
-const data = JSON.parse(readFileSync('data/market-data.json', 'utf8'));
+const snapshotData = JSON.parse(readFileSync('data/market-data.json', 'utf8'));
+const historyData = JSON.parse(readFileSync('data/history-data.json', 'utf8'));
+const data = mergeHistory(snapshotData, historyData);
 const css = readFileSync('assets/styles.css', 'utf8');
 const checks = [];
 const record = (label, fn) => {
@@ -13,12 +15,22 @@ const record = (label, fn) => {
   catch (error) { checks.push({ label, ok: false, error: error.message }); }
 };
 const mkReturns = (values) => values.map((value, index) => ({ date: `2026-02-${String(index + 1).padStart(2, '0')}`, value }));
+function mergeHistory(snapshot, history) {
+  const merged = JSON.parse(JSON.stringify(snapshot));
+  merged.fx = { ...(merged.fx || {}), history: Array.isArray(history.fxHistory) ? history.fxHistory : [] };
+  for (const [ticker, series] of Object.entries(history.assets || {})) {
+    if (!merged.assets[ticker]) merged.assets[ticker] = { ticker };
+    merged.assets[ticker].prices = Array.isArray(series.prices) ? series.prices : [];
+    merged.assets[ticker].returns = Array.isArray(series.returns) ? series.returns : [];
+  }
+  return merged;
+}
 
 record('fractional shares use close price and explicit currency', () => {
   const result = Core.calculatePortfolio([{ ticker: 'SPY', shares: 0.125, priceCurrency: 'USD' }], data);
   const spy = data.assets.SPY;
   assert.ok(spy.price > 0);
-  assert.ok(Math.abs(result.totalKrw - (0.125 * spy.price * data.fx.rate)) < 0.01);
+  assert.ok(Math.abs(result.totalKrw - (0.125 * spy.price * result.fxRate)) < 0.01);
   assert.equal(result.direct[0].priceCurrency, 'USD');
   assert.equal(result.direct[0].inputShares, 0.125);
 });
@@ -168,6 +180,10 @@ record('dark visual contract has no light-mode regression marker', () => {
 record('live refreshed data contains broad SPY/QQQ decomposition and explicit proxy status', () => {
   assert.ok(data.etfHoldings.SPY.holdings.length >= 400);
   assert.ok(data.etfHoldings.QQQ.holdings.length >= 100);
+  assert.equal(snapshotData.historyManifest?.url, 'data/history-data.json');
+  assert.ok(!Array.isArray(snapshotData.assets.SPY.prices), 'snapshot JSON stays small and omits embedded SPY price history');
+  assert.ok(Array.isArray(data.fx.history) && data.fx.history.length > 0, 'FX history is present');
+  assert.ok(Array.isArray(data.assets.SPY.prices) && data.assets.SPY.prices.length > 0, 'SPY close history is present');
   assert.equal(data.etfHoldings.TQQQ.sourceStatus, 'proxy');
   assert.equal(data.assets.DRAM.source, 'Roundhill DailyNAV CSV');
   assert.equal(data.etfHoldings.DRAM.source, 'Roundhill official holdings CSV');
@@ -175,6 +191,19 @@ record('live refreshed data contains broad SPY/QQQ decomposition and explicit pr
   const result = Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], data, { exposureTopN: 20 });
   assert.ok(result.primaryExposureRows.length > 0);
   assert.ok(result.primaryExposureRows.every((row) => !row.ticker.includes(':') && !['SPY', 'QQQ', 'TQQQ'].includes(row.ticker)), 'primary public-data exposure rows are constituent stocks, not ETF/bucket rows');
+});
+
+record('basis-date valuation uses historical close and FX without future returns', () => {
+  const spy = data.assets.SPY;
+  const historical = spy.prices.find((point) => point.date < spy.priceAsOf);
+  assert.ok(historical, 'SPY has at least one historical close before latest');
+  const fxPoint = [...data.fx.history].filter((point) => point.date <= historical.date).at(-1);
+  assert.ok(fxPoint, `FX history exists on or before ${historical.date}`);
+  const result = Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], data, { asOfDate: historical.date, exposureTopN: 10 });
+  assert.equal(result.direct[0].price, historical.close);
+  assert.equal(result.fxRate, fxPoint.rate);
+  assert.equal(result.analysisAsOf, historical.date);
+  assert.ok(result.instrumentCorrelation.rows.every((row) => row.cells.every((cell) => !cell.samples || cell.samples <= data.assets.SPY.returns.length)));
 });
 
 record('new DRAM ticker calculates from shares and decomposes into individual memory stocks', () => {
@@ -239,11 +268,17 @@ record('ticker input auto-refresh wiring exists without requiring the manual fil
   const server = readFileSync('scripts/dev-server.mjs', 'utf8');
   assert.ok(app.includes('scheduleAutoRefreshFromPortfolio'));
   assert.ok(app.includes('autoRefreshCandidates'));
+  assert.ok(app.includes('hasPriceForBasisDate'));
+  assert.ok(app.includes('hasFxForBasisDate'));
+  assert.ok(app.includes('rangeForBasisDate'));
   assert.ok(app.includes('/api/refresh-data'));
   assert.ok(app.includes('x-port-dev-token'));
   assert.ok(!app.includes('ACTIONS_DISPATCH_URL'));
   assert.ok(!html.includes('id="actions-token"'));
+  assert.ok(html.includes('id="analysis-date"'));
+  assert.ok(html.includes('id="update-range"'));
   assert.ok(server.includes('POST') && server.includes('/api/refresh-data'));
+  assert.ok(server.includes('PORT_PRICE_RANGE'));
   assert.ok(server.includes('127.0.0.1'));
   assert.ok(server.includes('hasTrustedOrigin'));
 });
@@ -291,7 +326,10 @@ record('refresh provider timeout falls back with explicit warning evidence', () 
     });
     assert.equal(result.status, 0, result.stderr || result.stdout);
     const generated = JSON.parse(readFileSync(join(tmp, 'data/market-data.json'), 'utf8'));
+    const generatedHistory = JSON.parse(readFileSync(join(tmp, 'data/history-data.json'), 'utf8'));
     assert.ok(generated.fx.rate > 0);
+    assert.equal(generated.historyManifest?.url, 'data/history-data.json');
+    assert.ok(Array.isArray(generatedHistory.fxHistory));
     assert.ok(generated.warnings.some((warning) => /timed out/i.test(warning)), 'timeout warning is surfaced');
   } finally { rmSync(tmp, { recursive: true, force: true }); }
 });
@@ -305,8 +343,13 @@ record('offline refresh produces valid deterministic share-based JSON', () => {
     const result = spawnSync(process.execPath, ['scripts/refresh-data.mjs', '--offline-sample'], { cwd: tmp, encoding: 'utf8' });
     assert.equal(result.status, 0, result.stderr || result.stdout);
     const generated = JSON.parse(readFileSync(join(tmp, 'data/market-data.json'), 'utf8'));
+    const generatedHistory = JSON.parse(readFileSync(join(tmp, 'data/history-data.json'), 'utf8'));
     assert.equal(generated.schemaVersion, 1);
     assert.ok(generated.fx.rate > 0);
+    assert.equal(generated.historyManifest?.url, 'data/history-data.json');
+    assert.ok(!Array.isArray(generated.fx.history));
+    assert.ok(Array.isArray(generatedHistory.fxHistory));
+    assert.ok(Object.values(generatedHistory.assets).every((asset) => Array.isArray(asset.prices) && asset.prices.length > 0));
     assert.ok(Object.values(generated.assets).every((asset) => asset.priceSynthetic === true && asset.valuationEligible === false));
     assert.ok(generated.samplePortfolio.every((row) => Number.isFinite(row.shares)));
   } finally { rmSync(tmp, { recursive: true, force: true }); }

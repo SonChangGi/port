@@ -5,7 +5,7 @@ const mkReturns = (values) => values.map((value, index) => ({ date: `2026-01-${S
 const marketData = {
   schemaVersion: 1,
   generatedAt: '2026-06-25T00:00:00Z',
-  dataAsOf: '2026-06-24',
+  dataAsOf: '2026-06-26',
   fx: { rate: 1400, asOf: '2026-06-24' },
   assets: {
     SPY: { ticker: 'SPY', name: 'SPY ETF', type: 'etf', currency: 'USD', price: 500, priceAsOf: '2026-06-24', leverage: 1, returns: mkReturns([0.01, 0.02, -0.01, 0.03]) },
@@ -94,7 +94,71 @@ assert.ok(corr.value > 0.99 && corr.samples === 4, 'known identical return serie
 const matrix = Core.buildCorrelationMatrix(['SPY', 'TQQQ', 'UNKNOWN'], marketData);
 assert.deepEqual(matrix.tickers, ['SPY', 'TQQQ'], 'correlation matrix skips tickers without returns');
 
+const basisDateMarketData = {
+  schemaVersion: 1,
+  generatedAt: '2026-06-26T00:00:00Z',
+  dataAsOf: '2026-06-26',
+  fx: {
+    rate: 1500,
+    asOf: '2026-06-26',
+    history: [{ date: '2026-06-18', rate: 1300 }, { date: '2026-06-20', rate: 1400 }, { date: '2026-06-26', rate: 1500 }],
+  },
+  assets: {
+    SPY: {
+      ticker: 'SPY',
+      name: 'SPY ETF',
+      type: 'etf',
+      currency: 'USD',
+      price: 120,
+      priceAsOf: '2026-06-26',
+      prices: [{ date: '2026-06-20', close: 100 }, { date: '2026-06-26', close: 120 }],
+      returns: [{ date: '2026-06-18', value: 0.01 }, { date: '2026-06-19', value: 0.02 }, { date: '2026-06-20', value: -0.01 }, { date: '2026-06-26', value: 0.04 }],
+    },
+    TSLL: {
+      ticker: 'TSLL',
+      name: 'TSLL ETF',
+      type: 'etf',
+      currency: 'USD',
+      price: 12,
+      priceAsOf: '2026-06-26',
+      leverage: 2,
+      prices: [{ date: '2026-06-20', close: 8 }, { date: '2026-06-26', close: 12 }],
+      returns: [{ date: '2026-06-18', value: 0.02 }, { date: '2026-06-19', value: 0.04 }, { date: '2026-06-20', value: -0.02 }, { date: '2026-06-26', value: 0.08 }],
+    },
+    AAPL: {
+      ticker: 'AAPL',
+      returns: [{ date: '2026-06-18', value: 0.01 }, { date: '2026-06-19', value: 0.02 }, { date: '2026-06-20', value: -0.01 }, { date: '2026-06-26', value: -0.04 }],
+    },
+  },
+  etfHoldings: {
+    SPY: { ticker: 'SPY', sourceStatus: 'official', asOf: '2026-06-26', holdings: [{ ticker: 'AAPL', name: 'Apple', weight: 1 }] },
+    TSLL: { ticker: 'TSLL', sourceStatus: 'proxy', historicalPolicy: 'static_underlying_proxy', asOf: '2026-06-26', holdings: [{ ticker: 'TSLA', name: 'Tesla', weight: 1 }] },
+  },
+};
+const historicalSpy = Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], basisDateMarketData, { asOfDate: '2026-06-20' });
+assert.equal(historicalSpy.totalKrw, 140000, 'basis-date valuation uses selected-date close and selected-date FX history');
+assert.equal(historicalSpy.direct[0].price, 100, 'basis-date direct row uses historical close, not latest close');
+assert.equal(historicalSpy.fxRate, 1400, 'basis-date result exposes historical FX rate');
+assert.equal(historicalSpy.coverageRows[0].status, 'no_historical_holdings', 'future holdings snapshots are not used for earlier basis dates');
+assert.ok(historicalSpy.auditExposureRows.some((row) => row.ticker === 'SPY:UNMAPPED'), 'historical holdings gap is preserved in audit rows');
+const futureCappedHoldingsData = JSON.parse(JSON.stringify(basisDateMarketData));
+futureCappedHoldingsData.generatedAt = '2026-06-20T00:00:00Z';
+futureCappedHoldingsData.dataAsOf = '2026-06-20';
+futureCappedHoldingsData.etfHoldings.SPY.asOf = '2026-06-30';
+const futureCappedSpy = Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], futureCappedHoldingsData, { asOfDate: '2026-06-20' });
+assert.equal(futureCappedSpy.coverageRows[0].status, 'no_historical_holdings', 'raw future holdings dates are not made eligible by capped global dataAsOf');
+assert.ok(futureCappedSpy.auditExposureRows.some((row) => row.ticker === 'SPY:UNMAPPED'), 'future holdings remain an audit gap even when global dataAsOf is capped to the basis date');
+const historicalTsll = Core.calculatePortfolio([{ ticker: 'TSLL', shares: 1, priceCurrency: 'USD' }], basisDateMarketData, { asOfDate: '2026-06-20' });
+assert.equal(historicalTsll.primaryExposureRows[0].ticker, 'TSLA', 'static single-stock ETF proxy can map historical basis dates');
+assert.equal(historicalTsll.primaryExposureRows[0].valueKrw, 11200, 'static proxy still uses historical ETF price and FX');
+assert.equal(Core.correlationBetween('SPY', 'AAPL', basisDateMarketData, { asOfDate: '2026-06-20' }).samples, 3, 'basis-date correlation excludes returns after selected date');
+assert.throws(
+  () => Core.calculatePortfolio([{ ticker: 'SPY', shares: 1, priceCurrency: 'USD' }], basisDateMarketData, { asOfDate: '2026-06-01' }),
+  /close price.*2026-06-01|기준일/,
+  'basis-date valuation errors when selected-date price history is not loaded'
+);
+
 assert.equal(Core.classifyFreshness('2026-06-24', new Date('2026-06-25T00:00:00Z')).status, 'fresh', 'freshness classifies current data');
 assert.equal(Core.classifyFreshness('2026-06-01', new Date('2026-06-25T00:00:00Z')).status, 'stale', 'freshness classifies stale data');
 
-console.log('PASS regression share-count valuation, ETF decomposition, leverage, filters, correlation, and freshness checks');
+console.log('PASS regression share-count valuation, basis-date analysis, ETF decomposition, leverage, filters, correlation, and freshness checks');

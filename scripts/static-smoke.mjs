@@ -29,6 +29,7 @@ const checks = [
   ['/assets/portfolio-core.js', 'calculatePortfolio'],
   ['/assets/styles.css', '.heatmap'],
   ['/data/market-data.json', 'schemaVersion'],
+  ['/data/history-data.json', 'fxHistory'],
 ];
 try {
   for (const [path, needle] of checks) {

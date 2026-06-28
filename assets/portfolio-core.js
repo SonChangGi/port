@@ -5,7 +5,6 @@
 })(typeof globalThis !== 'undefined' ? globalThis : this, function portfolioCoreFactory() {
   'use strict';
 
-  const DEFAULT_FX = 1400;
   const BASE_CURRENCY = 'KRW';
   const SUPPORTED_CURRENCIES = new Set(['KRW', 'USD']);
   const LEVERAGE_BY_TICKER = new Map(Object.entries({
@@ -56,14 +55,85 @@
     throw new Error(`${normalizeTicker(ticker)} price currency ${currency} is not supported for share valuation. 현재 보유 주수 계산은 USD/KRW 종가만 환산합니다. refresh 데이터에 해외 현지통화 가격만 있으면 USD/KRW 기준 가격을 별도로 공급해야 합니다.`);
   }
 
-  function getFxRate(marketData) {
-    return asPositiveNumber(marketData?.fx?.rate, DEFAULT_FX);
+  function dateOnly(value) {
+    if (!value) return '';
+    if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value.trim())) return value.trim();
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? String(value).slice(0, 10) : date.toISOString().slice(0, 10);
   }
 
-  function convertAmount(amount, currency, marketData) {
+  function compareDate(left, right) {
+    const a = dateOnly(left);
+    const b = dateOnly(right);
+    if (!a && !b) return 0;
+    if (!a) return -1;
+    if (!b) return 1;
+    return a.localeCompare(b);
+  }
+
+  function getAnalysisDate(options = {}, marketData = {}) {
+    return dateOnly(options.asOfDate || options.analysisAsOf || marketData.dataAsOf || marketData.fx?.asOf || marketData.generatedAt);
+  }
+
+  function latestPointOnOrBefore(points, basisDate, valueKeys = ['close', 'price', 'rate', 'value']) {
+    const targetDate = dateOnly(basisDate);
+    const normalized = (Array.isArray(points) ? points : [])
+      .map((point) => {
+        const date = dateOnly(point?.date || point?.asOf);
+        const key = valueKeys.find((candidate) => Number.isFinite(asNumber(point?.[candidate], NaN)));
+        return key ? { date, value: asNumber(point[key], NaN), raw: point, valueKey: key } : null;
+      })
+      .filter((point) => point?.date && Number.isFinite(point.value))
+      .sort((a, b) => compareDate(a.date, b.date));
+    if (!normalized.length) return null;
+    if (!targetDate) return normalized.at(-1);
+    return normalized.filter((point) => compareDate(point.date, targetDate) <= 0).at(-1) || null;
+  }
+
+  function latestPriceOnOrBefore(asset = {}, basisDate) {
+    const historyPoint = latestPointOnOrBefore(asset.prices || asset.priceHistory, basisDate, ['close', 'price']);
+    if (historyPoint) return { price: historyPoint.value, priceAsOf: historyPoint.date, source: 'history' };
+    const currentPrice = asPositiveNumber(asset.price ?? asset.close ?? asset.lastClose, NaN);
+    const currentAsOf = dateOnly(asset.priceAsOf || asset.asOf);
+    if (Number.isFinite(currentPrice) && (!basisDate || !currentAsOf || compareDate(currentAsOf, basisDate) <= 0)) {
+      return { price: currentPrice, priceAsOf: currentAsOf, source: 'latest' };
+    }
+    return null;
+  }
+
+  function resolveFxRate(marketData, options = {}) {
+    const fx = marketData?.fx || {};
+    const basisDate = getAnalysisDate(options, marketData);
+    const historyPoint = latestPointOnOrBefore(fx.history, basisDate, ['rate', 'close', 'price']);
+    if (historyPoint) {
+      return {
+        rate: historyPoint.value,
+        asOf: historyPoint.date,
+        source: fx.historySource || fx.source || 'FX history',
+        sourceStatus: fx.sourceStatus || 'history',
+      };
+    }
+    const currentRate = asPositiveNumber(fx.rate, NaN);
+    const currentAsOf = dateOnly(fx.asOf || marketData?.dataAsOf || marketData?.generatedAt);
+    if (Number.isFinite(currentRate) && (!basisDate || !currentAsOf || compareDate(currentAsOf, basisDate) <= 0)) {
+      return {
+        rate: currentRate,
+        asOf: currentAsOf,
+        source: fx.source || 'FX',
+        sourceStatus: fx.sourceStatus || 'latest',
+      };
+    }
+    if (!basisDate && Number.isFinite(currentRate)) {
+      return { rate: currentRate, asOf: currentAsOf, source: fx.source || 'FX', sourceStatus: fx.sourceStatus || 'latest' };
+    }
+    throw new Error(`USD/KRW FX rate is unavailable on or before ${basisDate || 'selected basis date'}. 기준일 환율 히스토리가 없어 USD/KRW 환산을 할 수 없습니다. PORT_PRICE_RANGE를 넓혀 데이터를 갱신하세요.`);
+  }
+
+  function convertAmount(amount, currency, marketData, options = {}) {
     const numericAmount = asNumber(amount, 0);
     const normalizedCurrency = asCurrency(currency);
-    const fxRate = getFxRate(marketData);
+    const fxSnapshot = resolveFxRate(marketData, options);
+    const fxRate = fxSnapshot.rate;
     if (normalizedCurrency === 'KRW') {
       return { amount: numericAmount, currency: 'KRW', valueKrw: numericAmount, valueUsd: numericAmount / fxRate, fxRate };
     }
@@ -131,29 +201,34 @@
     };
   }
 
-  function resolveShareValuation(input, asset, marketData) {
+  function resolveShareValuation(input, asset, marketData, options = {}) {
     const shares = asNumber(input.shares ?? input.quantity ?? input.units, NaN);
     if (!Number.isFinite(shares) || shares === 0) return null;
-    const price = asPositiveNumber(input.price ?? asset.price ?? asset.close ?? asset.lastClose, NaN);
     if (asset.priceSynthetic || asset.valuationEligible === false) {
       throw new Error(`${normalizeTicker(input.ticker)} close price is provider fallback/synthetic data. 보유 주수 계산에 임의 fallback 가격을 사용하지 않습니다. npm run refresh:data로 실제 종가를 확보하거나 USD/KRW 기준 가격을 명시적으로 공급하세요.`);
     }
+    const manualPrice = asPositiveNumber(input.price, NaN);
+    const priceSnapshot = Number.isFinite(manualPrice)
+      ? { price: manualPrice, priceAsOf: dateOnly(input.priceAsOf || options.asOfDate || asset.priceAsOf || asset.asOf), source: 'manual' }
+      : latestPriceOnOrBefore(asset, options.asOfDate);
+    const price = asPositiveNumber(priceSnapshot?.price, NaN);
     if (!Number.isFinite(price) || price <= 0) {
-      throw new Error(`${normalizeTicker(input.ticker)} close price is unavailable. data/market-data.json에 종가가 없어 보유 주수 계산을 할 수 없습니다. npm run refresh:data 또는 PORT_EXTRA_SYMBOLS/PORT_EXTRA_ETFS로 티커를 포함해 데이터를 갱신하세요.`);
+      throw new Error(`${normalizeTicker(input.ticker)} close price is unavailable on or before ${options.asOfDate || 'selected basis date'}. data/market-data.json에 해당 기준일 종가가 없어 보유 주수 계산을 할 수 없습니다. PORT_PRICE_RANGE를 넓히고 PORT_EXTRA_SYMBOLS/PORT_EXTRA_ETFS로 티커를 포함해 데이터를 갱신하세요.`);
     }
     const priceCurrency = explicitSupportedCurrency(asset.currency || input.priceCurrency || input.currency || 'USD', input.ticker);
-    const converted = convertAmount(shares * price, priceCurrency, marketData);
+    const converted = convertAmount(shares * price, priceCurrency, marketData, options);
     return {
       mode: 'shares',
       shares,
       price,
       priceCurrency,
-      priceAsOf: asset.priceAsOf || asset.asOf || '',
+      priceAsOf: priceSnapshot?.priceAsOf || asset.priceAsOf || asset.asOf || '',
+      priceSource: priceSnapshot?.source || '',
       converted,
     };
   }
 
-  function resolveCashValuation(input, marketData) {
+  function resolveCashValuation(input, marketData, options = {}) {
     const amount = asNumber(input.amount, 0);
     if (!Number.isFinite(amount) || amount === 0) return null;
     return {
@@ -162,19 +237,22 @@
       price: null,
       priceCurrency: asCurrency(input.currency),
       priceAsOf: '',
-      converted: convertAmount(amount, input.currency, marketData),
+      converted: convertAmount(amount, input.currency, marketData, options),
     };
   }
 
-  function normalizePortfolioRows(rows, marketData) {
+  function normalizePortfolioRows(rows, marketData, options = {}) {
     const assets = marketData?.assets || {};
+    const analysisAsOf = getAnalysisDate(options, marketData);
+    const fxSnapshot = resolveFxRate(marketData, { ...options, asOfDate: analysisAsOf });
     const grouped = new Map();
     for (const input of Array.isArray(rows) ? rows : []) {
       const ticker = normalizeTicker(input.ticker);
       if (!ticker) continue;
       const asset = assets[ticker] || { ticker, name: ticker, currency: input.priceCurrency || input.currency || 'USD', type: 'stock' };
-      const shareValuation = resolveShareValuation(input, asset, marketData);
-      const cashValuation = shareValuation ? null : resolveCashValuation(input, marketData);
+      const valuationOptions = { ...options, asOfDate: analysisAsOf };
+      const shareValuation = resolveShareValuation(input, asset, marketData, valuationOptions);
+      const cashValuation = shareValuation ? null : resolveCashValuation(input, marketData, valuationOptions);
       const valuation = shareValuation || cashValuation;
       if (!valuation || !Number.isFinite(valuation.converted.valueKrw) || valuation.converted.valueKrw === 0) continue;
 
@@ -194,6 +272,8 @@
         averagePrice: valuation.price,
         price: valuation.price,
         priceAsOf: valuation.priceAsOf || asset.priceAsOf || asset.asOf || '',
+        valuationAsOf: analysisAsOf,
+        priceSource: valuation.priceSource || '',
         valuationModes: new Set(),
         valueKrw: 0,
         valueUsd: 0,
@@ -209,6 +289,7 @@
       existing.averagePrice = existing.inputShares ? Math.abs((existing.priceCurrency === 'KRW' ? existing.valueKrw : existing.valueUsd) / existing.inputShares) : existing.price;
       existing.priceCurrency = valuation.priceCurrency || existing.priceCurrency;
       existing.priceAsOf = valuation.priceAsOf || existing.priceAsOf;
+      existing.priceSource = valuation.priceSource || existing.priceSource;
       existing.valuationModes.add(valuation.mode);
       existing.leverage = leverageOverride || existing.leverage || leverage;
       existing.leverageSource = leverageOverride ? 'manual' : existing.leverageSource;
@@ -216,12 +297,15 @@
     }
     const direct = Array.from(grouped.values()).map((row) => ({ ...row, valuationModes: Array.from(row.valuationModes).sort() }));
     const totalKrw = direct.reduce((sum, row) => sum + row.valueKrw, 0);
-    const fxRate = getFxRate(marketData);
     return {
       direct: direct.map((row) => ({ ...row, weight: totalKrw ? row.valueKrw / totalKrw : 0 })),
       totalKrw,
-      totalUsd: totalKrw / fxRate,
-      fxRate,
+      totalUsd: totalKrw / fxSnapshot.rate,
+      fxRate: fxSnapshot.rate,
+      fxAsOf: fxSnapshot.asOf,
+      fxSource: fxSnapshot.source,
+      fxSourceStatus: fxSnapshot.sourceStatus,
+      analysisAsOf,
     };
   }
 
@@ -288,6 +372,30 @@
     return true;
   }
 
+  function selectHoldingsRecord(rawRecord, basisDate) {
+    if (!rawRecord) return { record: null, reason: 'missing' };
+    const records = Array.isArray(rawRecord.history) && rawRecord.history.length
+      ? rawRecord.history.map((record) => ({ ...rawRecord, ...record }))
+      : [rawRecord];
+    const targetDate = dateOnly(basisDate);
+    if (!targetDate) return { record: records.at(-1), reason: 'latest' };
+    const staticProxy = rawRecord.historicalPolicy === 'static_underlying_proxy';
+    const candidates = records
+      .map((record) => ({ ...record, effectiveAsOf: dateOnly(record.asOf) }))
+      .filter((record) => {
+        if (staticProxy && record.sourceStatus === 'proxy') return true;
+        return record.effectiveAsOf && compareDate(record.effectiveAsOf, targetDate) <= 0;
+      })
+      .sort((a, b) => compareDate(a.effectiveAsOf, b.effectiveAsOf));
+    if (candidates.length) return { record: candidates.at(-1), reason: 'matched' };
+    const nearest = records
+      .map((record) => dateOnly(record.asOf))
+      .filter(Boolean)
+      .sort((a, b) => compareDate(a, b))
+      .at(0);
+    return { record: null, reason: nearest ? `after_basis:${nearest}` : 'undated' };
+  }
+
   function computeLookThrough(normalizedPortfolio, marketData, options = {}) {
     const etfHoldings = marketData?.etfHoldings || {};
     const totalKrw = normalizedPortfolio.totalKrw || 0;
@@ -295,9 +403,12 @@
     const auditBucket = new Map();
     const coverageRows = [];
     const universe = getUniverseOptions(options);
+    const analysisAsOf = normalizedPortfolio.analysisAsOf || getAnalysisDate(options, marketData);
 
     for (const row of normalizedPortfolio.direct) {
-      const holdingsRecord = etfHoldings[row.ticker];
+      const rawHoldingsRecord = etfHoldings[row.ticker];
+      const selectedHoldings = selectHoldingsRecord(rawHoldingsRecord, analysisAsOf);
+      const holdingsRecord = selectedHoldings.record;
       const rawHoldings = Array.isArray(holdingsRecord?.holdings) ? holdingsRecord.holdings : [];
       const positiveHoldings = rawHoldings
         .map((holding) => ({ ...holding, ticker: normalizeTicker(holding.ticker), weight: Math.max(0, Math.min(1, asNumber(holding.weight, 0))) }))
@@ -308,7 +419,7 @@
         .map((holding) => ({ ...holding, weight: holding.weight * normalizationFactor }))
         .sort((a, b) => b.weight - a.weight);
       const hasHoldings = holdings.length > 0;
-      const isEtf = row.type === 'etf' || Boolean(holdingsRecord);
+      const isEtf = row.type === 'etf' || Boolean(rawHoldingsRecord);
       const leverage = row.leverage || 1;
       if (isEtf && hasHoldings) {
         let coveredWeight = 0;
@@ -360,19 +471,26 @@
           residualWeight,
           leverage,
           source: holdingsRecord.source || 'holdings',
-          asOf: holdingsRecord.asOf || '',
+          asOf: holdingsRecord.effectiveAsOf || holdingsRecord.asOf || '',
           status: holdingsRecord.sourceStatus || 'sample',
+          basisAsOf: analysisAsOf,
+          selection: selectedHoldings.reason,
         });
       } else {
+        const historicalMissing = isEtf && rawHoldingsRecord && !holdingsRecord && selectedHoldings.reason !== 'missing';
+        const coverageStatus = historicalMissing ? 'no_historical_holdings' : (isEtf ? 'no_holdings' : 'direct');
+        const coverageName = historicalMissing
+          ? `${row.name || row.ticker} · 기준일 이전 holdings 없음`
+          : (isEtf ? `${row.name || row.ticker} · 구성종목 미확보` : row.name);
         const targetBucket = isEtf ? auditBucket : stockBucket;
         addExposure(targetBucket, {
           ticker: isEtf ? `${row.ticker}:UNMAPPED` : row.ticker,
-          name: isEtf ? `${row.name || row.ticker} · 구성종목 미확보` : row.name,
+          name: coverageName,
           sourceTicker: row.ticker,
           valueKrw: row.valueKrw,
           leveredValueKrw: row.valueKrw * (isEtf ? leverage : 1),
           holdingWeight: 1,
-          coverage: isEtf ? 'no_holdings' : 'direct',
+          coverage: coverageStatus,
           type: isEtf ? 'unmapped_etf' : 'stock',
         });
         coverageRows.push({
@@ -385,9 +503,11 @@
           filteredWeight: 0,
           residualWeight: isEtf ? 1 : 0,
           leverage: isEtf ? leverage : 1,
-          source: isEtf ? 'unavailable' : 'direct stock',
-          asOf: row.priceAsOf || '',
-          status: isEtf ? 'no_holdings' : 'direct',
+          source: historicalMissing ? `holdings snapshot is after selected basis date (${selectedHoldings.reason.replace('after_basis:', '')})` : (isEtf ? 'unavailable' : 'direct stock'),
+          asOf: historicalMissing ? (selectedHoldings.reason.replace('after_basis:', '') || '') : (row.priceAsOf || ''),
+          status: coverageStatus,
+          basisAsOf: analysisAsOf,
+          selection: selectedHoldings.reason,
         });
       }
     }
@@ -412,12 +532,23 @@
     };
   }
 
-  function returnsForTicker(ticker, marketData) {
+  function returnsForTicker(ticker, marketData, options = {}) {
     const asset = marketData?.assets?.[normalizeTicker(ticker)];
     const returns = Array.isArray(asset?.returns) ? asset.returns : [];
+    const analysisAsOf = getAnalysisDate(options, marketData);
+    const lookbackDays = asNumber(options.correlationLookbackDays, Infinity);
+    const sinceDate = Number.isFinite(lookbackDays) && lookbackDays > 0 && analysisAsOf
+      ? new Date(`${analysisAsOf}T00:00:00Z`)
+      : null;
+    if (sinceDate) sinceDate.setUTCDate(sinceDate.getUTCDate() - Math.floor(lookbackDays));
     return returns
       .map((point) => ({ date: String(point.date || ''), value: asNumber(point.value, NaN) }))
-      .filter((point) => point.date && Number.isFinite(point.value));
+      .filter((point) => {
+        if (!point.date || !Number.isFinite(point.value)) return false;
+        if (analysisAsOf && compareDate(point.date, analysisAsOf) > 0) return false;
+        if (sinceDate && compareDate(point.date, sinceDate.toISOString().slice(0, 10)) < 0) return false;
+        return true;
+      });
   }
 
   function pearsonFromPairs(pairs) {
@@ -441,10 +572,10 @@
     return numerator / Math.sqrt(denomX * denomY);
   }
 
-  function correlationBetween(tickerA, tickerB, marketData) {
-    if (normalizeTicker(tickerA) === normalizeTicker(tickerB)) return { value: 1, samples: returnsForTicker(tickerA, marketData).length, overlap: 'identity' };
-    const a = returnsForTicker(tickerA, marketData);
-    const b = returnsForTicker(tickerB, marketData);
+  function correlationBetween(tickerA, tickerB, marketData, options = {}) {
+    if (normalizeTicker(tickerA) === normalizeTicker(tickerB)) return { value: 1, samples: returnsForTicker(tickerA, marketData, options).length, overlap: 'identity' };
+    const a = returnsForTicker(tickerA, marketData, options);
+    const b = returnsForTicker(tickerB, marketData, options);
     const byDate = new Map(a.map((point) => [point.date, point.value]));
     const pairs = [];
     for (const point of b) {
@@ -453,21 +584,21 @@
     return { value: pearsonFromPairs(pairs), samples: pairs.length, overlap: pairs.length >= 3 ? 'ok' : 'insufficient' };
   }
 
-  function buildCorrelationMatrix(tickers, marketData, limit = 12) {
+  function buildCorrelationMatrix(tickers, marketData, limit = 12, options = {}) {
     const unique = [];
     const seen = new Set();
     const max = Number.isFinite(asNumber(limit, 12)) ? Math.max(1, Math.floor(asNumber(limit, 12))) : 12;
     for (const ticker of tickers || []) {
       const normalized = normalizeTicker(ticker);
       if (!normalized || normalized.includes(':') || seen.has(normalized)) continue;
-      if (!returnsForTicker(normalized, marketData).length) continue;
+      if (!returnsForTicker(normalized, marketData, options).length) continue;
       unique.push(normalized);
       seen.add(normalized);
       if (unique.length >= max) break;
     }
     const rows = unique.map((rowTicker) => ({
       ticker: rowTicker,
-      cells: unique.map((columnTicker) => ({ ticker: columnTicker, ...correlationBetween(rowTicker, columnTicker, marketData) })),
+      cells: unique.map((columnTicker) => ({ ticker: columnTicker, ...correlationBetween(rowTicker, columnTicker, marketData, options) })),
     }));
     return { tickers: unique, rows };
   }
@@ -483,20 +614,23 @@
   }
 
   function calculatePortfolio(rows, marketData, options = {}) {
-    const normalized = normalizePortfolioRows(rows, marketData);
-    const lookThrough = computeLookThrough(normalized, marketData, options);
-    const instrumentCorrelation = buildCorrelationMatrix(normalized.direct.map((row) => row.ticker), marketData, options.instrumentLimit || 12);
+    const analysisAsOf = getAnalysisDate(options, marketData);
+    const datedOptions = { ...options, asOfDate: analysisAsOf };
+    const normalized = normalizePortfolioRows(rows, marketData, datedOptions);
+    const lookThrough = computeLookThrough(normalized, marketData, datedOptions);
+    const instrumentCorrelation = buildCorrelationMatrix(normalized.direct.map((row) => row.ticker), marketData, options.instrumentLimit || 12, datedOptions);
     const underlyingTickers = lookThrough.primaryExposureRows
       .map((row) => row.ticker)
       .filter((ticker) => !ticker.includes(':'));
-    const underlyingCorrelation = buildCorrelationMatrix(underlyingTickers, marketData, options.underlyingLimit || options.exposureTopN || 12);
-    const fxFreshness = classifyFreshness(marketData?.fx?.asOf || marketData?.dataAsOf || marketData?.generatedAt);
+    const underlyingCorrelation = buildCorrelationMatrix(underlyingTickers, marketData, options.underlyingLimit || options.exposureTopN || 12, datedOptions);
+    const fxFreshness = classifyFreshness(normalized.fxAsOf || marketData?.fx?.asOf || marketData?.dataAsOf || marketData?.generatedAt, analysisAsOf ? new Date(`${analysisAsOf}T23:59:59Z`) : new Date());
     return {
       ...normalized,
       ...lookThrough,
       instrumentCorrelation,
       underlyingCorrelation,
       fxFreshness,
+      analysisAsOf,
       generatedAt: marketData?.generatedAt || '',
       dataAsOf: marketData?.dataAsOf || '',
       warnings: Array.isArray(marketData?.warnings) ? marketData.warnings : [],
@@ -509,6 +643,9 @@
     asNumber,
     asCurrency,
     convertAmount,
+    getAnalysisDate,
+    latestPriceOnOrBefore,
+    resolveFxRate,
     parseTickerList,
     inferLeverage,
     parsePortfolioText,

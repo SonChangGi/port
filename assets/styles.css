@@ -181,8 +181,22 @@ textarea { resize: vertical; border-radius: var(--radius-md); min-height: 120px;
 select option { background: #111827; color: var(--ink); }
 
 .filter-card { margin-top: 18px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: rgba(8,10,15,.38); }
+.basis-date-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  gap: 14px;
+  align-items: end;
+  margin: 14px 0 10px;
+  padding: 16px;
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, rgba(125, 211, 252, 0.08), rgba(8, 10, 15, 0.42));
+}
+.basis-date-card label { display: grid; gap: 6px; color: var(--muted); font-size: .88rem; font-weight: 850; }
+.basis-date-card + .muted { margin-top: 0; }
 .filter-grid,
 .update-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.update-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .filter-grid label,
 .update-grid label { display: grid; gap: 6px; color: var(--muted); font-size: .88rem; font-weight: 850; }
 
@@ -257,7 +271,7 @@ tr:last-child td { border-bottom: 0; }
   .hero-main, .hero-note, .panel, .notice, .metric-card { border-radius: 22px; }
   .hero-main { padding: 24px; }
   body { word-break: normal; }
-  .metric-row, .filter-grid, .update-grid { grid-template-columns: 1fr; }
+  .metric-row, .filter-grid, .update-grid, .basis-date-card { grid-template-columns: 1fr; }
   .panel-header { flex-direction: column; }
   h1 { font-size: clamp(2rem, 9vw, 2.95rem); line-height: 1.12; }
   h2 { font-size: clamp(1.75rem, 8vw, 2.35rem); }

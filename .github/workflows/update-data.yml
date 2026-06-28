@@ -11,6 +11,10 @@ on:
         description: 'Additional ETF tickers to fetch holdings for, e.g. RAM'
         required: false
         default: ''
+      price_range:
+        description: 'Yahoo/Naver price and FX history range for basis-date analysis (6mo, 1y, 2y, 5y, 10y, max)'
+        required: false
+        default: '6mo'
   schedule:
     - cron: '30 0 * * 2-6'
 
@@ -29,17 +33,18 @@ jobs:
         env:
           PORT_EXTRA_SYMBOLS: ${{ github.event.inputs.extra_symbols || '' }}
           PORT_EXTRA_ETFS: ${{ github.event.inputs.extra_etfs || '' }}
+          PORT_PRICE_RANGE: ${{ github.event.inputs.price_range || '6mo' }}
         run: npm run refresh:data
       - name: Verify static dashboard
         run: npm test
       - name: Commit data refresh
         run: |
-          if git diff --quiet -- data/market-data.json; then
+          if git diff --quiet -- data/market-data.json data/history-data.json; then
             echo "No generated data changes."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/market-data.json
+          git add data/market-data.json data/history-data.json
           git commit -m "Refresh portfolio market data" -m "Constraint: Free best-effort public data sources can lag or fail." -m "Confidence: medium" -m "Scope-risk: narrow" -m "Tested: npm test" -m "Not-tested: Provider completeness beyond parsed public sources"
           git push

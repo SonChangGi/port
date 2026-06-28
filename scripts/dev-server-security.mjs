@@ -82,12 +82,13 @@ try {
   const allowed = await request(base, '/api/refresh-data', {
     method: 'POST',
     headers: { origin: base, 'content-type': 'application/json', 'x-port-dev-token': status.body.token },
-    body: JSON.stringify({ symbols: 'TSLL; <script>alert(1)</script>; SNXX', etfs: 'TSLL SNXX' }),
+    body: JSON.stringify({ symbols: 'TSLL; <script>alert(1)</script>; SNXX', etfs: 'TSLL SNXX', range: '2y' }),
   });
   assert.equal(allowed.response.status, 200, 'same-origin tokened JSON POST is accepted');
   assert.equal(allowed.body.ok, true);
   assert.equal(allowed.body.symbols, 'TSLL SNXX', 'invalid ticker text is sanitized');
   assert.equal(allowed.body.etfs, 'TSLL SNXX');
+  assert.equal(allowed.body.range, '2y', 'price range is sanitized and returned');
 
   console.log('PASS dev server localhost/token/origin/content-type security checks');
 } finally {

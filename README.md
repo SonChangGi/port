@@ -15,6 +15,7 @@
 - 분석 universe를 직접 제어할 수 있습니다: 최대 종목수(공백이면 전체), 최소 비중, 강제 포함 티커, 제외 티커.
 - 사용자가 필터로 숨긴 구성종목, holdings 합계가 100%에 못 미치는 현금·파생·반올림 잔여분, holdings를 못 가져온 ETF는 주 노출 표에 `ETF:OTHER`처럼 섞지 않고 별도 잔여 노출 표에만 표시합니다.
 - 입력 종목과 ETF 기초 종목의 일별 수익률 상관관계를 heatmap으로 표시합니다.
+- **분석 기준일**을 선택하면 그 날짜 이전의 종가, USD/KRW 환율, 수익률 표본만 사용해 “그 날짜에 이 보유 주수를 들고 있었다면”의 포트폴리오를 재계산합니다. 초기 스냅샷은 작게 읽고 가격/환율/수익률 히스토리는 `data/history-data.json`에서 지연 로드합니다.
 - 데이터 생성 시각, 환율 기준일, source/fallback/stale 상태와 provider warnings를 함께 표시합니다.
 - Quant Dashboard로 돌아가는 링크를 제공합니다.
 
@@ -34,7 +35,7 @@ npm run refresh:data
 npm test
 ```
 
-화면의 **데이터 업데이트 → 새 티커 종가 추가·업데이트** 패널에서도 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS` 명령을 만들 수 있습니다. `npm run dev`로 로컬 서버를 열면 티커 입력만으로 누락 종목을 감지해 localhost-only `/api/refresh-data`가 `npm run refresh:data && npm test`를 자동 실행하고, 생성 JSON을 다시 읽어 재계산합니다. 이 endpoint는 `127.0.0.1`에만 bind되고 same-origin/dev-token 검사를 통과해야 실행됩니다. 공개 GitHub Pages는 보안상 브라우저에서 GitHub Actions write token을 받지 않으며, 같은 티커 목록이 패널과 명령에 자동 반영되면 GitHub Actions의 `extra_symbols`/`extra_etfs` 입력칸에 붙여 넣어 수동 갱신합니다.
+화면의 **데이터 업데이트 → 새 티커 종가 추가·업데이트** 패널에서도 `PORT_EXTRA_SYMBOLS`/`PORT_EXTRA_ETFS`/`PORT_PRICE_RANGE` 명령을 만들 수 있습니다. `npm run dev`로 로컬 서버를 열면 티커 입력 또는 기준일 히스토리 누락만으로 localhost-only `/api/refresh-data`가 `npm run refresh:data && npm test`를 자동 실행하고, 스냅샷/히스토리 JSON을 다시 읽어 재계산합니다. 이 endpoint는 `127.0.0.1`에만 bind되고 same-origin/dev-token 검사를 통과해야 실행됩니다. 공개 GitHub Pages는 보안상 브라우저에서 GitHub Actions write token을 받지 않으며, 같은 티커 목록과 가격 히스토리 범위가 패널과 명령에 자동 반영되면 GitHub Actions의 `extra_symbols`/`extra_etfs`/`price_range` 입력칸에 붙여 넣어 수동 갱신합니다.
 
 네트워크 없이 deterministic sample JSON을 다시 만들려면:
 
@@ -61,12 +62,12 @@ TQQQ,2,USD,3
 
 ## 데이터 소스 정책
 
-브라우저 UI는 외부 금융 API를 직접 호출하지 않습니다. `scripts/refresh-data.mjs` 또는 GitHub Actions가 best-effort로 데이터를 가져와 `data/market-data.json`을 생성하고, 정적 웹페이지는 이 JSON만 읽습니다.
+브라우저 UI는 외부 금융 API를 직접 호출하지 않습니다. `scripts/refresh-data.mjs` 또는 GitHub Actions가 best-effort로 데이터를 가져와 `data/market-data.json`(최신 스냅샷)과 `data/history-data.json`(가격/환율/수익률 히스토리)을 생성하고, 정적 웹페이지는 이 JSON만 읽습니다. 히스토리 파일은 기준일 분석이나 상관관계 계산이 필요할 때 지연 로드됩니다.
 
 현재 refresh 스크립트의 무료/no-key 소스:
 
 - FX: Frankfurter `USD/KRW`
-- 가격/종가/수익률: Yahoo Chart daily history
+- 가격/종가/수익률: Yahoo Chart daily history (`history-data.json`에 분리 저장)
 - 한국 상장 6자리 ETF/종목 fallback: Yahoo `.KS` 우선, 실패 시 Naver Finance chart (`0167A0`/`069500` → `.KS`)
 - SPY holdings: State Street official holdings XLSX
 - QQQ holdings: Invesco QQQ holdings API
@@ -88,6 +89,7 @@ PORT_EXTRA_SYMBOLS="VOO SCHD TSLL SNXX 069500 360750 0167A0 RAM" PORT_EXTRA_ETFS
 
 - `PORT_EXTRA_SYMBOLS`: 종가/수익률을 추가로 가져올 주식·ETF 티커입니다.
 - `PORT_EXTRA_ETFS`: holdings 파싱도 시도할 ETF 티커입니다. 공식 parser가 없는 미국 ETF는 StockAnalysis 공개 holdings 페이지를 best-effort로 사용하고, 한국 ETF는 holdings 미지원 상태를 명확히 남깁니다.
+- `PORT_PRICE_RANGE`: 기준일 분석에 필요한 가격/환율 히스토리 범위입니다. `6mo`, `1y`, `2y`, `5y`, `10y`, `max`를 지원하며, 화면에서 기준일을 과거로 옮기면 필요한 범위를 자동으로 제안합니다.
 - refresh 후에도 종가가 확보되지 않은 티커를 보유 주수로 입력하면, 화면은 임의 가격을 만들지 않고 “종가 없음 / refresh에 티커 포함” 오류를 표시합니다.
 - 보유 주수 직접 평가는 현재 `USD`/`KRW` 종가만 KRW 기준으로 환산합니다. DRAM 구성종목처럼 JPY/TWD/CNY 현지통화 종가가 데이터에 들어온 해외 기초종목은 ETF look-through 비중에는 사용되지만, 해당 현지통화 티커를 직접 보유 row로 넣으면 USD/KRW 환산 가격을 확보하기 전까지 오류로 막습니다.
 
@@ -95,13 +97,15 @@ PORT_EXTRA_SYMBOLS="VOO SCHD TSLL SNXX 069500 360750 0167A0 RAM" PORT_EXTRA_ETFS
 
 ## 계산 개요
 
-1. 각 입력 row의 `보유 주수 × 종가`를 종가 통화 기준 평가금액으로 계산합니다.
-2. `USD/KRW` 환율로 KRW 기준 평가금액을 만들고 전체 비중을 계산합니다.
-3. ETF holdings가 있으면 `ETF 평가금액 × 보유종목 비중`으로 **개별 구성종목** 노출을 계산합니다. ETF 자체는 주 노출 표의 최종 행이 아닙니다.
-4. 사용자가 분석 universe를 제한하면 숨겨진 구성종목은 별도 `ETF:OTHER` 잔여 노출로 보존하되, 개별 종목 최종 비중 표에는 섞지 않습니다.
-5. 보유비중 합계가 100% 미만이면 잔여 노출로 남겨 누락을 조작하지 않습니다.
-6. 레버리지 포함 노출은 각 개별 구성종목 노출에 ETF 배율을 곱한 **명목 노출**입니다. inverse ETF는 음수 배율을 유지합니다.
-7. 상관관계는 개별 종목 최종 비중 표의 분석 universe 중 생성 JSON에 일별 수익률이 있는 종목만 사용하며 표본 수가 부족하면 `n/a`로 표시합니다.
+1. 사용자가 선택한 분석 기준일을 정하고, 해당 날짜 이전의 가장 가까운 종가와 USD/KRW 환율을 고릅니다.
+2. 각 입력 row의 `보유 주수 × 기준일 종가`를 종가 통화 기준 평가금액으로 계산합니다.
+3. 기준일 `USD/KRW` 환율로 KRW 기준 평가금액을 만들고 전체 비중을 계산합니다.
+4. ETF holdings가 기준일 이전 snapshot 또는 static single-stock proxy로 사용 가능하면 `ETF 평가금액 × 보유종목 비중`으로 **개별 구성종목** 노출을 계산합니다. ETF 자체는 주 노출 표의 최종 행이 아닙니다.
+5. historical holdings snapshot이 기준일 이후에만 있으면 미래 구성종목으로 보정하지 않고 `no_historical_holdings` 잔여 노출로 남깁니다.
+6. 사용자가 분석 universe를 제한하면 숨겨진 구성종목은 별도 `ETF:OTHER` 잔여 노출로 보존하되, 개별 종목 최종 비중 표에는 섞지 않습니다.
+7. 보유비중 합계가 100% 미만이면 잔여 노출로 남겨 누락을 조작하지 않습니다.
+8. 레버리지 포함 노출은 각 개별 구성종목 노출에 ETF 배율을 곱한 **명목 노출**입니다. inverse ETF는 음수 배율을 유지합니다.
+9. 상관관계는 기준일 이전 최근 최대 252거래일의 일별 수익률 교집합만 사용하며 표본 수가 부족하면 `n/a`로 표시합니다.
 
 ## 검증
 

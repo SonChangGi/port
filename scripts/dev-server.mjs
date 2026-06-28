@@ -14,6 +14,7 @@ const MAX_BODY_BYTES = 16_384;
 const MAX_OUTPUT_BYTES = 80_000;
 const DEV_TOKEN = randomBytes(24).toString('hex');
 const DRY_RUN = process.env.PORT_DEV_SERVER_DRY_RUN === '1';
+const ALLOWED_PRICE_RANGES = new Set(['5d', '1mo', '3mo', '6mo', '1y', '2y', '5y', '10y', 'max']);
 let activeRefresh = null;
 
 const MIME = new Map([
@@ -42,6 +43,11 @@ function sanitizeTickerText(value) {
     .filter((item) => /^[A-Z0-9.\-]{1,16}$/.test(item))
     .filter((item, index, list) => list.indexOf(item) === index)
     .join(' ');
+}
+
+function sanitizePriceRange(value) {
+  const normalized = String(value || '6mo').trim().toLowerCase();
+  return ALLOWED_PRICE_RANGES.has(normalized) ? normalized : '6mo';
 }
 
 function requestHostName(req) {
@@ -107,13 +113,14 @@ function runCommand(command, args, env = {}) {
   });
 }
 
-async function refreshData(symbols, etfs) {
+async function refreshData(symbols, etfs, range = '6mo') {
   if (DRY_RUN) {
-    return `dry-run refresh accepted\nsymbols=${symbols}\netfs=${etfs || symbols}\n`;
+    return `dry-run refresh accepted\nsymbols=${symbols}\netfs=${etfs || symbols}\nrange=${range}\n`;
   }
   const env = {
     PORT_EXTRA_SYMBOLS: symbols,
     PORT_EXTRA_ETFS: etfs || symbols,
+    PORT_PRICE_RANGE: range,
   };
   const refreshOutput = await runCommand('npm', ['run', 'refresh:data'], env);
   const testOutput = await runCommand('npm', ['test']);
@@ -141,13 +148,14 @@ async function handleRefresh(req, res) {
     const body = await readBody(req);
     const symbols = sanitizeTickerText(body.symbols || body.extra_symbols);
     const etfs = sanitizeTickerText(body.etfs || body.extra_etfs || symbols);
+    const range = sanitizePriceRange(body.range || body.price_range || body.priceRange);
     if (!symbols && !etfs) {
       json(res, 400, { ok: false, message: 'symbols or etfs required' });
       return;
     }
-    activeRefresh = refreshData(symbols, etfs);
+    activeRefresh = refreshData(symbols, etfs, range);
     const output = await activeRefresh;
-    json(res, 200, { ok: true, symbols, etfs, output: output.slice(-MAX_OUTPUT_BYTES) });
+    json(res, 200, { ok: true, symbols, etfs, range, output: output.slice(-MAX_OUTPUT_BYTES) });
   } catch (error) {
     const message = error.message || 'refresh failed';
     if (/request body too large/i.test(message)) json(res, 413, { ok: false, message });

@@ -33,7 +33,8 @@
         <div class="hero-actions">
           <a class="primary-button" href="#portfolio-input">포트폴리오 계산</a>
           <a class="secondary-button" href="#data-update">새 티커 종가 업데이트</a>
-          <a class="secondary-button" href="data/market-data.json" target="_blank" rel="noopener noreferrer">생성 JSON 보기</a>
+          <a class="secondary-button" href="data/market-data.json" target="_blank" rel="noopener noreferrer">스냅샷 JSON</a>
+          <a class="secondary-button" href="data/history-data.json" target="_blank" rel="noopener noreferrer">히스토리 JSON</a>
         </div>
       </div>
       <aside class="hero-note" aria-label="데이터 신호">
@@ -54,16 +55,28 @@
         <p class="eyebrow">Inputs</p>
         <h2 id="input-title">포트폴리오 입력</h2>
         <p>티커와 보유 주수를 입력하면 종가 통화(USD/KRW)를 기준으로 평가금액을 계산합니다. 가격이 없는 티커는 명시적으로 오류 처리됩니다.</p>
+        <p>기준일 입력값을 바꾸면 해당 날짜 이전의 종가·환율·수익률만 사용해 과거 보유 시나리오를 다시 계산합니다.</p>
       </div>
       <div class="input-grid">
         <article class="panel portfolio-editor" aria-labelledby="editor-title">
           <div class="panel-header compact">
             <div>
               <h3 id="editor-title">종목·보유 주수</h3>
-              <p>종가 통화는 생성 JSON의 티커 메타데이터를 기본 사용하며, 필요하면 행에서 명시할 수 있습니다.</p>
+              <p>종가 통화는 생성 JSON의 티커 메타데이터를 기본 사용하며, 기준일의 종가·환율·수익률만 분석에 사용합니다.</p>
             </div>
             <button id="add-row" type="button" class="secondary-button">행 추가</button>
           </div>
+          <div class="basis-date-card" aria-labelledby="basis-date-title">
+            <div>
+              <h4 id="basis-date-title">분석 기준일</h4>
+              <p class="muted">“이 날짜에 이 보유 주수를 들고 있었다면”을 계산합니다. 종가, USD/KRW, 상관관계 표본, ETF holdings 사용 가능 여부가 모두 이 날짜 기준으로 판정됩니다.</p>
+            </div>
+            <label>
+              기준일
+              <input id="analysis-date" type="date" aria-describedby="basis-date-help" />
+            </label>
+          </div>
+          <p id="basis-date-help" class="muted">해당 기준일 가격/환율 히스토리가 JSON에 없으면 로컬 <code>npm run dev</code>에서 자동으로 더 긴 가격 범위 refresh를 시도합니다. historical holdings가 없으면 미래 구성종목으로 보정하지 않고 잔여 노출에 표시합니다.</p>
           <div class="table-wrap input-wrap">
             <table class="input-table">
               <caption>포트폴리오 입력 테이블</caption>
@@ -202,7 +215,7 @@
       <div class="section-heading centered">
         <p class="eyebrow">Correlation</p>
         <h2 id="correlation-title">수익률 상관관계</h2>
-        <p>분석 유니버스 필터를 통과한 구성종목 중 생성 JSON의 일별 수익률이 겹치는 종목만 사용합니다.</p>
+          <p>분석 유니버스 필터를 통과한 구성종목 중 기준일 이하의 최근 최대 252거래일 일별 수익률이 겹치는 종목만 사용합니다. 히스토리 JSON은 스냅샷 렌더 후 지연 로드됩니다.</p>
       </div>
       <div class="correlation-grid">
         <article class="panel">
@@ -243,6 +256,17 @@
             holdings도 시도할 ETF 티커
             <input id="update-etfs" value="VOO SCHD TSLL SNXX 069500.KS 360750.KS 0167A0.KS RAM" autocomplete="off" spellcheck="false" aria-describedby="update-help" />
           </label>
+          <label>
+            가격/환율 히스토리 범위
+            <select id="update-range" aria-describedby="update-help">
+              <option value="6mo">6개월</option>
+              <option value="1y">1년</option>
+              <option value="2y">2년</option>
+              <option value="5y">5년</option>
+              <option value="10y">10년</option>
+              <option value="max">최대</option>
+            </select>
+          </label>
         </div>
         <div class="manual-update-actions">
           <button id="update-from-portfolio" type="button" class="secondary-button">현재 입력 티커로 채우기</button>
@@ -251,7 +275,7 @@
         </div>
         <p id="update-help" class="muted refresh-help">
           로컬 자동 갱신은 <code>npm run dev</code>로 연 페이지에서만 동작합니다. 공개 Pages는 보안상 브라우저에서 GitHub Actions write token을 받지 않으므로,
-          새 티커가 감지되면 입력값과 명령을 자동으로 준비하고 Actions 링크/명령 복사로 갱신합니다. 갱신 후 생성 JSON을 다시 읽으면 보유 주수 계산에 실제 종가가 사용됩니다.
+          새 티커나 기준일 히스토리 누락이 감지되면 입력값·범위·명령을 자동으로 준비하고 Actions 링크/명령 복사로 갱신합니다. 갱신 후 스냅샷 JSON과 히스토리 JSON을 다시 읽으면 기준일 종가와 환율이 보유 주수 계산에 사용됩니다.
         </p>
         <p id="update-status" class="status-line" role="status" aria-live="polite">TSLL/SNXX/0167A0/RAM ETF 갱신 입력과 자동 refresh 감지를 준비했습니다.</p>
       </article>
