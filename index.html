@@ -9,7 +9,7 @@
   <script src="assets/portfolio-core.js" defer></script>
   <script src="assets/app.js" defer></script>
 </head>
-<body>
+<body id="top">
   <noscript><div class="noscript-warning">이 대시보드는 JavaScript가 필요합니다. 브라우저 설정을 확인하세요.</div></noscript>
 
   <header class="hero" aria-labelledby="page-title">
@@ -54,10 +54,6 @@
   </header>
 
   <main>
-    <section class="section notice" aria-label="주의사항">
-      <strong>중요:</strong> 이 화면은 개인 리서치용 포트폴리오 노출 관제 도구이며 투자, 세무, 법률 또는 매매 조언이 아닙니다.
-      무료 데이터의 지연·누락·구조 변경, ETF 보유비중 잔여값, correlation 표본 부족을 반드시 함께 확인하세요.
-    </section>
 
     <section class="section analysis-map" aria-labelledby="analysis-map-title">
       <div class="section-heading">
@@ -341,6 +337,11 @@
         </div>
       </article>
     </section>
+    <section class="section notice moved-notice" aria-label="주의사항">
+      <strong>중요:</strong> 이 화면은 개인 리서치용 포트폴리오 노출 관제 도구이며 투자, 세무, 법률 또는 매매 조언이 아닙니다.
+      무료 데이터의 지연·누락·구조 변경, ETF 보유비중 잔여값, correlation 표본 부족을 반드시 함께 확인하세요.
+    </section>
+
   </main>
 
   <footer class="site-footer">
@@ -349,5 +350,10 @@
       환율 기준일 차이, correlation 표본 부족이 있을 수 있습니다.
     </p>
   </footer>
+  <nav class="page-jump-nav" aria-label="페이지 빠른 이동">
+    <a href="#top" aria-label="맨 위로 이동">↑ 위</a>
+    <a href="#page-bottom" aria-label="맨 아래로 이동">↓ 아래</a>
+  </nav>
+  <div id="page-bottom" tabindex="-1" aria-hidden="true"></div>
 </body>
 </html>
