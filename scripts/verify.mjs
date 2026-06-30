@@ -241,6 +241,10 @@ assert(!contains(files.refresh, 'record.holdings.slice(0, 12)'), 'refresh script
 assert(contains(files.workflow, 'extra_symbols'), 'Actions workflow accepts extra_symbols input');
 assert(contains(files.workflow, 'extra_etfs'), 'Actions workflow accepts extra_etfs input');
 assert(contains(files.workflow, 'price_range'), 'Actions workflow accepts price_range input');
+assert(contains(files.workflow, '08:45/10:45/12:45 KST Tue-Sat'), 'Actions workflow documents earlier 08:45 KST primary plus 2-hour retries');
+assert(contains(files.workflow, "cron: '45 23 * * 1-5'"), 'Actions workflow primary runs at 08:45 KST Tue-Sat');
+assert(contains(files.workflow, "cron: '45 1 * * 2-6'"), 'Actions workflow first retry runs at 10:45 KST Tue-Sat');
+assert(contains(files.workflow, "cron: '45 3 * * 2-6'"), 'Actions workflow second retry runs at 12:45 KST Tue-Sat');
 assert(contains(files.workflow, 'PORT_EXTRA_SYMBOLS'), 'Actions workflow passes extra_symbols to refresh script');
 assert(contains(files.workflow, 'PORT_EXTRA_ETFS'), 'Actions workflow passes extra_etfs to refresh script');
 assert(contains(files.workflow, 'PORT_PRICE_RANGE'), 'Actions workflow passes price_range to refresh script');

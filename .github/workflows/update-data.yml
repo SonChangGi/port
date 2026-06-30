@@ -16,7 +16,10 @@ on:
         required: false
         default: '6mo'
   schedule:
-    - cron: '30 0 * * 2-6'
+    # 08:45/10:45/12:45 KST Tue-Sat: earlier staggered refresh plus 2-hour retries after market-data publication windows.
+    - cron: '45 23 * * 1-5'
+    - cron: '45 1 * * 2-6'
+    - cron: '45 3 * * 2-6'
 
 permissions:
   contents: write
