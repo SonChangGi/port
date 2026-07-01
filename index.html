@@ -6,10 +6,10 @@
   <meta name="description" content="보유 주수와 KRW/USD 종가를 기반으로 ETF·주식 포트폴리오 비중, ETF 구성종목 look-through, 레버리지 노출, 상관관계를 확인하는 정적 포트폴리오 대시보드" />
   <title>Port Portfolio Dashboard</title>
   <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="stylesheet" href="assets/common-ui.css" />
+  <link rel="stylesheet" href="assets/common-ui.css?v=20260701-visual-ralph" />
   <script src="assets/portfolio-core.js" defer></script>
   <script src="assets/app.js" defer></script>
-  <script src="assets/common-ui.js" defer></script>
+  <script src="assets/common-ui.js?v=20260701-visual-ralph" defer></script>
 </head>
 <body id="top">
   <noscript><div class="noscript-warning">이 대시보드는 JavaScript가 필요합니다. 브라우저 설정을 확인하세요.</div></noscript>
@@ -28,9 +28,8 @@
         <p class="eyebrow">Port · Exposure Cockpit</p>
         <h1 id="page-title"><span class="title-line">최종 비중</span><span class="title-line">개별 종목 매핑</span><span class="title-line">위험 집중 신호</span></h1>
         <p class="hero-copy">
-          보유 주수를 입력하면 생성 JSON의 최신 종가와 USD/KRW 환율을 사용해 평가금액을 계산하고,
-          ETF 투자금액은 각 구성종목 비중으로 풀어 개별 종목 최종 비중과 레버리지 노출을 보여줍니다.
-          데이터 신선도와 미상 잔여비중은 별도 잔여 노출 표에 남깁니다.
+          보유 주수와 기준일을 입력해 평가금액, ETF look-through, 최종 종목 비중을 확인합니다.
+          데이터 신선도와 미상 잔여비중은 별도 표로 남깁니다.
         </p>
         <div class="hero-actions">
           <a class="primary-button" href="#portfolio-input">포트폴리오 계산</a>
@@ -44,7 +43,7 @@
           <span class="eyebrow">Live State</span>
           <strong>데이터 신호</strong>
         </div>
-        <div id="hero-data-status" class="data-signal-grid">정적 JSON 생성시각, FX 기준일, 보유비중 커버리지, fallback 여부를 확인하는 중...</div>
+        <div id="hero-data-status" class="data-signal-grid">생성시각, FX 기준일, 커버리지, fallback 여부를 확인하는 중...</div>
         <div class="workflow-rail" aria-label="분석 흐름">
           <a href="#portfolio-input"><span>01</span><strong>보유 주수</strong><small>티커 입력 · CSV</small></a>
           <a href="#portfolio-input"><span>02</span><strong>기준일</strong><small>가격·환율 ≤ 선택일</small></a>
@@ -61,7 +60,7 @@
       <div class="section-heading">
         <p class="eyebrow">Analysis Flow</p>
         <h2 id="analysis-map-title">입력에서 결론까지 한 번에 따라가는 구조</h2>
-        <p>색감은 유지하면서 긴 대시보드에서 헤매지 않도록, 핵심 작업과 결과 섹션을 카드형 흐름으로 고정했습니다.</p>
+        <p>핵심 입력과 결과 섹션을 카드형 흐름으로 먼저 보여줍니다.</p>
       </div>
       <div class="flow-grid">
         <a class="flow-card" href="#portfolio-input">
