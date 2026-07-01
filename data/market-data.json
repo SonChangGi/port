@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-01T06:10:26.119Z",
+  "generatedAt": "2026-07-01T07:57:39.156Z",
   "dataAsOf": "2026-07-01",
   "historyRange": "6mo",
   "baseCurrency": "KRW",
@@ -127,13 +127,6 @@
       "detail": "Korean ETF holdings are not scraped by this free-source refresh; price/returns still use Yahoo/Naver and exposure remains transparent in audit rows."
     },
     {
-      "name": "State Street SPY official holdings XLSX",
-      "url": "https://www.ssga.com/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx",
-      "status": "official",
-      "asOf": "2026-06-29",
-      "detail": "504 holdings parsed from provider workbook."
-    },
-    {
       "name": "StockAnalysis IVV holdings",
       "url": "https://stockanalysis.com/etf/ivv/holdings/",
       "status": "live",
@@ -145,6 +138,34 @@
       "url": "https://stockanalysis.com/etf/voo/holdings/",
       "status": "live",
       "asOf": "2026-05-31",
+      "detail": "25 holdings parsed from public ETF holdings page."
+    },
+    {
+      "name": "StockAnalysis VTI holdings",
+      "url": "https://stockanalysis.com/etf/vti/holdings/",
+      "status": "live",
+      "asOf": "2026-05-31",
+      "detail": "25 holdings parsed from public ETF holdings page."
+    },
+    {
+      "name": "StockAnalysis XLE holdings",
+      "url": "https://stockanalysis.com/etf/xle/holdings/",
+      "status": "live",
+      "asOf": "2026-06-29",
+      "detail": "21 holdings parsed from public ETF holdings page."
+    },
+    {
+      "name": "StockAnalysis DIA holdings",
+      "url": "https://stockanalysis.com/etf/dia/holdings/",
+      "status": "live",
+      "asOf": "2026-06-29",
+      "detail": "25 holdings parsed from public ETF holdings page."
+    },
+    {
+      "name": "StockAnalysis IWM holdings",
+      "url": "https://stockanalysis.com/etf/iwm/holdings/",
+      "status": "live",
+      "asOf": "2026-06-26",
       "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
@@ -162,94 +183,31 @@
       "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
-      "name": "StockAnalysis XLI holdings",
-      "url": "https://stockanalysis.com/etf/xli/holdings/",
+      "name": "StockAnalysis VNQ holdings",
+      "url": "https://stockanalysis.com/etf/vnq/holdings/",
       "status": "live",
-      "asOf": "2026-06-29",
+      "asOf": "2026-05-31",
       "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
-      "name": "StockAnalysis XLE holdings",
-      "url": "https://stockanalysis.com/etf/xle/holdings/",
+      "name": "StockAnalysis XLK holdings",
+      "url": "https://stockanalysis.com/etf/xlk/holdings/",
       "status": "live",
-      "asOf": "2026-06-29",
-      "detail": "21 holdings parsed from public ETF holdings page."
+      "asOf": "2026-06-26",
+      "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
-      "name": "TLT holdings fallback",
-      "url": "https://stockanalysis.com/etf/tlt/holdings/",
-      "status": "no_holdings",
-      "asOf": "",
-      "detail": "No parseable holdings table"
+      "name": "StockAnalysis XLF holdings",
+      "url": "https://stockanalysis.com/etf/xlf/holdings/",
+      "status": "live",
+      "asOf": "2026-06-29",
+      "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
       "name": "StockAnalysis SMH holdings",
       "url": "https://stockanalysis.com/etf/smh/holdings/",
       "status": "live",
       "asOf": "2026-06-27",
-      "detail": "25 holdings parsed from public ETF holdings page."
-    },
-    {
-      "name": "GLD holdings fallback",
-      "url": "https://stockanalysis.com/etf/gld/holdings/",
-      "status": "no_holdings",
-      "asOf": "",
-      "detail": "StockAnalysis holdings GLD 404"
-    },
-    {
-      "name": "StockAnalysis VTI holdings",
-      "url": "https://stockanalysis.com/etf/vti/holdings/",
-      "status": "live",
-      "asOf": "2026-05-31",
-      "detail": "25 holdings parsed from public ETF holdings page."
-    },
-    {
-      "name": "StockAnalysis DIA holdings",
-      "url": "https://stockanalysis.com/etf/dia/holdings/",
-      "status": "live",
-      "asOf": "2026-06-26",
-      "detail": "24 holdings parsed from public ETF holdings page."
-    },
-    {
-      "name": "StockAnalysis SOXX holdings",
-      "url": "https://stockanalysis.com/etf/soxx/holdings/",
-      "status": "live",
-      "asOf": "2026-06-26",
-      "detail": "25 holdings parsed from public ETF holdings page."
-    },
-    {
-      "name": "AGG holdings fallback",
-      "url": "https://stockanalysis.com/etf/agg/holdings/",
-      "status": "no_holdings",
-      "asOf": "",
-      "detail": "No parseable holdings table"
-    },
-    {
-      "name": "StockAnalysis SOXL holdings",
-      "url": "https://stockanalysis.com/etf/soxl/holdings/",
-      "status": "live",
-      "asOf": "2026-06-25",
-      "detail": "16 holdings parsed from public ETF holdings page."
-    },
-    {
-      "name": "RAM holdings fallback",
-      "url": "https://stockanalysis.com/etf/ram/holdings/",
-      "status": "no_holdings",
-      "asOf": "",
-      "detail": "StockAnalysis holdings RAM 404"
-    },
-    {
-      "name": "StockAnalysis IWM holdings",
-      "url": "https://stockanalysis.com/etf/iwm/holdings/",
-      "status": "live",
-      "asOf": "2026-06-26",
-      "detail": "25 holdings parsed from public ETF holdings page."
-    },
-    {
-      "name": "StockAnalysis XLP holdings",
-      "url": "https://stockanalysis.com/etf/xlp/holdings/",
-      "status": "live",
-      "asOf": "2026-06-26",
       "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
@@ -260,32 +218,25 @@
       "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
-      "name": "StockAnalysis QLD holdings",
-      "url": "https://stockanalysis.com/etf/qld/holdings/",
-      "status": "live",
-      "asOf": "2026-06-26",
-      "detail": "12 holdings parsed from public ETF holdings page."
-    },
-    {
-      "name": "StockAnalysis XLF holdings",
-      "url": "https://stockanalysis.com/etf/xlf/holdings/",
+      "name": "StockAnalysis XLP holdings",
+      "url": "https://stockanalysis.com/etf/xlp/holdings/",
       "status": "live",
       "asOf": "2026-06-29",
       "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
-      "name": "StockAnalysis XLU holdings",
-      "url": "https://stockanalysis.com/etf/xlu/holdings/",
+      "name": "StockAnalysis XLI holdings",
+      "url": "https://stockanalysis.com/etf/xli/holdings/",
       "status": "live",
-      "asOf": "2026-06-26",
+      "asOf": "2026-06-29",
       "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
-      "name": "StockAnalysis VNQ holdings",
-      "url": "https://stockanalysis.com/etf/vnq/holdings/",
+      "name": "StockAnalysis QLD holdings",
+      "url": "https://stockanalysis.com/etf/qld/holdings/",
       "status": "live",
-      "asOf": "2026-05-31",
-      "detail": "25 holdings parsed from public ETF holdings page."
+      "asOf": "2026-06-26",
+      "detail": "12 holdings parsed from public ETF holdings page."
     },
     {
       "name": "BND holdings fallback",
@@ -295,11 +246,11 @@
       "detail": "No parseable holdings table"
     },
     {
-      "name": "StockAnalysis SSO holdings",
-      "url": "https://stockanalysis.com/etf/sso/holdings/",
+      "name": "StockAnalysis SOXX holdings",
+      "url": "https://stockanalysis.com/etf/soxx/holdings/",
       "status": "live",
       "asOf": "2026-06-26",
-      "detail": "13 holdings parsed from public ETF holdings page."
+      "detail": "25 holdings parsed from public ETF holdings page."
     },
     {
       "name": "StockAnalysis ARKK holdings",
@@ -316,11 +267,46 @@
       "detail": "14 holdings parsed from public ETF holdings page."
     },
     {
-      "name": "StockAnalysis XLK holdings",
-      "url": "https://stockanalysis.com/etf/xlk/holdings/",
+      "name": "StockAnalysis XLU holdings",
+      "url": "https://stockanalysis.com/etf/xlu/holdings/",
       "status": "live",
       "asOf": "2026-06-26",
       "detail": "25 holdings parsed from public ETF holdings page."
+    },
+    {
+      "name": "StockAnalysis SOXL holdings",
+      "url": "https://stockanalysis.com/etf/soxl/holdings/",
+      "status": "live",
+      "asOf": "2026-06-25",
+      "detail": "16 holdings parsed from public ETF holdings page."
+    },
+    {
+      "name": "GLD holdings fallback",
+      "url": "https://stockanalysis.com/etf/gld/holdings/",
+      "status": "no_holdings",
+      "asOf": "",
+      "detail": "StockAnalysis holdings GLD 404"
+    },
+    {
+      "name": "TLT holdings fallback",
+      "url": "https://stockanalysis.com/etf/tlt/holdings/",
+      "status": "no_holdings",
+      "asOf": "",
+      "detail": "No parseable holdings table"
+    },
+    {
+      "name": "StockAnalysis SSO holdings",
+      "url": "https://stockanalysis.com/etf/sso/holdings/",
+      "status": "live",
+      "asOf": "2026-06-26",
+      "detail": "13 holdings parsed from public ETF holdings page."
+    },
+    {
+      "name": "AGG holdings fallback",
+      "url": "https://stockanalysis.com/etf/agg/holdings/",
+      "status": "no_holdings",
+      "asOf": "",
+      "detail": "No parseable holdings table"
     },
     {
       "name": "Invesco QQQ official holdings API",
@@ -335,6 +321,20 @@
       "status": "proxy",
       "asOf": "2026-06-29",
       "detail": "TQQQ is modeled through QQQ/Nasdaq-100 constituents, then leverage is applied separately."
+    },
+    {
+      "name": "RAM holdings fallback",
+      "url": "https://stockanalysis.com/etf/ram/holdings/",
+      "status": "no_holdings",
+      "asOf": "",
+      "detail": "StockAnalysis holdings RAM 404"
+    },
+    {
+      "name": "State Street SPY official holdings XLSX",
+      "url": "https://www.ssga.com/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx",
+      "status": "official",
+      "asOf": "2026-06-29",
+      "detail": "504 holdings parsed from provider workbook."
     },
     {
       "name": "Roundhill DRAM official holdings CSV",
@@ -357,6 +357,20 @@
       "detail": "122 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart SPY",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SPY?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart IVV",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/IVV?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart VOO",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/VOO?range=6mo&interval=1d",
       "status": "live",
@@ -371,29 +385,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart IVV",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/IVV?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart SPY",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SPY?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart QQQ",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/QQQ?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart IWM",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/IWM?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -413,8 +406,36 @@
       "detail": "122 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart IWM",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/IWM?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart XLY",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLY?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart XLP",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLP?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart XLF",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLF?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart XLI",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLI?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -434,22 +455,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart XLP",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLP?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart VNQ",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VNQ?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart XLY",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLY?range=6mo&interval=1d",
+      "name": "Yahoo Chart SMH",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SMH?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -462,22 +469,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart XLI",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XLI?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart SMH",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SMH?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart SOXX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SOXX?range=6mo&interval=1d",
+      "name": "Yahoo Chart TLT",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TLT?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -490,8 +483,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart TLT",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TLT?range=6mo&interval=1d",
+      "name": "Yahoo Chart VNQ",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VNQ?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -499,6 +492,13 @@
     {
       "name": "Yahoo Chart GLD",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/GLD?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart SOXX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SOXX?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -518,27 +518,6 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart AGG",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AGG?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart QLD",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/QLD?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart SSO",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SSO?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart UPRO",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/UPRO?range=6mo&interval=1d",
       "status": "live",
@@ -546,8 +525,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart SOXL",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SOXL?range=6mo&interval=1d",
+      "name": "Yahoo Chart AGG",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AGG?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -560,8 +539,29 @@
       "detail": "106 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart SOXL",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SOXL?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart QLD",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/QLD?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart TSLL",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/TSLL?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart SSO",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SSO?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -572,34 +572,6 @@
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "4 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart 0167A0.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/0167A0.KS?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-07-01",
-      "detail": "72 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart 133690.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/133690.KS?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-07-01",
-      "detail": "120 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart 069500.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/069500.KS?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-07-01",
-      "detail": "120 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart 102110.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/102110.KS?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-07-01",
-      "detail": "120 daily returns loaded."
     },
     {
       "name": "Yahoo Chart DRAM supplemental history",
@@ -616,8 +588,15 @@
       "detail": "Official DRAM market price/NAV row parsed from Roundhill DailyNAV CSV."
     },
     {
-      "name": "Yahoo Chart 360750.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/360750.KS?range=6mo&interval=1d",
+      "name": "Yahoo Chart 069500.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/069500.KS?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-07-01",
+      "detail": "120 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart 133690.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/133690.KS?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-07-01",
       "detail": "120 daily returns loaded."
@@ -630,15 +609,29 @@
       "detail": "120 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart 305540.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/305540.KS?range=6mo&interval=1d",
+      "name": "Yahoo Chart 0167A0.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/0167A0.KS?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-07-01",
+      "detail": "72 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart 278540.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/278540.KS?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-07-01",
       "detail": "120 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart 278540.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/278540.KS?range=6mo&interval=1d",
+      "name": "Yahoo Chart 102110.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/102110.KS?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-07-01",
+      "detail": "120 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart 305540.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/305540.KS?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-07-01",
       "detail": "120 daily returns loaded."
@@ -651,11 +644,25 @@
       "detail": "120 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart 360750.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/360750.KS?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-07-01",
+      "detail": "120 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart 232080.KS",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/232080.KS?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-07-01",
       "detail": "120 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart AAPL",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
     },
     {
       "name": "Yahoo Chart 091230.KS",
@@ -665,18 +672,18 @@
       "detail": "120 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart NVDA",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart 091160.KS",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/091160.KS?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-07-01",
       "detail": "120 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart AMD",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AMD?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
     },
     {
       "name": "Yahoo Chart MSFT",
@@ -693,22 +700,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart NVDA",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=6mo&interval=1d",
+      "name": "Yahoo Chart META",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/META?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart AMZN",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AMZN?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart AAPL",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=6mo&interval=1d",
+      "name": "Yahoo Chart AMD",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AMD?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -721,8 +721,29 @@
       "detail": "122 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart 005930.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/005930.KS?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-07-01",
+      "detail": "120 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart AMZN",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AMZN?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart SNDK",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/SNDK?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart INTC",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/INTC?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -735,22 +756,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart META",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/META?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart 005930.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/005930.KS?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-07-01",
-      "detail": "120 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart INTC",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/INTC?range=6mo&interval=1d",
+      "name": "Yahoo Chart MU",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MU?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -763,13 +770,6 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart 000660.KS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/000660.KS?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-07-01",
-      "detail": "120 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart GOOG",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/GOOG?range=6mo&interval=1d",
       "status": "live",
@@ -777,8 +777,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart LLY",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/LLY?range=6mo&interval=1d",
+      "name": "Yahoo Chart 000660.KS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/000660.KS?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-07-01",
+      "detail": "120 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart LRCX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/LRCX?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -791,15 +798,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart LRCX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/LRCX?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart MU",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MU?range=6mo&interval=1d",
+      "name": "Yahoo Chart LLY",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/LLY?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -812,8 +812,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart JPM",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/JPM?range=6mo&interval=1d",
+      "name": "Yahoo Chart KLAC",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/KLAC?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -826,8 +826,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart KLAC",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/KLAC?range=6mo&interval=1d",
+      "name": "Yahoo Chart TXN",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TXN?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -854,8 +854,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart UNH",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UNH?range=6mo&interval=1d",
+      "name": "Yahoo Chart JPM",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/JPM?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -868,22 +868,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart TSM",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TSM?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart COST",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/COST?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart JNJ",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/JNJ?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart UNH",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UNH?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -896,15 +889,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart VRTPX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VRTPX?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart V",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/V?range=6mo&interval=1d",
+      "name": "Yahoo Chart TSM",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TSM?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -917,22 +903,22 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart TXN",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TXN?range=6mo&interval=1d",
+      "name": "Yahoo Chart VRTPX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VRTPX?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart AMGN",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AMGN?range=6mo&interval=1d",
+      "name": "Yahoo Chart COST",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/COST?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart PG",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PG?range=6mo&interval=1d",
+      "name": "Yahoo Chart V",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/V?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -945,22 +931,22 @@
       "detail": "122 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart PG",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PG?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart AMGN",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AMGN?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart NEE",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/NEE?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart ABBV",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ABBV?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart MRK",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MRK?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -980,8 +966,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart CSCO",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/CSCO?range=6mo&interval=1d",
+      "name": "Yahoo Chart MRK",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MRK?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -994,8 +980,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart WELL",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/WELL?range=6mo&interval=1d",
+      "name": "Yahoo Chart CSCO",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/CSCO?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart ABBV",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ABBV?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1015,15 +1008,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart SO",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SO?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart TER",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TER?range=6mo&interval=1d",
+      "name": "Yahoo Chart WELL",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/WELL?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1036,15 +1022,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart STX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/STX?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart NXPI",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/NXPI?range=6mo&interval=1d",
+      "name": "Yahoo Chart TER",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TER?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1057,22 +1036,36 @@
       "detail": "122 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart NXPI",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/NXPI?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart SO",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SO?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart STX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/STX?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart PLD",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PLD?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart GE",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/GE?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart ABT",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ABT?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart DUK",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/DUK?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1085,13 +1078,6 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart MPWR",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MPWR?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart PLTR",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/PLTR?range=6mo&interval=1d",
       "status": "live",
@@ -1099,8 +1085,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart PLD",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PLD?range=6mo&interval=1d",
+      "name": "Yahoo Chart DUK",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/DUK?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart ABT",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ABT?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1120,8 +1113,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart EQIX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/EQIX?range=6mo&interval=1d",
+      "name": "Yahoo Chart EOG",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/EOG?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1134,8 +1127,22 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart EOG",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/EOG?range=6mo&interval=1d",
+      "name": "Yahoo Chart MPWR",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MPWR?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart HOOD",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/HOOD?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart EQIX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/EQIX?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1148,8 +1155,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart HOOD",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/HOOD?range=6mo&interval=1d",
+      "name": "Yahoo Chart BA",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BA?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart TGT",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TGT?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1169,20 +1183,6 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart TEM",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TEM?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart TGT",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TGT?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart SHOP",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/SHOP?range=6mo&interval=1d",
       "status": "live",
@@ -1197,8 +1197,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart BAC",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BAC?range=6mo&interval=1d",
+      "name": "Yahoo Chart TEM",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TEM?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1218,8 +1218,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart MDLZ",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MDLZ?range=6mo&interval=1d",
+      "name": "Yahoo Chart BAC",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BAC?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1232,15 +1232,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart BMY",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BMY?range=6mo&interval=1d",
+      "name": "Yahoo Chart MDLZ",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MDLZ?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart ADP",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ADP?range=6mo&interval=1d",
+      "name": "Yahoo Chart BMY",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BMY?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1253,8 +1253,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart VLO",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VLO?range=6mo&interval=1d",
+      "name": "Yahoo Chart ADP",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ADP?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1267,8 +1267,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart BA",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BA?range=6mo&interval=1d",
+      "name": "Yahoo Chart AMT",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AMT?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1281,22 +1281,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart AMT",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AMT?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart TRV",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/TRV?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart ALAB",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ALAB?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1309,11 +1295,11 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart 285A.T",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/285A.T?range=6mo&interval=1d",
+      "name": "Yahoo Chart ALAB",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ALAB?range=6mo&interval=1d",
       "status": "live",
-      "asOf": "2026-07-01",
-      "detail": "119 daily returns loaded."
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
     },
     {
       "name": "Yahoo Chart CL",
@@ -1323,8 +1309,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart GILD",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/GILD?range=6mo&interval=1d",
+      "name": "Yahoo Chart VLO",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VLO?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart LMT",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/LMT?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1337,11 +1330,18 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart SPCX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SPCX?range=6mo&interval=1d",
+      "name": "Yahoo Chart 285A.T",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/285A.T?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-07-01",
+      "detail": "119 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart GILD",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/GILD?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
-      "detail": "11 daily returns loaded."
+      "detail": "122 daily returns loaded."
     },
     {
       "name": "Yahoo Chart PSX",
@@ -1365,22 +1365,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart SBUX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SBUX?range=6mo&interval=1d",
+      "name": "Yahoo Chart SPCX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SPCX?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
+      "detail": "11 daily returns loaded."
     },
     {
       "name": "Yahoo Chart SRE",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/SRE?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart ISRG",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ISRG?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1393,6 +1386,20 @@
       "detail": "122 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart XEL",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XEL?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart SBUX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SBUX?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart SHW",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/SHW?range=6mo&interval=1d",
       "status": "live",
@@ -1400,22 +1407,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart BKR",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BKR?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart LMT",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/LMT?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart XEL",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/XEL?range=6mo&interval=1d",
+      "name": "Yahoo Chart ISRG",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ISRG?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1442,6 +1435,13 @@
       "detail": "122 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart BKR",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BKR?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart EXC",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/EXC?range=6mo&interval=1d",
       "status": "live",
@@ -1463,36 +1463,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart ETR",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ETR?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart SPG",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SPG?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart MCHP",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/MCHP?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart VST",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VST?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart UPS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UPS?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1505,15 +1477,29 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart TMO",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TMO?range=6mo&interval=1d",
+      "name": "Yahoo Chart SPG",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SPG?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart TRGP",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TRGP?range=6mo&interval=1d",
+      "name": "Yahoo Chart UPS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UPS?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart ETR",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ETR?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart VST",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VST?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1526,8 +1512,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart VRTX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VRTX?range=6mo&interval=1d",
+      "name": "Yahoo Chart TRGP",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TRGP?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1540,8 +1526,29 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart BEAM",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BEAM?range=6mo&interval=1d",
+      "name": "Yahoo Chart VRTX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VRTX?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart TMO",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TMO?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart KDP",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/KDP?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart BX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BX?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1554,8 +1561,22 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart KDP",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/KDP?range=6mo&interval=1d",
+      "name": "Yahoo Chart LOW",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/LOW?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart BEAM",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BEAM?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart NFLX",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/NFLX?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1575,41 +1596,6 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart BX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/BX?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart LOW",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/LOW?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart NFLX",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/NFLX?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart TXG",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TXG?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart MAR",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MAR?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart 603986.SS",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/603986.SS?range=6mo&interval=1d",
       "status": "live",
@@ -1617,15 +1603,8 @@
       "detail": "116 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart UNP",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UNP?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart CMCSA",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/CMCSA?range=6mo&interval=1d",
+      "name": "Yahoo Chart HON",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/HON?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1638,6 +1617,34 @@
       "detail": "122 daily returns loaded."
     },
     {
+      "name": "Yahoo Chart MAR",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/MAR?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart UNP",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UNP?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart TXG",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/TXG?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart CMCSA",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/CMCSA?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
       "name": "Yahoo Chart CRWD",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/CRWD?range=6mo&interval=1d",
       "status": "live",
@@ -1645,22 +1652,8 @@
       "detail": "120 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart UBER",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UBER?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart ETN",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/ETN?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart SNPS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SNPS?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1673,8 +1666,22 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart NTLA",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/NTLA?range=6mo&interval=1d",
+      "name": "Yahoo Chart DVN",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/DVN?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart UBER",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/UBER?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart SNPS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/SNPS?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1687,22 +1694,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart DVN",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/DVN?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart CRWV",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/CRWV?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart ED",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ED?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1722,15 +1715,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart PCG",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PCG?range=6mo&interval=1d",
+      "name": "Yahoo Chart NTLA",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/NTLA?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart FANG",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/FANG?range=6mo&interval=1d",
+      "name": "Yahoo Chart ED",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ED?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1738,6 +1731,27 @@
     {
       "name": "Yahoo Chart DASH",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/DASH?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart PSA",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PSA?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart PCG",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PCG?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart PFE",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PFE?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1757,22 +1771,15 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart PSA",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PSA?range=6mo&interval=1d",
+      "name": "Yahoo Chart FANG",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/FANG?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart CVS",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/CVS?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart PFE",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PFE?range=6mo&interval=1d",
+      "name": "Yahoo Chart KVUE",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/KVUE?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1785,15 +1792,22 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart ON",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ON?range=6mo&interval=1d",
+      "name": "Yahoo Chart ROST",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ROST?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart ROST",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ROST?range=6mo&interval=1d",
+      "name": "Yahoo Chart CVS",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/CVS?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart ON",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ON?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1813,22 +1827,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart KVUE",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/KVUE?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart ADM",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/ADM?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart VRT",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VRT?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1841,13 +1841,6 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart AEE",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AEE?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
       "name": "Yahoo Chart KMB",
       "url": "https://query1.finance.yahoo.com/v8/finance/chart/KMB?range=6mo&interval=1d",
       "status": "live",
@@ -1855,8 +1848,22 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart ABNB",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ABNB?range=6mo&interval=1d",
+      "name": "Yahoo Chart AEE",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/AEE?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart PH",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PH?range=6mo&interval=1d",
+      "status": "live",
+      "asOf": "2026-06-30",
+      "detail": "122 daily returns loaded."
+    },
+    {
+      "name": "Yahoo Chart VRT",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/VRT?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1869,15 +1876,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart DTE",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/DTE?range=6mo&interval=1d",
-      "status": "live",
-      "asOf": "2026-06-30",
-      "detail": "122 daily returns loaded."
-    },
-    {
-      "name": "Yahoo Chart CCI",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/CCI?range=6mo&interval=1d",
+      "name": "Yahoo Chart ABNB",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/ABNB?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1890,8 +1890,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart PH",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/PH?range=6mo&interval=1d",
+      "name": "Yahoo Chart DTE",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/DTE?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1918,8 +1918,8 @@
       "detail": "122 daily returns loaded."
     },
     {
-      "name": "Yahoo Chart RCL",
-      "url": "https://query1.finance.yahoo.com/v8/finance/chart/RCL?range=6mo&interval=1d",
+      "name": "Yahoo Chart CCI",
+      "url": "https://query1.finance.yahoo.com/v8/finance/chart/CCI?range=6mo&interval=1d",
       "status": "live",
       "asOf": "2026-06-30",
       "detail": "122 daily returns loaded."
@@ -1933,11 +1933,11 @@
     }
   ],
   "warnings": [
-    "TLT holdings live parse failed: No parseable holdings table; using sample/manual fallback if available.",
+    "BND holdings live parse failed: No parseable holdings table; using sample/manual fallback if available.",
     "GLD holdings live parse failed: StockAnalysis holdings GLD 404; using sample/manual fallback if available.",
+    "TLT holdings live parse failed: No parseable holdings table; using sample/manual fallback if available.",
     "AGG holdings live parse failed: No parseable holdings table; using sample/manual fallback if available.",
     "RAM holdings live parse failed: StockAnalysis holdings RAM 404; using sample/manual fallback if available.",
-    "BND holdings live parse failed: No parseable holdings table; using sample/manual fallback if available.",
     "Roundhill DRAM holdings row date 2026-07-01 is after file date 2026-06-30; using file date for historical basis-date safety."
   ],
   "assets": {
@@ -1950,6 +1950,30 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SCHD?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "SPY": {
+      "ticker": "SPY",
+      "name": "State Street SPDR S&P 500 ETF Trust",
+      "type": "etf",
+      "currency": "USD",
+      "price": 746.77001953125,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SPY?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "IVV": {
+      "ticker": "IVV",
+      "name": "iShares Core S&P 500 ETF",
+      "type": "etf",
+      "currency": "USD",
+      "price": 748.8900146484375,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/IVV?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -1977,30 +2001,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "IVV": {
-      "ticker": "IVV",
-      "name": "iShares Core S&P 500 ETF",
-      "type": "etf",
-      "currency": "USD",
-      "price": 748.8900146484375,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/IVV?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "SPY": {
-      "ticker": "SPY",
-      "name": "State Street SPDR S&P 500 ETF Trust",
-      "type": "etf",
-      "currency": "USD",
-      "price": 746.77001953125,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SPY?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "QQQ": {
       "ticker": "QQQ",
       "name": "Invesco QQQ Trust",
@@ -2010,18 +2010,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/QQQ?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "IWM": {
-      "ticker": "IWM",
-      "name": "iShares Russell 2000 ETF",
-      "type": "etf",
-      "currency": "USD",
-      "price": 300.45001220703125,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/IWM?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2049,6 +2037,42 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "IWM": {
+      "ticker": "IWM",
+      "name": "iShares Russell 2000 ETF",
+      "type": "etf",
+      "currency": "USD",
+      "price": 300.45001220703125,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/IWM?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "XLY": {
+      "ticker": "XLY",
+      "name": "State Street Consumer Discretionary Select Sector SPDR ETF",
+      "type": "etf",
+      "currency": "USD",
+      "price": 117.27999877929688,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XLY?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "XLP": {
+      "ticker": "XLP",
+      "name": "State Street Consumer Staples Select Sector SPDR ETF",
+      "type": "etf",
+      "currency": "USD",
+      "price": 83.06999969482422,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XLP?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "XLF": {
       "ticker": "XLF",
       "name": "State Street Financial Select Sector SPDR ETF",
@@ -2058,6 +2082,18 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XLF?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "XLI": {
+      "ticker": "XLI",
+      "name": "State Street Industrial Select Sector SPDR ETF",
+      "type": "etf",
+      "currency": "USD",
+      "price": 185.22999572753906,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XLI?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2085,39 +2121,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "XLP": {
-      "ticker": "XLP",
-      "name": "State Street Consumer Staples Select Sector SPDR ETF",
+    "SMH": {
+      "ticker": "SMH",
+      "name": "VanEck Semiconductor ETF",
       "type": "etf",
       "currency": "USD",
-      "price": 83.06999969482422,
+      "price": 655.8900146484375,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XLP?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "VNQ": {
-      "ticker": "VNQ",
-      "name": "Vanguard Real Estate Index Fund ETF Shares",
-      "type": "etf",
-      "currency": "USD",
-      "price": 96.43000030517578,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VNQ?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "XLY": {
-      "ticker": "XLY",
-      "name": "State Street Consumer Discretionary Select Sector SPDR ETF",
-      "type": "etf",
-      "currency": "USD",
-      "price": 117.27999877929688,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XLY?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SMH?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2133,39 +2145,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "XLI": {
-      "ticker": "XLI",
-      "name": "State Street Industrial Select Sector SPDR ETF",
+    "TLT": {
+      "ticker": "TLT",
+      "name": "iShares 20+ Year Treasury Bond ETF",
       "type": "etf",
       "currency": "USD",
-      "price": 185.22999572753906,
+      "price": 86.41999816894531,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XLI?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "SMH": {
-      "ticker": "SMH",
-      "name": "VanEck Semiconductor ETF",
-      "type": "etf",
-      "currency": "USD",
-      "price": 655.8900146484375,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SMH?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "SOXX": {
-      "ticker": "SOXX",
-      "name": "iShares Semiconductor ETF",
-      "type": "etf",
-      "currency": "USD",
-      "price": 640.760009765625,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SOXX?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TLT?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2181,15 +2169,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "TLT": {
-      "ticker": "TLT",
-      "name": "iShares 20+ Year Treasury Bond ETF",
+    "VNQ": {
+      "ticker": "VNQ",
+      "name": "Vanguard Real Estate Index Fund ETF Shares",
       "type": "etf",
       "currency": "USD",
-      "price": 86.41999816894531,
+      "price": 96.43000030517578,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TLT?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VNQ?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2202,6 +2190,18 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/GLD?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "SOXX": {
+      "ticker": "SOXX",
+      "name": "iShares Semiconductor ETF",
+      "type": "etf",
+      "currency": "USD",
+      "price": 640.760009765625,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SOXX?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2229,6 +2229,18 @@
       "sourceStatus": "live",
       "leverage": 3
     },
+    "UPRO": {
+      "ticker": "UPRO",
+      "name": "ProShares UltraPro S&P500",
+      "type": "etf",
+      "currency": "USD",
+      "price": 141.7899932861328,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UPRO?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 3
+    },
     "AGG": {
       "ticker": "AGG",
       "name": "iShares Core U.S. Aggregate Bond ETF",
@@ -2241,41 +2253,17 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "QLD": {
-      "ticker": "QLD",
-      "name": "ProShares Ultra QQQ",
+    "SNXX": {
+      "ticker": "SNXX",
+      "name": "Tradr 2X Long SNXX Daily ETF",
       "type": "etf",
       "currency": "USD",
-      "price": 96.76000213623047,
+      "price": 42.04999923706055,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/QLD?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SNXX?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 2
-    },
-    "SSO": {
-      "ticker": "SSO",
-      "name": "ProShares Ultra S&P500",
-      "type": "etf",
-      "currency": "USD",
-      "price": 67.37999725341797,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SSO?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 2
-    },
-    "UPRO": {
-      "ticker": "UPRO",
-      "name": "ProShares UltraPro S&P500",
-      "type": "etf",
-      "currency": "USD",
-      "price": 141.7899932861328,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UPRO?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 3
     },
     "SOXL": {
       "ticker": "SOXL",
@@ -2289,15 +2277,15 @@
       "sourceStatus": "live",
       "leverage": 3
     },
-    "SNXX": {
-      "ticker": "SNXX",
-      "name": "Tradr 2X Long SNXX Daily ETF",
+    "QLD": {
+      "ticker": "QLD",
+      "name": "ProShares Ultra QQQ",
       "type": "etf",
       "currency": "USD",
-      "price": 42.04999923706055,
+      "price": 96.76000213623047,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SNXX?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/QLD?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 2
     },
@@ -2313,6 +2301,18 @@
       "sourceStatus": "live",
       "leverage": 2
     },
+    "SSO": {
+      "ticker": "SSO",
+      "name": "ProShares Ultra S&P500",
+      "type": "etf",
+      "currency": "USD",
+      "price": 67.37999725341797,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SSO?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 2
+    },
     "RAM": {
       "ticker": "RAM",
       "name": "Roundhill T-REX 2X Long DRAM Daily Target ETF",
@@ -2324,54 +2324,6 @@
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/RAM?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 2
-    },
-    "0167A0.KS": {
-      "ticker": "0167A0.KS",
-      "name": "SOL AI Semiconductor TOP2 Plus ETF",
-      "type": "etf",
-      "currency": "KRW",
-      "price": 26160,
-      "priceAsOf": "2026-07-01",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/0167A0.KS?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "133690.KS": {
-      "ticker": "133690.KS",
-      "name": "Mirae Asset TIGER USA NASDAQ 100 ETF",
-      "type": "etf",
-      "currency": "KRW",
-      "price": 207395,
-      "priceAsOf": "2026-07-01",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/133690.KS?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "069500.KS": {
-      "ticker": "069500.KS",
-      "name": "KODEX 200",
-      "type": "etf",
-      "currency": "KRW",
-      "price": 134130,
-      "priceAsOf": "2026-07-01",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/069500.KS?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "102110.KS": {
-      "ticker": "102110.KS",
-      "name": "Mirae Asset TIGER 200 ETF",
-      "type": "etf",
-      "currency": "KRW",
-      "price": 134290,
-      "priceAsOf": "2026-07-01",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/102110.KS?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
     },
     "DRAM": {
       "ticker": "DRAM",
@@ -2386,15 +2338,27 @@
       "historicalSource": "Yahoo Chart",
       "leverage": 1
     },
-    "360750.KS": {
-      "ticker": "360750.KS",
-      "name": "Mirae Asset Maps Management - Mirae Asset Tiger S&P500 ETF",
+    "069500.KS": {
+      "ticker": "069500.KS",
+      "name": "KODEX 200",
       "type": "etf",
       "currency": "KRW",
-      "price": 28790,
+      "price": 134525,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/360750.KS?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/069500.KS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "133690.KS": {
+      "ticker": "133690.KS",
+      "name": "Mirae Asset TIGER USA NASDAQ 100 ETF",
+      "type": "etf",
+      "currency": "KRW",
+      "price": 207780,
+      "priceAsOf": "2026-07-01",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/133690.KS?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2403,22 +2367,22 @@
       "name": "Samsung KODEX S&P500 ETF",
       "type": "etf",
       "currency": "KRW",
-      "price": 26250,
+      "price": 26310,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/379800.KS?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
-    "305540.KS": {
-      "ticker": "305540.KS",
-      "name": "Mirae Asset Management - Tiger Secondary Battery ETF",
+    "0167A0.KS": {
+      "ticker": "0167A0.KS",
+      "name": "SOL AI Semiconductor TOP2 Plus ETF",
       "type": "etf",
       "currency": "KRW",
-      "price": 18040,
+      "price": 26265,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/305540.KS?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/0167A0.KS?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2427,10 +2391,34 @@
       "name": "KODEX MSCI Korea TR",
       "type": "etf",
       "currency": "KRW",
-      "price": 47760,
+      "price": 47975,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/278540.KS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "102110.KS": {
+      "ticker": "102110.KS",
+      "name": "Mirae Asset TIGER 200 ETF",
+      "type": "etf",
+      "currency": "KRW",
+      "price": 134300,
+      "priceAsOf": "2026-07-01",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/102110.KS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "305540.KS": {
+      "ticker": "305540.KS",
+      "name": "Mirae Asset Management - Tiger Secondary Battery ETF",
+      "type": "etf",
+      "currency": "KRW",
+      "price": 18340,
+      "priceAsOf": "2026-07-01",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/305540.KS?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2439,10 +2427,22 @@
       "name": "KODEX KOSDAQ 150",
       "type": "etf",
       "currency": "KRW",
-      "price": 16545,
+      "price": 16625,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/229200.KS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "360750.KS": {
+      "ticker": "360750.KS",
+      "name": "Mirae Asset Maps Management - Mirae Asset Tiger S&P500 ETF",
+      "type": "etf",
+      "currency": "KRW",
+      "price": 28865,
+      "priceAsOf": "2026-07-01",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/360750.KS?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2451,10 +2451,22 @@
       "name": "Mirae Asset Tiger KOSDAQ150 ETF",
       "type": "etf",
       "currency": "KRW",
-      "price": 16860,
+      "price": 16945,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/232080.KS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "AAPL": {
+      "ticker": "AAPL",
+      "name": "Apple Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 289.3599853515625,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2463,10 +2475,22 @@
       "name": "Mirae Asset TIGER Semicon ETF",
       "type": "etf",
       "currency": "KRW",
-      "price": 176555,
+      "price": 177310,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/091230.KS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "NVDA": {
+      "ticker": "NVDA",
+      "name": "NVIDIA Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 200.08999633789062,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2475,22 +2499,10 @@
       "name": "Kodex Semicon",
       "type": "etf",
       "currency": "KRW",
-      "price": 169055,
+      "price": 169545,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/091160.KS?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "AMD": {
-      "ticker": "AMD",
-      "name": "Advanced Micro Devices, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 580.9099731445312,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMD?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2518,39 +2530,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "NVDA": {
-      "ticker": "NVDA",
-      "name": "NVIDIA Corporation",
+    "META": {
+      "ticker": "META",
+      "name": "Meta Platforms, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 200.08999633789062,
+      "price": 563.2899780273438,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NVDA?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/META?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
-    "AMZN": {
-      "ticker": "AMZN",
-      "name": "Amazon.com, Inc.",
+    "AMD": {
+      "ticker": "AMD",
+      "name": "Advanced Micro Devices, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 238.33999633789062,
+      "price": 580.9099731445312,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMZN?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "AAPL": {
-      "ticker": "AAPL",
-      "name": "Apple Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 289.3599853515625,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AAPL?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMD?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2566,6 +2566,30 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "005930.KS": {
+      "ticker": "005930.KS",
+      "name": "Samsung Electronics Co., Ltd.",
+      "type": "stock",
+      "currency": "KRW",
+      "price": 314500,
+      "priceAsOf": "2026-07-01",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/005930.KS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "AMZN": {
+      "ticker": "AMZN",
+      "name": "Amazon.com, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 238.33999633789062,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMZN?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "SNDK": {
       "ticker": "SNDK",
       "name": "Sandisk Corporation",
@@ -2575,42 +2599,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SNDK?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "AVGO": {
-      "ticker": "AVGO",
-      "name": "Broadcom Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 377.75,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AVGO?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "META": {
-      "ticker": "META",
-      "name": "Meta Platforms, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 563.2899780273438,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/META?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "005930.KS": {
-      "ticker": "005930.KS",
-      "name": "Samsung Electronics Co., Ltd.",
-      "type": "stock",
-      "currency": "KRW",
-      "price": 315500,
-      "priceAsOf": "2026-07-01",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/005930.KS?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2626,75 +2614,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "AMAT": {
-      "ticker": "AMAT",
-      "name": "Applied Materials, Inc.",
+    "AVGO": {
+      "ticker": "AVGO",
+      "name": "Broadcom Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 723,
+      "price": 377.75,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMAT?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "000660.KS": {
-      "ticker": "000660.KS",
-      "name": "SK hynix Inc.",
-      "type": "stock",
-      "currency": "KRW",
-      "price": 2571000,
-      "priceAsOf": "2026-07-01",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/000660.KS?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "GOOG": {
-      "ticker": "GOOG",
-      "name": "Alphabet Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 353.3299865722656,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/GOOG?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "LLY": {
-      "ticker": "LLY",
-      "name": "Eli Lilly and Company",
-      "type": "stock",
-      "currency": "USD",
-      "price": 1199.4300537109375,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/LLY?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "XOM": {
-      "ticker": "XOM",
-      "name": "Exxon Mobil Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 136.72000122070312,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XOM?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "LRCX": {
-      "ticker": "LRCX",
-      "name": "Lam Research Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 433.3299865722656,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/LRCX?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AVGO?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2710,6 +2638,78 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "AMAT": {
+      "ticker": "AMAT",
+      "name": "Applied Materials, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 723,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMAT?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "GOOG": {
+      "ticker": "GOOG",
+      "name": "Alphabet Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 353.3299865722656,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/GOOG?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "000660.KS": {
+      "ticker": "000660.KS",
+      "name": "SK hynix Inc.",
+      "type": "stock",
+      "currency": "KRW",
+      "price": 2560000,
+      "priceAsOf": "2026-07-01",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/000660.KS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "LRCX": {
+      "ticker": "LRCX",
+      "name": "Lam Research Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 433.3299865722656,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/LRCX?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "XOM": {
+      "ticker": "XOM",
+      "name": "Exxon Mobil Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 136.72000122070312,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XOM?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "LLY": {
+      "ticker": "LLY",
+      "name": "Eli Lilly and Company",
+      "type": "stock",
+      "currency": "USD",
+      "price": 1199.4300537109375,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/LLY?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "BRK-B": {
       "ticker": "BRK-B",
       "name": "Berkshire Hathaway Inc.",
@@ -2722,15 +2722,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "JPM": {
-      "ticker": "JPM",
-      "name": "JPMorgan Chase & Co.",
+    "KLAC": {
+      "ticker": "KLAC",
+      "name": "KLA Corporation",
       "type": "stock",
       "currency": "USD",
-      "price": 327.3299865722656,
+      "price": 301.7099914550781,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/JPM?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/KLAC?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2746,15 +2746,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "KLAC": {
-      "ticker": "KLAC",
-      "name": "KLA Corporation",
+    "TXN": {
+      "ticker": "TXN",
+      "name": "Texas Instruments Incorporated",
       "type": "stock",
       "currency": "USD",
-      "price": 301.7099914550781,
+      "price": 298.07000732421875,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/KLAC?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TXN?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2794,15 +2794,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "UNH": {
-      "ticker": "UNH",
-      "name": "UnitedHealth Group Incorporated",
+    "JPM": {
+      "ticker": "JPM",
+      "name": "JPMorgan Chase & Co.",
       "type": "stock",
       "currency": "USD",
-      "price": 415.6300048828125,
+      "price": 327.3299865722656,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UNH?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/JPM?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2818,30 +2818,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "TSM": {
-      "ticker": "TSM",
-      "name": "Taiwan Semiconductor Manufacturing Company Limited",
-      "type": "stock",
-      "currency": "USD",
-      "price": 477.57000732421875,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TSM?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "COST": {
-      "ticker": "COST",
-      "name": "Costco Wholesale Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 935.469970703125,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/COST?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "JNJ": {
       "ticker": "JNJ",
       "name": "Johnson & Johnson",
@@ -2851,6 +2827,18 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/JNJ?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "UNH": {
+      "ticker": "UNH",
+      "name": "UnitedHealth Group Incorporated",
+      "type": "stock",
+      "currency": "USD",
+      "price": 415.6300048828125,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UNH?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2866,27 +2854,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "VRTPX": {
-      "ticker": "VRTPX",
-      "name": "Vanguard Real Estate II Index",
-      "type": "etf",
-      "currency": "USD",
-      "price": 23.200000762939453,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VRTPX?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "V": {
-      "ticker": "V",
-      "name": "Visa Inc.",
+    "TSM": {
+      "ticker": "TSM",
+      "name": "Taiwan Semiconductor Manufacturing Company Limited",
       "type": "stock",
       "currency": "USD",
-      "price": 343.0899963378906,
+      "price": 477.57000732421875,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/V?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TSM?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2902,39 +2878,39 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "TXN": {
-      "ticker": "TXN",
-      "name": "Texas Instruments Incorporated",
-      "type": "stock",
+    "VRTPX": {
+      "ticker": "VRTPX",
+      "name": "Vanguard Real Estate II Index",
+      "type": "etf",
       "currency": "USD",
-      "price": 298.07000732421875,
+      "price": 23.200000762939453,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TXN?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VRTPX?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
-    "AMGN": {
-      "ticker": "AMGN",
-      "name": "Amgen Inc.",
+    "COST": {
+      "ticker": "COST",
+      "name": "Costco Wholesale Corporation",
       "type": "stock",
       "currency": "USD",
-      "price": 362.1199951171875,
+      "price": 935.469970703125,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMGN?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/COST?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
-    "PG": {
-      "ticker": "PG",
-      "name": "The Procter & Gamble Company",
+    "V": {
+      "ticker": "V",
+      "name": "Visa Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 146.63999938964844,
+      "price": 343.0899963378906,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PG?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/V?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -2950,6 +2926,30 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "PG": {
+      "ticker": "PG",
+      "name": "The Procter & Gamble Company",
+      "type": "stock",
+      "currency": "USD",
+      "price": 146.63999938964844,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PG?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "AMGN": {
+      "ticker": "AMGN",
+      "name": "Amgen Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 362.1199951171875,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMGN?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "NEE": {
       "ticker": "NEE",
       "name": "NextEra Energy, Inc.",
@@ -2959,30 +2959,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NEE?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "ABBV": {
-      "ticker": "ABBV",
-      "name": "AbbVie Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 251.63999938964844,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ABBV?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "MRK": {
-      "ticker": "MRK",
-      "name": "Merck & Co., Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 128.5,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MRK?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3010,15 +2986,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "CSCO": {
-      "ticker": "CSCO",
-      "name": "Cisco Systems, Inc.",
+    "MRK": {
+      "ticker": "MRK",
+      "name": "Merck & Co., Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 117.45999908447266,
+      "price": 128.5,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CSCO?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MRK?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3034,15 +3010,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "WELL": {
-      "ticker": "WELL",
-      "name": "Welltower Inc.",
+    "CSCO": {
+      "ticker": "CSCO",
+      "name": "Cisco Systems, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 226.97000122070312,
+      "price": 117.45999908447266,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/WELL?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CSCO?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "ABBV": {
+      "ticker": "ABBV",
+      "name": "AbbVie Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 251.63999938964844,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ABBV?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3070,27 +3058,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "SO": {
-      "ticker": "SO",
-      "name": "The Southern Company",
+    "WELL": {
+      "ticker": "WELL",
+      "name": "Welltower Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 95.70999908447266,
+      "price": 226.97000122070312,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SO?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "TER": {
-      "ticker": "TER",
-      "name": "Teradyne, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 483.8399963378906,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TER?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/WELL?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3106,27 +3082,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "STX": {
-      "ticker": "STX",
-      "name": "Seagate Technology Holdings plc",
+    "TER": {
+      "ticker": "TER",
+      "name": "Teradyne, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 965,
+      "price": 483.8399963378906,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/STX?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "NXPI": {
-      "ticker": "NXPI",
-      "name": "NXP Semiconductors N.V.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 281.0299987792969,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NXPI?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TER?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3142,6 +3106,54 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "NXPI": {
+      "ticker": "NXPI",
+      "name": "NXP Semiconductors N.V.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 281.0299987792969,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NXPI?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "SO": {
+      "ticker": "SO",
+      "name": "The Southern Company",
+      "type": "stock",
+      "currency": "USD",
+      "price": 95.70999908447266,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SO?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "STX": {
+      "ticker": "STX",
+      "name": "Seagate Technology Holdings plc",
+      "type": "stock",
+      "currency": "USD",
+      "price": 965,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/STX?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "PLD": {
+      "ticker": "PLD",
+      "name": "Prologis, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 135.47000122070312,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PLD?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "GE": {
       "ticker": "GE",
       "name": "GE Aerospace",
@@ -3151,30 +3163,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/GE?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "ABT": {
-      "ticker": "ABT",
-      "name": "Abbott Laboratories",
-      "type": "stock",
-      "currency": "USD",
-      "price": 90.73999786376953,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ABT?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "DUK": {
-      "ticker": "DUK",
-      "name": "Duke Energy Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 126.58000183105469,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/DUK?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3190,18 +3178,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "MPWR": {
-      "ticker": "MPWR",
-      "name": "Monolithic Power Systems, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 1382.3599853515625,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MPWR?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "PLTR": {
       "ticker": "PLTR",
       "name": "Palantir Technologies Inc.",
@@ -3214,15 +3190,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "PLD": {
-      "ticker": "PLD",
-      "name": "Prologis, Inc.",
+    "DUK": {
+      "ticker": "DUK",
+      "name": "Duke Energy Corporation",
       "type": "stock",
       "currency": "USD",
-      "price": 135.47000122070312,
+      "price": 126.58000183105469,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PLD?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/DUK?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "ABT": {
+      "ticker": "ABT",
+      "name": "Abbott Laboratories",
+      "type": "stock",
+      "currency": "USD",
+      "price": 90.73999786376953,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ABT?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3250,15 +3238,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "EQIX": {
-      "ticker": "EQIX",
-      "name": "Equinix, Inc.",
+    "EOG": {
+      "ticker": "EOG",
+      "name": "EOG Resources, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 1042.3900146484375,
+      "price": 129.72999572753906,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/EQIX?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/EOG?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3274,15 +3262,39 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "EOG": {
-      "ticker": "EOG",
-      "name": "EOG Resources, Inc.",
+    "MPWR": {
+      "ticker": "MPWR",
+      "name": "Monolithic Power Systems, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 129.72999572753906,
+      "price": 1382.3599853515625,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/EOG?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MPWR?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "HOOD": {
+      "ticker": "HOOD",
+      "name": "Robinhood Markets, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 100.27999877929688,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/HOOD?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "EQIX": {
+      "ticker": "EQIX",
+      "name": "Equinix, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 1042.3900146484375,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/EQIX?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3298,15 +3310,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "HOOD": {
-      "ticker": "HOOD",
-      "name": "Robinhood Markets, Inc.",
+    "BA": {
+      "ticker": "BA",
+      "name": "The Boeing Company",
       "type": "stock",
       "currency": "USD",
-      "price": 100.27999877929688,
+      "price": 216.47000122070312,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/HOOD?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BA?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "TGT": {
+      "ticker": "TGT",
+      "name": "Target Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 130.61000061035156,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TGT?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3334,30 +3358,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "TEM": {
-      "ticker": "TEM",
-      "name": "Tempus AI, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 57.93000030517578,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TEM?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "TGT": {
-      "ticker": "TGT",
-      "name": "Target Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 130.61000061035156,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TGT?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "SHOP": {
       "ticker": "SHOP",
       "name": "Shopify Inc.",
@@ -3382,15 +3382,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "BAC": {
-      "ticker": "BAC",
-      "name": "Bank of America Corporation",
+    "TEM": {
+      "ticker": "TEM",
+      "name": "Tempus AI, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 56.97999954223633,
+      "price": 57.93000030517578,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BAC?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TEM?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3418,15 +3418,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "MDLZ": {
-      "ticker": "MDLZ",
-      "name": "Mondelez International, Inc.",
+    "BAC": {
+      "ticker": "BAC",
+      "name": "Bank of America Corporation",
       "type": "stock",
       "currency": "USD",
-      "price": 57.84000015258789,
+      "price": 56.97999954223633,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MDLZ?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BAC?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3442,6 +3442,18 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "MDLZ": {
+      "ticker": "MDLZ",
+      "name": "Mondelez International, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 57.84000015258789,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MDLZ?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "BMY": {
       "ticker": "BMY",
       "name": "Bristol-Myers Squibb Company",
@@ -3451,18 +3463,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BMY?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "ADP": {
-      "ticker": "ADP",
-      "name": "Automatic Data Processing, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 223.9499969482422,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ADP?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3478,15 +3478,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "VLO": {
-      "ticker": "VLO",
-      "name": "Valero Energy Corporation",
+    "ADP": {
+      "ticker": "ADP",
+      "name": "Automatic Data Processing, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 260.44000244140625,
+      "price": 223.9499969482422,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VLO?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ADP?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3502,15 +3502,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "BA": {
-      "ticker": "BA",
-      "name": "The Boeing Company",
+    "AMT": {
+      "ticker": "AMT",
+      "name": "American Tower Corporation",
       "type": "stock",
       "currency": "USD",
-      "price": 216.47000122070312,
+      "price": 163.57000732421875,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BA?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMT?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3526,18 +3526,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "AMT": {
-      "ticker": "AMT",
-      "name": "American Tower Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 163.57000732421875,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AMT?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "TRV": {
       "ticker": "TRV",
       "name": "The Travelers Companies, Inc.",
@@ -3547,18 +3535,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TRV?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "ALAB": {
-      "ticker": "ALAB",
-      "name": "Astera Labs, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 483.0199890136719,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ALAB?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3574,15 +3550,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "285A.T": {
-      "ticker": "285A.T",
-      "name": "KIOXIA HOLDINGS CORPORATION",
+    "ALAB": {
+      "ticker": "ALAB",
+      "name": "Astera Labs, Inc.",
       "type": "stock",
-      "currency": "JPY",
-      "price": 89260,
-      "priceAsOf": "2026-07-01",
+      "currency": "USD",
+      "price": 483.0199890136719,
+      "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/285A.T?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ALAB?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3598,15 +3574,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "GILD": {
-      "ticker": "GILD",
-      "name": "Gilead Sciences, Inc.",
+    "VLO": {
+      "ticker": "VLO",
+      "name": "Valero Energy Corporation",
       "type": "stock",
       "currency": "USD",
-      "price": 126.33999633789062,
+      "price": 260.44000244140625,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/GILD?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VLO?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "LMT": {
+      "ticker": "LMT",
+      "name": "Lockheed Martin Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 509.4599914550781,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/LMT?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3622,15 +3610,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "SPCX": {
-      "ticker": "SPCX",
-      "name": "Space Exploration Technologies Corp.",
+    "285A.T": {
+      "ticker": "285A.T",
+      "name": "KIOXIA HOLDINGS CORPORATION",
+      "type": "stock",
+      "currency": "JPY",
+      "price": 88130,
+      "priceAsOf": "2026-07-01",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/285A.T?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "GILD": {
+      "ticker": "GILD",
+      "name": "Gilead Sciences, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 170.86000061035156,
+      "price": 126.33999633789062,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SPCX?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/GILD?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3670,15 +3670,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "SBUX": {
-      "ticker": "SBUX",
-      "name": "Starbucks Corporation",
+    "SPCX": {
+      "ticker": "SPCX",
+      "name": "Space Exploration Technologies Corp.",
       "type": "stock",
       "currency": "USD",
-      "price": 102.19000244140625,
+      "price": 170.86000061035156,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SBUX?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SPCX?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3694,18 +3694,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "ISRG": {
-      "ticker": "ISRG",
-      "name": "Intuitive Surgical, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 397.67999267578125,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ISRG?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "VZ": {
       "ticker": "VZ",
       "name": "Verizon Communications Inc.",
@@ -3715,6 +3703,30 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VZ?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "XEL": {
+      "ticker": "XEL",
+      "name": "Xcel Energy Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 80.30000305175781,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XEL?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "SBUX": {
+      "ticker": "SBUX",
+      "name": "Starbucks Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 102.19000244140625,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SBUX?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3730,39 +3742,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "BKR": {
-      "ticker": "BKR",
-      "name": "Baker Hughes Company",
+    "ISRG": {
+      "ticker": "ISRG",
+      "name": "Intuitive Surgical, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 55.5,
+      "price": 397.67999267578125,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BKR?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "LMT": {
-      "ticker": "LMT",
-      "name": "Lockheed Martin Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 509.4599914550781,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/LMT?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "XEL": {
-      "ticker": "XEL",
-      "name": "Xcel Energy Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 80.30000305175781,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/XEL?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ISRG?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3802,6 +3790,18 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "BKR": {
+      "ticker": "BKR",
+      "name": "Baker Hughes Company",
+      "type": "stock",
+      "currency": "USD",
+      "price": 55.5,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BKR?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "EXC": {
       "ticker": "EXC",
       "name": "Exelon Corporation",
@@ -3838,30 +3838,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "ETR": {
-      "ticker": "ETR",
-      "name": "Entergy Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 114.86000061035156,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ETR?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "SPG": {
-      "ticker": "SPG",
-      "name": "Simon Property Group, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 223.64999389648438,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SPG?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "MCHP": {
       "ticker": "MCHP",
       "name": "Microchip Technology Incorporated",
@@ -3871,30 +3847,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MCHP?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "VST": {
-      "ticker": "VST",
-      "name": "Vistra Corp.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 158.6300048828125,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VST?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "UPS": {
-      "ticker": "UPS",
-      "name": "United Parcel Service, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 107.5,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UPS?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3910,27 +3862,51 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "TMO": {
-      "ticker": "TMO",
-      "name": "Thermo Fisher Scientific Inc.",
+    "SPG": {
+      "ticker": "SPG",
+      "name": "Simon Property Group, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 501.3599853515625,
+      "price": 223.64999389648438,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TMO?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SPG?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
-    "TRGP": {
-      "ticker": "TRGP",
-      "name": "Targa Resources Corp.",
+    "UPS": {
+      "ticker": "UPS",
+      "name": "United Parcel Service, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 268.1400146484375,
+      "price": 107.5,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TRGP?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UPS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "ETR": {
+      "ticker": "ETR",
+      "name": "Entergy Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 114.86000061035156,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ETR?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "VST": {
+      "ticker": "VST",
+      "name": "Vistra Corp.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 158.6300048828125,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VST?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3946,15 +3922,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "VRTX": {
-      "ticker": "VRTX",
-      "name": "Vertex Pharmaceuticals Incorporated",
+    "TRGP": {
+      "ticker": "TRGP",
+      "name": "Targa Resources Corp.",
       "type": "stock",
       "currency": "USD",
-      "price": 496.7300109863281,
+      "price": 268.1400146484375,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VRTX?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TRGP?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3970,15 +3946,51 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "BEAM": {
-      "ticker": "BEAM",
-      "name": "Beam Therapeutics Inc.",
+    "VRTX": {
+      "ticker": "VRTX",
+      "name": "Vertex Pharmaceuticals Incorporated",
       "type": "stock",
       "currency": "USD",
-      "price": 34.31999969482422,
+      "price": 496.7300109863281,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BEAM?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VRTX?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "TMO": {
+      "ticker": "TMO",
+      "name": "Thermo Fisher Scientific Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 501.3599853515625,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TMO?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "KDP": {
+      "ticker": "KDP",
+      "name": "Keurig Dr Pepper Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 32.72999954223633,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/KDP?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "BX": {
+      "ticker": "BX",
+      "name": "Blackstone Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 117.66999816894531,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BX?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -3994,15 +4006,39 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "KDP": {
-      "ticker": "KDP",
-      "name": "Keurig Dr Pepper Inc.",
+    "LOW": {
+      "ticker": "LOW",
+      "name": "Lowe's Companies, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 32.72999954223633,
+      "price": 220.49000549316406,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/KDP?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/LOW?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "BEAM": {
+      "ticker": "BEAM",
+      "name": "Beam Therapeutics Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 34.31999969482422,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BEAM?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "NFLX": {
+      "ticker": "NFLX",
+      "name": "Netflix, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 71.4000015258789,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NFLX?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4030,99 +4066,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "BX": {
-      "ticker": "BX",
-      "name": "Blackstone Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 117.66999816894531,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/BX?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "LOW": {
-      "ticker": "LOW",
-      "name": "Lowe's Companies, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 220.49000549316406,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/LOW?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "NFLX": {
-      "ticker": "NFLX",
-      "name": "Netflix, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 71.4000015258789,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NFLX?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "TXG": {
-      "ticker": "TXG",
-      "name": "10x Genomics, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 38.34000015258789,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TXG?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "MAR": {
-      "ticker": "MAR",
-      "name": "Marriott International, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 370.5899963378906,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MAR?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "603986.SS": {
       "ticker": "603986.SS",
       "name": "GigaDevice Semiconductor Inc.",
       "type": "stock",
       "currency": "CNY",
-      "price": 764,
+      "price": 772.010009765625,
       "priceAsOf": "2026-07-01",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/603986.SS?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
-    "UNP": {
-      "ticker": "UNP",
-      "name": "Union Pacific Corporation",
+    "HON": {
+      "ticker": "HON",
+      "name": "Honeywell International Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 272,
+      "price": 223.89999389648438,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UNP?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "CMCSA": {
-      "ticker": "CMCSA",
-      "name": "Comcast Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 24.549999237060547,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CMCSA?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/HON?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4138,6 +4102,54 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "MAR": {
+      "ticker": "MAR",
+      "name": "Marriott International, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 370.5899963378906,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/MAR?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "UNP": {
+      "ticker": "UNP",
+      "name": "Union Pacific Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 272,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UNP?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "TXG": {
+      "ticker": "TXG",
+      "name": "10x Genomics, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 38.34000015258789,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/TXG?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "CMCSA": {
+      "ticker": "CMCSA",
+      "name": "Comcast Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 24.549999237060547,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CMCSA?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "CRWD": {
       "ticker": "CRWD",
       "name": "CrowdStrike Holdings, Inc.",
@@ -4147,18 +4159,6 @@
       "priceAsOf": "2026-06-26",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CRWD?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "UBER": {
-      "ticker": "UBER",
-      "name": "Uber Technologies, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 72.16000366210938,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UBER?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4174,18 +4174,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "SNPS": {
-      "ticker": "SNPS",
-      "name": "Synopsys, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 446.07000732421875,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SNPS?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "DE": {
       "ticker": "DE",
       "name": "Deere & Company",
@@ -4195,30 +4183,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/DE?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "NTLA": {
-      "ticker": "NTLA",
-      "name": "Intellia Therapeutics, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 16.920000076293945,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NTLA?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "PEG": {
-      "ticker": "PEG",
-      "name": "Public Service Enterprise Group Incorporated",
-      "type": "stock",
-      "currency": "USD",
-      "price": 81.16000366210938,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PEG?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4234,6 +4198,42 @@
       "sourceStatus": "live",
       "leverage": 1
     },
+    "UBER": {
+      "ticker": "UBER",
+      "name": "Uber Technologies, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 72.16000366210938,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/UBER?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "SNPS": {
+      "ticker": "SNPS",
+      "name": "Synopsys, Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 446.07000732421875,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/SNPS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "PEG": {
+      "ticker": "PEG",
+      "name": "Public Service Enterprise Group Incorporated",
+      "type": "stock",
+      "currency": "USD",
+      "price": 81.16000366210938,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PEG?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
     "CRWV": {
       "ticker": "CRWV",
       "name": "CoreWeave, Inc.",
@@ -4243,18 +4243,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CRWV?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "ED": {
-      "ticker": "ED",
-      "name": "Consolidated Edison, Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 110.62999725341797,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ED?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4282,27 +4270,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "PCG": {
-      "ticker": "PCG",
-      "name": "PG&E Corporation",
+    "NTLA": {
+      "ticker": "NTLA",
+      "name": "Intellia Therapeutics, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 16.81999969482422,
+      "price": 16.920000076293945,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PCG?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/NTLA?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
-    "FANG": {
-      "ticker": "FANG",
-      "name": "Diamondback Energy, Inc.",
+    "ED": {
+      "ticker": "ED",
+      "name": "Consolidated Edison, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 175.77999877929688,
+      "price": 110.62999725341797,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/FANG?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ED?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4315,6 +4303,42 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/DASH?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "PSA": {
+      "ticker": "PSA",
+      "name": "Public Storage",
+      "type": "stock",
+      "currency": "USD",
+      "price": 318.30999755859375,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PSA?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "PCG": {
+      "ticker": "PCG",
+      "name": "PG&E Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 16.81999969482422,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PCG?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "PFE": {
+      "ticker": "PFE",
+      "name": "Pfizer Inc.",
+      "type": "stock",
+      "currency": "USD",
+      "price": 24.079999923706055,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PFE?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4342,39 +4366,27 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "PSA": {
-      "ticker": "PSA",
-      "name": "Public Storage",
+    "FANG": {
+      "ticker": "FANG",
+      "name": "Diamondback Energy, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 318.30999755859375,
+      "price": 175.77999877929688,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PSA?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/FANG?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
-    "CVS": {
-      "ticker": "CVS",
-      "name": "CVS Health Corporation",
+    "KVUE": {
+      "ticker": "KVUE",
+      "name": "Kenvue Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 103.44999694824219,
+      "price": 19.110000610351562,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CVS?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "PFE": {
-      "ticker": "PFE",
-      "name": "Pfizer Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 24.079999923706055,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PFE?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/KVUE?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4390,18 +4402,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "ON": {
-      "ticker": "ON",
-      "name": "ON Semiconductor Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 94.54000091552734,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ON?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "ROST": {
       "ticker": "ROST",
       "name": "Ross Stores, Inc.",
@@ -4411,6 +4411,30 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ROST?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "CVS": {
+      "ticker": "CVS",
+      "name": "CVS Health Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 103.44999694824219,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CVS?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "ON": {
+      "ticker": "ON",
+      "name": "ON Semiconductor Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 94.54000091552734,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ON?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4438,18 +4462,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "KVUE": {
-      "ticker": "KVUE",
-      "name": "Kenvue Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 19.110000610351562,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/KVUE?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "ADM": {
       "ticker": "ADM",
       "name": "Archer-Daniels-Midland Company",
@@ -4459,18 +4471,6 @@
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
       "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ADM?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "VRT": {
-      "ticker": "VRT",
-      "name": "Vertiv Holdings Co",
-      "type": "stock",
-      "currency": "USD",
-      "price": 334.82000732421875,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VRT?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4486,18 +4486,6 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "AEE": {
-      "ticker": "AEE",
-      "name": "Ameren Corporation",
-      "type": "stock",
-      "currency": "USD",
-      "price": 113.04000091552734,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AEE?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
     "KMB": {
       "ticker": "KMB",
       "name": "Kimberly-Clark Corporation",
@@ -4510,15 +4498,39 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "ABNB": {
-      "ticker": "ABNB",
-      "name": "Airbnb, Inc.",
+    "AEE": {
+      "ticker": "AEE",
+      "name": "Ameren Corporation",
       "type": "stock",
       "currency": "USD",
-      "price": 143.10000610351562,
+      "price": 113.04000091552734,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ABNB?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/AEE?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "PH": {
+      "ticker": "PH",
+      "name": "Parker-Hannifin Corporation",
+      "type": "stock",
+      "currency": "USD",
+      "price": 978.1199951171875,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PH?range=6mo&interval=1d",
+      "sourceStatus": "live",
+      "leverage": 1
+    },
+    "VRT": {
+      "ticker": "VRT",
+      "name": "Vertiv Holdings Co",
+      "type": "stock",
+      "currency": "USD",
+      "price": 334.82000732421875,
+      "priceAsOf": "2026-06-30",
+      "source": "Yahoo Chart",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/VRT?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4534,27 +4546,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "DTE": {
-      "ticker": "DTE",
-      "name": "DTE Energy Company",
+    "ABNB": {
+      "ticker": "ABNB",
+      "name": "Airbnb, Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 152.3699951171875,
+      "price": 143.10000610351562,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/DTE?range=6mo&interval=1d",
-      "sourceStatus": "live",
-      "leverage": 1
-    },
-    "CCI": {
-      "ticker": "CCI",
-      "name": "Crown Castle Inc.",
-      "type": "stock",
-      "currency": "USD",
-      "price": 75.7300033569336,
-      "priceAsOf": "2026-06-30",
-      "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CCI?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/ABNB?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4570,15 +4570,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "PH": {
-      "ticker": "PH",
-      "name": "Parker-Hannifin Corporation",
+    "DTE": {
+      "ticker": "DTE",
+      "name": "DTE Energy Company",
       "type": "stock",
       "currency": "USD",
-      "price": 978.1199951171875,
+      "price": 152.3699951171875,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/PH?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/DTE?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -4618,15 +4618,15 @@
       "sourceStatus": "live",
       "leverage": 1
     },
-    "RCL": {
-      "ticker": "RCL",
-      "name": "Royal Caribbean Cruises Ltd.",
+    "CCI": {
+      "ticker": "CCI",
+      "name": "Crown Castle Inc.",
       "type": "stock",
       "currency": "USD",
-      "price": 317.5299987792969,
+      "price": 75.7300033569336,
       "priceAsOf": "2026-06-30",
       "source": "Yahoo Chart",
-      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/RCL?range=6mo&interval=1d",
+      "sourceUrl": "https://query1.finance.yahoo.com/v8/finance/chart/CCI?range=6mo&interval=1d",
       "sourceStatus": "live",
       "leverage": 1
     },
@@ -8836,35 +8836,40 @@
     },
     "DIA": {
       "ticker": "DIA",
-      "asOf": "2026-06-26",
+      "asOf": "2026-06-29",
       "source": "StockAnalysis public ETF holdings page",
       "sourceUrl": "https://stockanalysis.com/etf/dia/holdings/",
       "sourceStatus": "live",
       "holdings": [
         {
-          "ticker": "GS",
-          "name": "The Goldman Sachs Group, Inc.",
-          "weight": 0.1166
-        },
-        {
           "ticker": "CAT",
           "name": "Caterpillar Inc.",
-          "weight": 0.11410000000000001
+          "weight": 0.1176
+        },
+        {
+          "ticker": "GS",
+          "name": "The Goldman Sachs Group, Inc.",
+          "weight": 0.1161
         },
         {
           "ticker": "UNH",
           "name": "UnitedHealth Group Incorporated",
-          "weight": 0.0489
+          "weight": 0.0478
         },
         {
           "ticker": "MSFT",
           "name": "Microsoft Corporation",
-          "weight": 0.0426
+          "weight": 0.042
         },
         {
           "ticker": "AMGN",
           "name": "Amgen Inc.",
           "weight": 0.040999999999999995
+        },
+        {
+          "ticker": "GOOGL",
+          "name": "Alphabet Inc.",
+          "weight": 0.0403
         },
         {
           "ticker": "HD",
@@ -8874,87 +8879,87 @@
         {
           "ticker": "SHW",
           "name": "The Sherwin-Williams Company",
-          "weight": 0.0393
-        },
-        {
-          "ticker": "AXP",
-          "name": "American Express Company",
-          "weight": 0.038900000000000004
-        },
-        {
-          "ticker": "GOOGL",
-          "name": "Alphabet Inc.",
-          "weight": 0.038599999999999995
+          "weight": 0.0392
         },
         {
           "ticker": "V",
           "name": "Visa Inc.",
-          "weight": 0.0384
+          "weight": 0.038900000000000004
         },
         {
-          "ticker": "JPM",
-          "name": "JPMorgan Chase & Co.",
-          "weight": 0.037599999999999995
+          "ticker": "AXP",
+          "name": "American Express Company",
+          "weight": 0.0388
         },
         {
           "ticker": "TRV",
           "name": "The Travelers Companies, Inc.",
-          "weight": 0.0374
+          "weight": 0.0378
+        },
+        {
+          "ticker": "JPM",
+          "name": "JPMorgan Chase & Co.",
+          "weight": 0.0375
         },
         {
           "ticker": "AAPL",
           "name": "Apple Inc.",
-          "weight": 0.0325
+          "weight": 0.0321
         },
         {
           "ticker": "IBM",
           "name": "International Business Machines Corporation",
-          "weight": 0.0311
+          "weight": 0.0316
         },
         {
           "ticker": "MCD",
           "name": "McDonald's Corporation",
-          "weight": 0.0308
+          "weight": 0.0304
         },
         {
           "ticker": "JNJ",
           "name": "Johnson & Johnson",
-          "weight": 0.0291
+          "weight": 0.0294
         },
         {
           "ticker": "AMZN",
           "name": "Amazon.com, Inc.",
-          "weight": 0.026600000000000002
+          "weight": 0.0273
+        },
+        {
+          "ticker": "HON",
+          "name": "Honeywell International Inc.",
+          "weight": 0.0259
         },
         {
           "ticker": "BA",
           "name": "The Boeing Company",
-          "weight": 0.0248
+          "weight": 0.024399999999999998
         },
         {
           "ticker": "NVDA",
           "name": "NVIDIA Corporation",
-          "weight": 0.022000000000000002
+          "weight": 0.0222
         },
         {
           "ticker": "CVX",
           "name": "Chevron Corporation",
-          "weight": 0.0196
+          "weight": 0.0192
         },
         {
           "ticker": "MMM",
           "name": "3M Company",
-          "weight": 0.018799999999999997
+          "weight": 0.018500000000000003
         },
         {
           "ticker": "CRM",
           "name": "Salesforce, Inc.",
-          "weight": 0.0181
+          "weight": 0.018000000000000002
         },
         {
           "ticker": "PG",
           "name": "The Procter & Gamble Company",
-          "weight": 0.017
+          "weight": 0.0169
         },
         {
           "ticker": "MRK",
@@ -9749,7 +9754,7 @@
     },
     "XLP": {
       "ticker": "XLP",
-      "asOf": "2026-06-26",
+      "asOf": "2026-06-29",
       "source": "StockAnalysis public ETF holdings page",
       "sourceUrl": "https://stockanalysis.com/etf/xlp/holdings/",
       "sourceStatus": "live",
@@ -9757,107 +9762,107 @@
         {
           "ticker": "WMT",
           "name": "Walmart Inc.",
-          "weight": 0.1076
+          "weight": 0.10769999999999999
         },
         {
           "ticker": "COST",
           "name": "Costco Wholesale Corporation",
-          "weight": 0.08960000000000001
+          "weight": 0.09
         },
         {
           "ticker": "PG",
           "name": "The Procter & Gamble Company",
-          "weight": 0.0736
+          "weight": 0.0741
         },
         {
           "ticker": "KO",
           "name": "The Coca-Cola Company",
-          "weight": 0.0679
+          "weight": 0.06860000000000001
         },
         {
           "ticker": "PM",
           "name": "Philip Morris International Inc.",
-          "weight": 0.059800000000000006
+          "weight": 0.0611
         },
         {
           "ticker": "CL",
           "name": "Colgate-Palmolive Company",
-          "weight": 0.046
+          "weight": 0.0466
         },
         {
           "ticker": "MO",
           "name": "Altria Group, Inc.",
-          "weight": 0.0453
-        },
-        {
-          "ticker": "PEP",
-          "name": "PepsiCo, Inc.",
-          "weight": 0.044000000000000004
+          "weight": 0.046
         },
         {
           "ticker": "MNST",
           "name": "Monster Beverage Corporation",
-          "weight": 0.0435
+          "weight": 0.0446
+        },
+        {
+          "ticker": "PEP",
+          "name": "PepsiCo, Inc.",
+          "weight": 0.0436
         },
         {
           "ticker": "MDLZ",
           "name": "Mondelez International, Inc.",
-          "weight": 0.0426
+          "weight": 0.042199999999999994
         },
         {
           "ticker": "TGT",
           "name": "Target Corporation",
-          "weight": 0.0403
+          "weight": 0.038900000000000004
         },
         {
           "ticker": "KDP",
           "name": "Keurig Dr Pepper Inc.",
-          "weight": 0.0288
+          "weight": 0.0291
         },
         {
           "ticker": "SYY",
           "name": "Sysco Corporation",
-          "weight": 0.025099999999999997
+          "weight": 0.0255
         },
         {
           "ticker": "ADM",
           "name": "Archer-Daniels-Midland Company",
-          "weight": 0.023399999999999997
+          "weight": 0.023700000000000002
         },
         {
           "ticker": "KVUE",
           "name": "Kenvue Inc.",
-          "weight": 0.0232
+          "weight": 0.023399999999999997
         },
         {
           "ticker": "KMB",
           "name": "Kimberly-Clark Corporation",
-          "weight": 0.023
+          "weight": 0.0233
         },
         {
           "ticker": "KR",
           "name": "The Kroger Co.",
-          "weight": 0.0207
+          "weight": 0.0203
         },
         {
           "ticker": "CASY",
           "name": "Casey's General Stores, Inc.",
-          "weight": 0.0182
+          "weight": 0.0184
         },
         {
           "ticker": "HSY",
           "name": "The Hershey Company",
-          "weight": 0.0168
+          "weight": 0.0172
         },
         {
           "ticker": "DG",
           "name": "Dollar General Corporation",
-          "weight": 0.0167
+          "weight": 0.0165
         },
         {
           "ticker": "CHD",
           "name": "Church & Dwight Co., Inc.",
-          "weight": 0.0149
+          "weight": 0.0148
         },
         {
           "ticker": "DLTR",
@@ -9865,19 +9870,19 @@
           "weight": 0.014199999999999999
         },
         {
-          "ticker": "STZ",
-          "name": "Constellation Brands, Inc.",
-          "weight": 0.0129
-        },
-        {
           "ticker": "KHC",
           "name": "The Kraft Heinz Company",
-          "weight": 0.0128
+          "weight": 0.0132
         },
         {
           "ticker": "EL",
           "name": "The Estée Lauder Companies Inc.",
-          "weight": 0.0126
+          "weight": 0.0125
+        },
+        {
+          "ticker": "STZ",
+          "name": "Constellation Brands, Inc.",
+          "weight": 0.0125
         }
       ]
     },
