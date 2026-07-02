@@ -6,10 +6,10 @@
   <meta name="description" content="보유 주수와 KRW/USD 종가를 기반으로 ETF·주식 포트폴리오 비중, ETF 구성종목 look-through, 레버리지 노출, 상관관계를 확인하는 정적 포트폴리오 대시보드" />
   <title>Port Portfolio Dashboard</title>
   <link rel="stylesheet" href="assets/styles.css" />
-  <link rel="stylesheet" href="assets/common-ui.css?v=20260701-ralph-table-v5d" />
+  <link rel="stylesheet" href="assets/common-ui.css?v=20260702-light-system-v6" />
   <script src="assets/portfolio-core.js" defer></script>
   <script src="assets/app.js" defer></script>
-  <script src="assets/common-ui.js?v=20260701-fullpage-v4" defer></script>
+  <script src="assets/common-ui.js?v=20260702-light-system-v6" defer></script>
 </head>
 <body id="top">
   <noscript><div class="noscript-warning">이 대시보드는 JavaScript가 필요합니다. 브라우저 설정을 확인하세요.</div></noscript>
@@ -28,8 +28,8 @@
         <p class="eyebrow">Port · Exposure Cockpit</p>
         <h1 id="page-title"><span class="title-line">최종 비중</span><span class="title-line">개별 종목 매핑</span><span class="title-line">위험 집중 신호</span></h1>
         <p class="hero-copy">
-          보유 주수와 기준일을 입력해 평가금액, ETF look-through, 최종 종목 비중을 확인합니다.
-          데이터 신선도와 미상 잔여비중은 별도 표로 남깁니다.
+          보유 주수와 기준일을 넣으면 평가금액, ETF look-through, 최종 종목 비중을 바로 정리합니다.
+          잔여 노출과 데이터 상태는 별도 표로 분리합니다.
         </p>
         <div class="hero-actions">
           <a class="primary-button" href="#portfolio-input">포트폴리오 계산</a>
@@ -56,7 +56,9 @@
 
   <main>
 
-    <section class="section analysis-map" aria-labelledby="analysis-map-title">
+    <details class="section analysis-map" aria-labelledby="analysis-map-title">
+      <summary>분석 흐름</summary>
+      <div class="details-body">
       <div class="section-heading">
         <p class="eyebrow">Analysis Flow</p>
         <h2 id="analysis-map-title">입력에서 결론까지 한 번에 따라가는 구조</h2>
@@ -84,7 +86,8 @@
           <small>입력 종목과 선택 구성종목의 수익률 상관관계를 나란히 확인합니다.</small>
         </a>
       </div>
-    </section>
+      </div>
+    </details>
 
     <section class="section input-section" id="portfolio-input" aria-labelledby="input-title">
       <div class="section-heading">
@@ -277,7 +280,9 @@
         <h2 id="data-health-title">데이터 신선도와 실패 상태</h2>
         <p>정적 페이지는 생성된 JSON만 읽습니다. 최신 데이터는 refresh 스크립트 또는 GitHub Actions에서 갱신합니다.</p>
       </div>
-      <article class="panel data-update-panel" id="data-update" aria-labelledby="data-update-title">
+      <details class="panel data-update-panel" id="data-update" aria-labelledby="data-update-title">
+      <summary>데이터 업데이트 옵션</summary>
+      <div class="details-body">
         <div class="panel-header compact">
           <div>
             <p class="eyebrow">Refresh</p>
@@ -320,7 +325,8 @@
           새 티커나 기준일 히스토리 누락이 감지되면 입력값·범위·명령을 자동으로 준비하고 Actions 링크/명령 복사로 갱신합니다. 갱신 후 스냅샷 JSON과 히스토리 JSON을 다시 읽으면 기준일 종가와 환율이 보유 주수 계산에 사용됩니다.
         </p>
         <p id="update-status" class="status-line" role="status" aria-live="polite">TSLL/SNXX/0167A0/RAM ETF 갱신 입력과 자동 refresh 감지를 준비했습니다.</p>
-      </article>
+      </div>
+    </details>
 
       <article class="panel">
         <div id="warnings" class="warning-list" aria-live="polite"></div>
@@ -338,10 +344,13 @@
         </div>
       </article>
     </section>
-    <section class="section notice moved-notice" aria-label="주의사항">
+    <details class="section notice moved-notice" aria-label="주의사항">
+      <summary>주의 및 한계</summary>
+      <div class="details-body">
       <strong>중요:</strong> 이 화면은 개인 리서치용 포트폴리오 노출 관제 도구이며 투자, 세무, 법률 또는 매매 조언이 아닙니다.
       무료 데이터의 지연·누락·구조 변경, ETF 보유비중 잔여값, correlation 표본 부족을 반드시 함께 확인하세요.
-    </section>
+      </div>
+    </details>
 
   </main>
 
